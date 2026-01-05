@@ -8,7 +8,6 @@ import {
   CardCream,
   SectionRed,
   PlaceholderImage,
-  TestimonialCard,
   FAQAccordion,
 } from "@/components/sales";
 import {
@@ -331,35 +330,6 @@ function ToolsSection() {
   );
 }
 
-// Seção 10: Depoimentos
-function TestimonialsSection() {
-  return (
-    <section className="px-6 py-6">
-      <h2 className="heading-playfair text-xl text-center mb-2">
-        O que estão dizendo
-      </h2>
-      <p className="body-inter text-sm text-center mb-6 opacity-70">
-        Resultados mudam, mas a sensação é a mesma: clareza, constância e conteúdo que conduz.
-      </p>
-      
-      <div className="space-y-4">
-        {[1, 2, 3, 4, 5, 6].map((num) => (
-          <TestimonialCard 
-            key={num}
-            name={`Cliente ${num}`}
-            instagram={`@cliente${num}`}
-            testimonial="Depoimento placeholder - texto de 2 a 4 linhas sobre a experiência com o produto e os resultados alcançados."
-            hasImage={num <= 2}
-          />
-        ))}
-      </div>
-
-      <div className="text-center mt-8">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
-    </section>
-  );
-}
 
 // Seção 11: Card de Oferta
 function OfferSection() {
@@ -412,10 +382,10 @@ function OfferSection() {
   );
 }
 
-// Seção 12: Quem é Samira
+// Seção 11: Quem é Samira
 function AboutSection() {
   return (
-    <SectionRed>
+    <section className="px-6 py-6">
       <PlaceholderImage label="FOTO DA SAMIRA (card premium)" aspectRatio="4:5" className="mb-6" />
       
       <h2 className="heading-playfair text-2xl text-center mb-4">
@@ -429,9 +399,9 @@ function AboutSection() {
       </p>
       
       <div className="text-center mt-6">
-        <ButtonOrange onClick={scrollToOffer}>QUERO ACESSAR</ButtonOrange>
+        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
       </div>
-    </SectionRed>
+    </section>
   );
 }
 
@@ -459,7 +429,7 @@ function FAQSection() {
   );
 }
 
-// Seção 14: CTA Final
+// Seção 13: CTA Final
 function FinalCTASection() {
   return (
     <section className="px-6 py-6 text-center">
@@ -477,7 +447,7 @@ function FinalCTASection() {
   );
 }
 
-// Seção 15: Rodapé
+// Seção 14: Rodapé
 function FooterSection() {
   return (
     <footer className="px-6 py-6 text-center border-t border-[hsl(var(--sp-gold)/0.2)]">
@@ -511,7 +481,6 @@ export default function SalesPage() {
         <LibrarySection />
         <StructureSection />
         <ToolsSection />
-        <TestimonialsSection />
         <OfferSection />
         <AboutSection />
         <FAQSection />
