@@ -422,9 +422,6 @@ function FAQSection() {
         Dúvidas rápidas
       </h2>
       <FAQAccordion items={faqItems} />
-      <div className="text-center mt-8">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
     </section>
   );
 }
@@ -453,8 +450,7 @@ function FooterSection() {
     <footer className="px-6 py-6 text-center border-t border-[hsl(var(--sp-gold)/0.2)]">
       <div className="mb-4">
         <p className="body-inter text-sm font-semibold mb-2">Suporte</p>
-        <p className="body-inter text-sm opacity-70">WhatsApp: [LINK_SUPORTE]</p>
-        <p className="body-inter text-sm opacity-70">E-mail: [EMAIL_SUPORTE]</p>
+        <p className="body-inter text-sm opacity-70">contato@samiragouvea.com.br</p>
       </div>
       <div className="mb-4 space-x-4">
         <a href="#" className="body-inter text-xs underline opacity-60 hover:opacity-100">Política de Privacidade</a>
