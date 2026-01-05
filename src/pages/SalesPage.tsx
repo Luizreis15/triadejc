@@ -27,22 +27,22 @@ const scrollToOffer = () => {
 // Seção 1: Hero
 function HeroSection() {
   return (
-    <section className="px-6 py-10 text-center">
+    <section className="px-6 py-6 text-center">
       {/* Logo */}
-      <div className="mb-6">
+      <div className="mb-3">
         <img 
           src={logoCarrosseis} 
           alt="Carroséis Magnéticos - Venda Mais Com" 
           className="w-48 mx-auto"
         />
-        <p className="text-xs mt-3 opacity-70 body-inter">Caderno Digital • Mobile e PC</p>
+        <p className="text-xs mt-2 opacity-70 body-inter">Caderno Digital • Mobile e PC</p>
       </div>
 
       {/* Headlines */}
-      <h1 className="heading-playfair text-2xl md:text-3xl mb-4 px-2">
+      <h1 className="heading-playfair text-2xl md:text-3xl mb-2 px-2">
         As estruturas de carrossel que mais vendem e mais posicionam, prontas pra você copiar e colar.
       </h1>
-      <p className="body-inter text-base mb-6 opacity-80">
+      <p className="body-inter text-base mb-4 opacity-80">
         Clique no botão abaixo e tenha acesso imediato às estruturas que mais me deram resultado — prontas pra copiar e adaptar.
       </p>
 
@@ -50,12 +50,12 @@ function HeroSection() {
       <ButtonGold onClick={scrollToOffer} className="w-full max-w-xs mx-auto">
         QUERO ACESSAR
       </ButtonGold>
-      <p className="text-xs mt-3 opacity-60 body-inter">
+      <p className="text-xs mt-2 opacity-60 body-inter">
         Acesso imediato • R$ 27 • Garantia de 7 dias
       </p>
 
       {/* Foto Samira com fade transparente */}
-      <div className="mt-8 relative overflow-hidden">
+      <div className="mt-4 relative overflow-hidden">
         <div 
           className="absolute inset-0 pointer-events-none z-10"
           style={{
