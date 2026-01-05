@@ -37,6 +37,13 @@ type LibraryItem = {
   tags: string[];
 };
 
+// Converte Markdown básico para HTML
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
+
 function LibraryItemCard({ item, isFavorited, onFavorite }: { 
   item: LibraryItem; 
   isFavorited: boolean;
@@ -76,9 +83,10 @@ function LibraryItemCard({ item, isFavorited, onFavorite }: {
             </Badge>
           </div>
           
-          <p className="text-sm text-muted-foreground whitespace-pre-wrap mb-4 line-clamp-4">
-            {item.content_md}
-          </p>
+          <p 
+            className="text-sm text-muted-foreground whitespace-pre-wrap mb-4 line-clamp-4"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(item.content_md) }}
+          />
 
           <div className="flex flex-wrap gap-1 mb-4">
             {item.tags?.map((tag) => (
