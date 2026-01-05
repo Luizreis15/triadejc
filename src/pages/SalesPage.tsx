@@ -1,5 +1,6 @@
 import "@/styles/sales-page.css";
 import samiraHero from "@/assets/samira-hero.jpeg";
+import logoCarrosseis from "@/assets/logo-carrosseis.png";
 import {
   ButtonGold,
   ButtonOrange,
@@ -27,11 +28,13 @@ const scrollToOffer = () => {
 function HeroSection() {
   return (
     <section className="px-6 py-10 text-center">
-      {/* Logo placeholder */}
+      {/* Logo */}
       <div className="mb-6">
-        <div className="placeholder-img w-32 h-32 mx-auto aspect-square rounded-full">
-          LOGO
-        </div>
+        <img 
+          src={logoCarrosseis} 
+          alt="Carroséis Magnéticos - Venda Mais Com" 
+          className="w-48 mx-auto"
+        />
         <p className="text-xs mt-3 opacity-70 body-inter">Caderno Digital • Mobile e PC</p>
       </div>
 
