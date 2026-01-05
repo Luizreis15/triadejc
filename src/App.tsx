@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Modules from "./pages/Modules";
@@ -13,6 +14,7 @@ import Library from "./pages/Library";
 import Notebook from "./pages/Notebook";
 import CalendarPage from "./pages/Calendar";
 import Results from "./pages/Results";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,7 @@ const App = () => (
             <Route path="/app/caderno" element={<ProtectedRoute><Notebook /></ProtectedRoute>} />
             <Route path="/app/calendario" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
             <Route path="/app/resultados" element={<ProtectedRoute><Results /></ProtectedRoute>} />
+            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
