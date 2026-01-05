@@ -405,11 +405,23 @@ function OfferSection() {
 function AboutSection() {
   return (
     <section className="px-6 py-6">
-      <div className="flex justify-center">
+      <div className="relative overflow-hidden mb-6">
+        <div 
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{
+            background: `linear-gradient(
+              to bottom,
+              hsl(350 30% 95%) 0%,
+              transparent 30%,
+              transparent 70%,
+              hsl(350 30% 95%) 100%
+            )`
+          }}
+        />
         <img 
           src={samiraAbout} 
           alt="Samira Gouvêa" 
-          className="w-3/4 rounded-lg shadow-lg mb-6"
+          className="w-full object-cover"
         />
       </div>
       
