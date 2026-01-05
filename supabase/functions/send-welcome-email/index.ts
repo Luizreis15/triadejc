@@ -10,6 +10,7 @@ const corsHeaders = {
 interface WelcomeEmailRequest {
   name: string;
   email: string;
+  password: string;
   loginUrl?: string;
 }
 
@@ -22,7 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, loginUrl }: WelcomeEmailRequest = await req.json();
+    const { name, email, password, loginUrl }: WelcomeEmailRequest = await req.json();
     
     console.log(`Sending welcome email to: ${email}, name: ${name}`);
 
@@ -35,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const firstName = name ? name.split(" ")[0] : "aluna";
-    const accessUrl = loginUrl || "https://tuqpnyyrlvvgkwizyzcs.lovableproject.com/login";
+    const accessUrl = loginUrl || "https://app.samiragouvea.com.br/";
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -78,6 +79,26 @@ const handler = async (req: Request): Promise<Response> => {
                 Agora você tem em mãos tudo que precisa para criar carrosséis que conectam, engajam e vendem no Instagram.
               </p>
               
+              <!-- Credentials Box -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #FEF9E7; border-radius: 12px; border: 2px solid #C4A052; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #1C1B1A;">
+                      🔐 Seus dados de acesso:
+                    </h3>
+                    <p style="margin: 0 0 8px; font-size: 15px; color: #4B2E2A;">
+                      <strong>E-mail:</strong> ${email}
+                    </p>
+                    <p style="margin: 0 0 16px; font-size: 15px; color: #4B2E2A;">
+                      <strong>Senha:</strong> ${password}
+                    </p>
+                    <p style="margin: 0; font-size: 13px; color: #B21F2D; font-weight: 500;">
+                      ⚠️ Recomendamos que você troque sua senha no primeiro acesso por uma senha de sua preferência.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
               <!-- CTA Button -->
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
@@ -98,9 +119,9 @@ const handler = async (req: Request): Promise<Response> => {
                     </h3>
                     <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8; color: #4B2E2A;">
                       <li>Clique no botão acima para acessar</li>
-                      <li>Faça login com este email: <strong>${email}</strong></li>
+                      <li>Faça login com o e-mail e senha acima</li>
+                      <li>Troque sua senha por uma de sua preferência</li>
                       <li>Explore os módulos e comece pelo que fizer mais sentido pra você</li>
-                      <li>Use a biblioteca de templates como referência</li>
                     </ol>
                   </td>
                 </tr>
@@ -138,7 +159,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "Samira Gouvêa <noreply@samiragouvea.com.br>",
         to: [email],
-        subject: "🎉 Bem-vinda ao Carrosséis Magnéticos!",
+        subject: "🎉 Bem-vinda ao Carrosséis Magnéticos! Seus dados de acesso",
         html: emailHtml,
       }),
     });

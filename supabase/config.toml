@@ -2,3 +2,6 @@ project_id = "tuqpnyyrlvvgkwizyzcs"
 
 [functions.send-welcome-email]
 verify_jwt = false
+
+[functions.hubla-webhook]
+verify_jwt = false
