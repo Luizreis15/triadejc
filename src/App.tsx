@@ -15,6 +15,7 @@ import Notebook from "./pages/Notebook";
 import CalendarPage from "./pages/Calendar";
 import Results from "./pages/Results";
 import Admin from "./pages/Admin";
+import SalesPage from "./pages/SalesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/app/calendario" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
             <Route path="/app/resultados" element={<ProtectedRoute><Results /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+            <Route path="/vendas" element={<SalesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
