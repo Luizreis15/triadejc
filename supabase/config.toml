@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.hubla-webhook]
 verify_jwt = false
+
+[functions.generate-mockup]
+verify_jwt = false
