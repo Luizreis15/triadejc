@@ -33,9 +33,9 @@ function HeroSection() {
         <img 
           src={logoCarrosseis} 
           alt="Carroséis Magnéticos - Venda Mais Com" 
-          className="w-48 mx-auto"
+          className="w-56 mx-auto"
         />
-        <p className="text-xs mt-2 opacity-70 body-inter">Caderno Digital • Mobile e PC</p>
+        <p className="text-xs mt-1 opacity-70 body-inter">Caderno Digital • Mobile e PC</p>
       </div>
 
       {/* Headlines */}
