@@ -90,7 +90,7 @@ function BenefitsSection() {
   ];
 
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-6">
         Com o Venda Mais com Carrosséis Magnéticos, você vai ser capaz de:
       </h2>
@@ -112,7 +112,7 @@ function BenefitsSection() {
 // Seção 3: Exemplos Slider
 function ExamplesSection() {
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-6">
         Esses são alguns dos carrosséis que você vai aprender a fazer
       </h2>
