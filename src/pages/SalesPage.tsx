@@ -405,11 +405,13 @@ function OfferSection() {
 function AboutSection() {
   return (
     <section className="px-6 py-6">
-      <img 
-        src={samiraAbout} 
-        alt="Samira Gouvêa" 
-        className="w-full rounded-lg shadow-lg mb-6"
-      />
+      <div className="flex justify-center">
+        <img 
+          src={samiraAbout} 
+          alt="Samira Gouvêa" 
+          className="w-3/4 rounded-lg shadow-lg mb-6"
+        />
+      </div>
       
       <h2 className="heading-playfair text-2xl text-center mb-4">
         Samira Gouvêa
