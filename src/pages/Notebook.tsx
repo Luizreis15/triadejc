@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { 
@@ -17,68 +17,67 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
-type Section = {
+type SectionConfig = {
   id: string;
   title: string;
   icon: React.ReactNode;
   description: string;
-  content?: string;
 };
 
-const sections: Section[] = [
+const sectionConfigs: SectionConfig[] = [
   {
     id: "promise",
     title: "Minha Promessa",
     icon: <Target className="h-5 w-5" />,
     description: "O que você promete entregar ao seu público",
-    content: "Ajudo empreendedoras a criarem carrosséis que vendem sem parecer propaganda.",
   },
   {
     id: "pillars",
     title: "Meus 3 Pilares",
     icon: <Columns3 className="h-5 w-5" />,
     description: "Os 3 temas principais do seu conteúdo",
-    content: "1. Autoridade silenciosa\n2. Copywriting magnético\n3. Estratégia de conteúdo",
   },
   {
     id: "audience",
     title: "Meu Público",
     icon: <Users className="h-5 w-5" />,
     description: "Dores, desejos e objeções da sua audiência",
-    content: "",
   },
   {
     id: "drafts",
     title: "Meus Rascunhos",
     icon: <FileText className="h-5 w-5" />,
     description: "Carrosséis que você está criando",
-    content: "",
   },
   {
     id: "calendar",
     title: "Meu Calendário",
     icon: <Calendar className="h-5 w-5" />,
     description: "O que você postou e vai postar",
-    content: "",
   },
   {
     id: "results",
     title: "Meus Resultados",
     icon: <Trophy className="h-5 w-5" />,
     description: "Prints, métricas e anotações",
-    content: "",
   },
 ];
 
 function SectionCard({ 
-  section, 
+  config, 
+  content,
   onEdit 
 }: { 
-  section: Section; 
-  onEdit: (section: Section) => void;
+  config: SectionConfig;
+  content?: string;
+  onEdit: () => void;
 }) {
-  const hasContent = Boolean(section.content);
+  const hasContent = Boolean(content);
 
   return (
     <motion.div
@@ -89,7 +88,7 @@ function SectionCard({
       <Card
         variant="interactive"
         className="group"
-        onClick={() => onEdit(section)}
+        onClick={onEdit}
       >
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
@@ -97,14 +96,14 @@ function SectionCard({
               "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
               hasContent ? "bg-success/10 text-success" : "bg-primary/10 text-primary"
             )}>
-              {section.icon}
+              {config.icon}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-serif font-semibold text-foreground mb-1">
-                {section.title}
+                {config.title}
               </h3>
               <p className="text-sm text-muted-foreground line-clamp-2">
-                {hasContent ? section.content : section.description}
+                {hasContent ? content : config.description}
               </p>
             </div>
             <div className="flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
@@ -122,15 +121,19 @@ function SectionCard({
 }
 
 function SectionEditor({
-  section,
+  config,
+  initialContent,
   onSave,
   onClose,
+  isSaving,
 }: {
-  section: Section;
+  config: SectionConfig;
+  initialContent: string;
   onSave: (content: string) => void;
   onClose: () => void;
+  isSaving: boolean;
 }) {
-  const [content, setContent] = useState(section.content || "");
+  const [content, setContent] = useState(initialContent);
 
   return (
     <motion.div
@@ -143,13 +146,13 @@ function SectionEditor({
         <header className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              {section.icon}
+              {config.icon}
             </div>
             <div>
               <h2 className="font-serif font-semibold text-foreground">
-                {section.title}
+                {config.title}
               </h2>
-              <p className="text-xs text-muted-foreground">{section.description}</p>
+              <p className="text-xs text-muted-foreground">{config.description}</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -161,7 +164,7 @@ function SectionEditor({
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={`Escreva sobre ${section.title.toLowerCase()}...`}
+            placeholder={`Escreva sobre ${config.title.toLowerCase()}...`}
             className="min-h-64 resize-none"
           />
         </div>
@@ -171,8 +174,9 @@ function SectionEditor({
             variant="gradient"
             className="w-full"
             onClick={() => onSave(content)}
+            disabled={isSaving}
           >
-            Salvar
+            {isSaving ? "Salvando..." : "Salvar"}
           </Button>
         </footer>
       </div>
@@ -182,18 +186,65 @@ function SectionEditor({
 
 export default function Notebook() {
   const navigate = useNavigate();
-  const [sectionsData, setSectionsData] = useState(sections);
-  const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [editingSection, setEditingSection] = useState<SectionConfig | null>(null);
 
-  const handleSave = (content: string) => {
-    if (editingSection) {
-      setSectionsData((prev) =>
-        prev.map((s) =>
-          s.id === editingSection.id ? { ...s, content } : s
-        )
-      );
+  // Buscar entradas do caderno
+  const { data: entries } = useQuery({
+    queryKey: ["notebook_entries", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("notebook_entries")
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Mutation para salvar entrada
+  const saveEntry = useMutation({
+    mutationFn: async ({ section, content }: { section: string; content: string }) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+      
+      const existingEntry = entries?.find(e => e.section === section);
+      
+      if (existingEntry) {
+        const { error } = await supabase
+          .from("notebook_entries")
+          .update({ content_md: content })
+          .eq("id", existingEntry.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("notebook_entries")
+          .insert({ 
+            user_id: user.id, 
+            section: section as any,
+            content_md: content 
+          });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notebook_entries", user?.id] });
+      toast({ title: "Salvo!" });
       setEditingSection(null);
-    }
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Erro ao salvar", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const getEntryContent = (sectionId: string) => {
+    return entries?.find(e => e.section === sectionId)?.content_md || "";
   };
 
   const container = {
@@ -251,11 +302,12 @@ export default function Notebook() {
           animate="show"
           className="space-y-3"
         >
-          {sectionsData.map((section) => (
+          {sectionConfigs.map((config) => (
             <SectionCard
-              key={section.id}
-              section={section}
-              onEdit={setEditingSection}
+              key={config.id}
+              config={config}
+              content={getEntryContent(config.id)}
+              onEdit={() => setEditingSection(config)}
             />
           ))}
         </motion.div>
@@ -264,9 +316,11 @@ export default function Notebook() {
       {/* Editor de seção */}
       {editingSection && (
         <SectionEditor
-          section={editingSection}
-          onSave={handleSave}
+          config={editingSection}
+          initialContent={getEntryContent(editingSection.id)}
+          onSave={(content) => saveEntry.mutate({ section: editingSection.id, content })}
           onClose={() => setEditingSection(null)}
+          isSaving={saveEntry.isPending}
         />
       )}
     </AppLayout>

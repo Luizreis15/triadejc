@@ -3,94 +3,65 @@ import { AppLayout } from "@/components/AppLayout";
 import { ModuleCard } from "@/components/ModuleCard";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
-
-const modules = [
-  {
-    id: 1,
-    slug: "virada-da-vitrine",
-    title: "A Virada da Vitrine",
-    description: "O que é carrossel magnético, intenção, percepção e promessa",
-    status: "completed" as const,
-    progress: 100,
-  },
-  {
-    id: 2,
-    slug: "posicionamento",
-    title: "Posicionamento que Aparece",
-    description: "Falar com todo mundo x atrair o certo",
-    status: "completed" as const,
-    progress: 100,
-  },
-  {
-    id: 3,
-    slug: "anatomia-carrossel",
-    title: "A Anatomia do Carrossel",
-    description: "Estrutura base: capa > condução > prova > CTA",
-    status: "completed" as const,
-    progress: 100,
-  },
-  {
-    id: 4,
-    slug: "capas-e-ganchos",
-    title: "Capas e Ganchos",
-    description: "12 tipos de ganchos + fórmulas de capa",
-    status: "in_progress" as const,
-    progress: 60,
-  },
-  {
-    id: 5,
-    slug: "conducao-slide",
-    title: "Condução Slide a Slide",
-    description: "Progressão, ritmo e clareza",
-    status: "available" as const,
-    progress: 0,
-  },
-  {
-    id: 6,
-    slug: "autoridade-silenciosa",
-    title: "Autoridade Silenciosa",
-    description: "Prova sem mendigar: estudo de caso, bastidor, critério",
-    status: "locked" as const,
-    progress: 0,
-  },
-  {
-    id: 7,
-    slug: "quebra-objecoes",
-    title: "Quebra de Objeções",
-    description: "Tempo, nicho, vergonha, 'não funciona comigo'",
-    status: "locked" as const,
-    progress: 0,
-  },
-  {
-    id: 8,
-    slug: "ctas-magneticos",
-    title: "CTAs Magnéticos",
-    description: "Seguir, salvar, comentar, DM, compra",
-    status: "locked" as const,
-    progress: 0,
-  },
-  {
-    id: 9,
-    slug: "producao-lote",
-    title: "Produção Rápida (Lote)",
-    description: "10 carrosséis em 2 horas",
-    status: "locked" as const,
-    progress: 0,
-  },
-  {
-    id: 10,
-    slug: "distribuicao-diagnostico",
-    title: "Distribuição e Diagnóstico",
-    description: "Fixados, reaproveitamento, análise semanal",
-    status: "locked" as const,
-    progress: 0,
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Modules() {
   const navigate = useNavigate();
-  const completedModules = modules.filter(m => m.status === "completed").length;
-  const overallProgress = Math.round((completedModules / modules.length) * 100);
+  const { user } = useAuth();
+
+  // Buscar módulos
+  const { data: modules, isLoading: modulesLoading } = useQuery({
+    queryKey: ["modules"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("modules")
+        .select("*")
+        .order("order_index");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Buscar progresso do usuário
+  const { data: progressData } = useQuery({
+    queryKey: ["progress", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("progress")
+        .select("*")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Determinar status de cada módulo
+  const getModuleStatus = (moduleId: string, orderIndex: number) => {
+    const progress = progressData?.find(p => p.module_id === moduleId);
+    
+    if (progress?.completed) return "completed" as const;
+    if (progress) return "in_progress" as const;
+    
+    // Primeiro módulo sempre disponível
+    if (orderIndex === 1) return "available" as const;
+    
+    // Verificar se o módulo anterior foi completado
+    const previousModule = modules?.find(m => m.order_index === orderIndex - 1);
+    if (previousModule) {
+      const prevProgress = progressData?.find(p => p.module_id === previousModule.id);
+      if (prevProgress?.completed) return "available" as const;
+    }
+    
+    return "locked" as const;
+  };
+
+  const completedModules = progressData?.filter(p => p.completed).length || 0;
+  const totalModules = modules?.length || 0;
+  const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
   const container = {
     hidden: { opacity: 0 },
@@ -99,6 +70,20 @@ export default function Modules() {
       transition: { staggerChildren: 0.08 }
     }
   };
+
+  if (modulesLoading) {
+    return (
+      <AppLayout>
+        <div className="px-4 py-6 max-w-lg mx-auto">
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -117,7 +102,7 @@ export default function Modules() {
               <Progress value={overallProgress} variant="gradient" className="h-2" />
             </div>
             <span className="text-sm font-medium text-foreground">
-              {completedModules}/{modules.length}
+              {completedModules}/{totalModules}
             </span>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -132,17 +117,23 @@ export default function Modules() {
           animate="show"
           className="space-y-3"
         >
-          {modules.map((module) => (
-            <ModuleCard
-              key={module.id}
-              moduleNumber={module.id}
-              title={module.title}
-              description={module.description}
-              status={module.status}
-              progress={module.progress}
-              onClick={() => navigate(`/app/modulos/${module.slug}`)}
-            />
-          ))}
+          {modules?.map((module) => {
+            const status = getModuleStatus(module.id, module.order_index);
+            const progress = progressData?.find(p => p.module_id === module.id);
+            const progressPercent = progress?.completed ? 100 : progress ? 50 : 0;
+
+            return (
+              <ModuleCard
+                key={module.id}
+                moduleNumber={module.order_index}
+                title={module.title}
+                description={module.description || ""}
+                status={status}
+                progress={progressPercent}
+                onClick={() => navigate(`/app/modulos/${module.slug}`)}
+              />
+            );
+          })}
         </motion.div>
       </div>
     </AppLayout>
