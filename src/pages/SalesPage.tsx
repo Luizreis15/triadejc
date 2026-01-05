@@ -62,8 +62,8 @@ function HeroSection() {
             background: `linear-gradient(
               to bottom,
               hsl(350 30% 95%) 0%,
-              transparent 40%,
-              transparent 60%,
+              transparent 30%,
+              transparent 70%,
               hsl(350 30% 95%) 100%
             )`
           }}
@@ -71,7 +71,7 @@ function HeroSection() {
         <img 
           src={samiraHero} 
           alt="Samira Gouvêa"
-          className="w-full max-w-sm mx-auto object-cover h-48"
+          className="w-full max-w-sm mx-auto object-cover h-80"
           style={{ objectPosition: 'center 100%' }}
         />
       </div>
