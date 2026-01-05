@@ -1,4 +1,5 @@
 import "@/styles/sales-page.css";
+import samiraHero from "@/assets/samira-hero.jpeg";
 import {
   ButtonGold,
   ButtonOrange,
@@ -50,9 +51,25 @@ function HeroSection() {
         Acesso imediato • R$ 27 • Garantia de 7 dias
       </p>
 
-      {/* Foto Samira placeholder */}
-      <div className="mt-8">
-        <PlaceholderImage label="FOTO DA SAMIRA (hero)" aspectRatio="4:5" />
+      {/* Foto Samira com fade transparente */}
+      <div className="mt-8 relative">
+        <div 
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{
+            background: `linear-gradient(
+              to bottom,
+              hsl(350 30% 95%) 0%,
+              transparent 15%,
+              transparent 85%,
+              hsl(350 30% 95%) 100%
+            )`
+          }}
+        />
+        <img 
+          src={samiraHero} 
+          alt="Samira Gouvêa"
+          className="w-full max-w-sm mx-auto object-cover"
+        />
       </div>
     </section>
   );
