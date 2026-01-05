@@ -1,6 +1,12 @@
 import "@/styles/sales-page.css";
 import samiraHero from "@/assets/samira-hero.jpeg";
 import logoCarrosseis from "@/assets/logo-carrosseis.png";
+import carousel1 from "@/assets/carousel/carousel-1.jpg";
+import carousel2 from "@/assets/carousel/carousel-2.jpg";
+import carousel3 from "@/assets/carousel/carousel-3.jpg";
+import carousel4 from "@/assets/carousel/carousel-4.jpg";
+import carousel5 from "@/assets/carousel/carousel-5.jpg";
+import carousel6 from "@/assets/carousel/carousel-6.jpg";
 import {
   ButtonGold,
   ButtonOrange,
@@ -110,6 +116,15 @@ function BenefitsSection() {
 
 // Seção 3: Exemplos Slider
 function ExamplesSection() {
+  const carouselImages = [
+    carousel1,
+    carousel2,
+    carousel3,
+    carousel4,
+    carousel5,
+    carousel6,
+  ];
+
   return (
     <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-6">
@@ -117,10 +132,13 @@ function ExamplesSection() {
       </h2>
       <Carousel className="w-full">
         <CarouselContent>
-          {[1, 2, 3, 4, 5, 6].map((num) => (
-            <CarouselItem key={num} className="basis-4/5">
-              <PlaceholderImage label={`EXEMPLO DE CARROSSEL #${num}`} aspectRatio="4:5" />
-              <p className="text-xs text-center mt-2 opacity-60 body-inter">exemplo real</p>
+          {carouselImages.map((img, index) => (
+            <CarouselItem key={index} className="basis-4/5">
+              <img 
+                src={img} 
+                alt={`Exemplo de carrossel ${index + 1}`}
+                className="w-full rounded-lg shadow-md"
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
