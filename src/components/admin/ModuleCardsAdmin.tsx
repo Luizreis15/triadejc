@@ -9,9 +9,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, ChevronDown, ChevronUp, Video, FileText, Sparkles, Dumbbell, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+// Converte URLs do YouTube para formato embed
+function convertToEmbedUrl(url: string): string | null {
+  if (!url || url === "[LINK]" || url.trim() === "") return null;
+  
+  const watchMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (watchMatch) {
+    return `https://www.youtube.com/embed/${watchMatch[1]}`;
+  }
+  
+  if (url.includes("youtube.com/embed/")) return url;
+  
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  
+  return url;
+}
+
+const cardTypeIcons: Record<string, React.ReactNode> = {
+  video: <Video className="h-4 w-4" />,
+  text: <FileText className="h-4 w-4" />,
+  model: <Sparkles className="h-4 w-4" />,
+  exercise: <Dumbbell className="h-4 w-4" />,
+  download: <Download className="h-4 w-4" />,
+};
 
 interface ModuleCard {
   id: string;
@@ -306,13 +333,36 @@ export function ModuleCardsAdmin() {
             </div>
 
             {formData.type === "video" && (
-              <div className="space-y-2">
-                <Label>URL do Vídeo</Label>
-                <Input
-                  value={formData.video_url}
-                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
-                  placeholder="https://..."
-                />
+              <div className="space-y-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="flex items-center gap-2 text-primary">
+                  <Video className="h-5 w-5" />
+                  <Label className="text-base font-semibold">Configuração do Vídeo</Label>
+                </div>
+                <div className="space-y-2">
+                  <Label>URL do Vídeo (YouTube ou Vimeo)</Label>
+                  <Input
+                    value={formData.video_url}
+                    onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                    placeholder="https://youtube.com/watch?v=... ou https://youtu.be/..."
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Cole a URL do YouTube ou Vimeo. A conversão para embed é automática.
+                  </p>
+                </div>
+                {formData.video_url && convertToEmbedUrl(formData.video_url) && (
+                  <div className="space-y-2">
+                    <Label className="text-sm">Preview do Vídeo</Label>
+                    <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                      <iframe
+                        src={convertToEmbedUrl(formData.video_url)!}
+                        className="w-full h-full"
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -402,7 +452,8 @@ export function ModuleCardsAdmin() {
                             <TableCell>{card.order_index}</TableCell>
                             <TableCell className="font-medium">{card.title}</TableCell>
                             <TableCell>
-                              <span className="text-xs px-2 py-1 rounded-full bg-muted">
+                              <span className="text-xs px-2 py-1 rounded-full bg-muted inline-flex items-center gap-1.5">
+                                {cardTypeIcons[card.type]}
                                 {cardTypes.find(t => t.value === card.type)?.label || card.type}
                               </span>
                             </TableCell>

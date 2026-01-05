@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Heart, BookmarkPlus, Check } from "lucide-react";
+import { Copy, Heart, BookmarkPlus, Check, Play } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -18,6 +18,31 @@ interface ContentCardProps {
   children?: React.ReactNode;
 }
 
+// Converte URLs do YouTube para formato embed
+function convertToEmbedUrl(url: string): string | null {
+  if (!url || url === "[LINK]" || url.trim() === "") return null;
+  
+  // YouTube watch URL
+  const watchMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (watchMatch) {
+    return `https://www.youtube.com/embed/${watchMatch[1]}`;
+  }
+  
+  // Já é embed URL
+  if (url.includes("youtube.com/embed/")) {
+    return url;
+  }
+  
+  // Vimeo URL
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  
+  // Retorna a URL original se não for reconhecida
+  return url;
+}
+
 export function ContentCard({
   type,
   title,
@@ -31,6 +56,8 @@ export function ContentCard({
 }: ContentCardProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+
+  const embedUrl = videoUrl ? convertToEmbedUrl(videoUrl) : null;
 
   const handleCopy = async () => {
     if (content) {
@@ -80,14 +107,23 @@ export function ContentCard({
           </div>
         </CardHeader>
         <CardContent>
-          {type === "video" && videoUrl && (
+          {type === "video" && (
             <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-4">
-              <iframe
-                src={videoUrl}
-                className="w-full h-full"
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
+              {embedUrl ? (
+                <iframe
+                  src={embedUrl}
+                  className="w-full h-full"
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-muted to-muted/50 text-muted-foreground">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                    <Play className="h-8 w-8 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium">Vídeo em breve</span>
+                </div>
+              )}
             </div>
           )}
 
