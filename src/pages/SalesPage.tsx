@@ -71,7 +71,7 @@ function HeroSection() {
         <img 
           src={samiraHero} 
           alt="Samira Gouvêa"
-          className="w-full max-w-sm mx-auto object-cover h-80"
+          className="w-full object-cover h-80"
           style={{ objectPosition: 'center 100%' }}
         />
       </div>
