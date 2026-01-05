@@ -14,8 +14,10 @@ import {
   IconSquare,
   CardCream,
   SectionRed,
-  PlaceholderImage,
   FAQAccordion,
+  MockupLibrary,
+  MockupModules,
+  MockupNotebook,
 } from "@/components/sales";
 import {
   Carousel,
@@ -270,7 +272,7 @@ function LibrarySection() {
         ))}
       </div>
       <div className="mt-8">
-        <PlaceholderImage label="MOCKUP BIBLIOTECA / MONTAGEM DE CARROSSÉIS" aspectRatio="1:1" />
+        <MockupLibrary />
       </div>
       <div className="text-center mt-6">
         <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
@@ -305,7 +307,7 @@ function StructureSection() {
         ))}
       </div>
       <div className="mt-8">
-        <PlaceholderImage label="MOCKUP ESTRUTURA CARD A CARD" aspectRatio="4:3" />
+        <MockupModules />
       </div>
       <div className="text-center mt-6">
         <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
@@ -340,7 +342,7 @@ function ToolsSection() {
         ))}
       </div>
       <div className="mt-8">
-        <PlaceholderImage label="MOCKUP FERRAMENTAS / PRINTS DO CADERNO" aspectRatio="4:3" />
+        <MockupNotebook />
       </div>
       <div className="text-center mt-6">
         <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
