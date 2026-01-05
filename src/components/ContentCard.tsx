@@ -18,6 +18,13 @@ interface ContentCardProps {
   children?: React.ReactNode;
 }
 
+// Converte Markdown básico para HTML
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
+
 // Converte URLs do YouTube para formato embed
 function convertToEmbedUrl(url: string): string | null {
   if (!url || url === "[LINK]" || url.trim() === "") return null;
@@ -128,9 +135,10 @@ export function ContentCard({
           )}
 
           {content && (
-            <div className="prose prose-sm max-w-none text-foreground mb-4">
-              <p className="whitespace-pre-wrap">{content}</p>
-            </div>
+            <div 
+              className="prose prose-sm max-w-none text-foreground mb-4 whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+            />
           )}
 
           {children}
