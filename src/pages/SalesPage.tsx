@@ -135,7 +135,7 @@ function ExamplesSection() {
 // Seção 4: CTA Box Creme
 function CTABoxSection() {
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <CardCream className="text-center py-8">
         <p className="body-inter text-base mb-6 px-4">
           Clique no botão abaixo para <strong>PARAR DE TRAVAR</strong> na hora de postar e ter acesso aos carrosséis (card a card) que mais me trouxeram resultado:
@@ -216,7 +216,7 @@ function AttentionSection() {
 // Seção 6: Título Transição
 function TransitionTitle() {
   return (
-    <section className="px-6 py-10 text-center">
+    <section className="px-6 py-6 text-center">
       <h2 className="heading-playfair text-2xl">
         Tudo o que você vai receber dentro do Venda Mais com Carrosséis Magnéticos:
       </h2>
@@ -237,7 +237,7 @@ function LibrarySection() {
   ];
 
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-6">
         Biblioteca de Formatos de Carrosséis
       </h2>
@@ -272,7 +272,7 @@ function StructureSection() {
   ];
 
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-6">
         Estrutura de Uso de Cada Formato
       </h2>
@@ -307,7 +307,7 @@ function ToolsSection() {
   ];
 
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-6">
         Ferramentas Extras
       </h2>
@@ -334,7 +334,7 @@ function ToolsSection() {
 // Seção 10: Depoimentos
 function TestimonialsSection() {
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-2">
         O que estão dizendo
       </h2>
@@ -447,7 +447,7 @@ function FAQSection() {
   ];
 
   return (
-    <section className="px-6 py-10">
+    <section className="px-6 py-6">
       <h2 className="heading-playfair text-xl text-center mb-6">
         Dúvidas rápidas
       </h2>
@@ -462,7 +462,7 @@ function FAQSection() {
 // Seção 14: CTA Final
 function FinalCTASection() {
   return (
-    <section className="px-6 py-10 text-center">
+    <section className="px-6 py-6 text-center">
       <h2 className="heading-playfair text-xl mb-4">
         Seu feed não precisa de mais posts. Precisa de mais intenção.
       </h2>
@@ -480,7 +480,7 @@ function FinalCTASection() {
 // Seção 15: Rodapé
 function FooterSection() {
   return (
-    <footer className="px-6 py-10 text-center border-t border-[hsl(var(--sp-gold)/0.2)]">
+    <footer className="px-6 py-6 text-center border-t border-[hsl(var(--sp-gold)/0.2)]">
       <div className="mb-4">
         <p className="body-inter text-sm font-semibold mb-2">Suporte</p>
         <p className="body-inter text-sm opacity-70">WhatsApp: [LINK_SUPORTE]</p>
