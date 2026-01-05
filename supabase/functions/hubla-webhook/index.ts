@@ -11,20 +11,32 @@ const corsHeaders = {
 
 const DEFAULT_PASSWORD = "Mudar@123";
 
-// Hubla webhook payload structure (adjust based on actual Hubla documentation)
+// Hubla webhook payload structure (based on actual webhook data)
 interface HublaWebhookPayload {
-  event: string;
-  data: {
-    customer: {
-      email: string;
+  type: string;
+  version: string;
+  event: {
+    product?: {
+      id: string;
       name: string;
-      phone?: string;
     };
-    purchase?: {
+    subscription?: {
       id: string;
       status: string;
-      product_id: string;
-      product_name: string;
+      payer: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string;
+      };
+    };
+    user?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
     };
   };
 }
@@ -51,22 +63,35 @@ const handler = async (req: Request): Promise<Response> => {
     const payload: HublaWebhookPayload = await req.json();
     console.log("Received webhook payload:", JSON.stringify(payload, null, 2));
 
-    // Validate required fields
-    const customerEmail = payload.data?.customer?.email;
-    const customerName = payload.data?.customer?.name;
-    const eventType = payload.event;
+    const eventType = payload.type;
+
+    // Extract customer data from the correct location in Hubla's payload
+    // Priority: payer (who paid) > user (member added)
+    const payer = payload.event?.subscription?.payer;
+    const user = payload.event?.user;
+    
+    const customerEmail = payer?.email || user?.email;
+    const customerFirstName = payer?.firstName || user?.firstName || "";
+    const customerLastName = payer?.lastName || user?.lastName || "";
+    const customerName = `${customerFirstName} ${customerLastName}`.trim();
 
     if (!customerEmail) {
-      console.error("Customer email is required");
+      console.error("Customer email is required. Payload structure:", JSON.stringify(payload, null, 2));
       return new Response(
         JSON.stringify({ error: "Customer email is required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    // Only process approved/confirmed purchase events
-    // Adjust these event types based on Hubla's actual webhook events
-    const validEvents = ["purchase.approved", "purchase.confirmed", "subscription.activated", "sale.approved"];
+    // Process relevant Hubla events
+    const validEvents = [
+      "customer.member_added",
+      "purchase.approved", 
+      "purchase.confirmed", 
+      "subscription.activated", 
+      "sale.approved"
+    ];
+    
     if (!validEvents.includes(eventType)) {
       console.log(`Ignoring event type: ${eventType}`);
       return new Response(
@@ -75,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Processing ${eventType} for ${customerEmail}`);
+    console.log(`Processing ${eventType} for ${customerEmail} (${customerName})`);
 
     // Create Supabase admin client
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -90,20 +115,18 @@ const handler = async (req: Request): Promise<Response> => {
     const existingUser = existingUsers?.users?.find(u => u.email === customerEmail);
 
     let userId: string;
+    let isNewUser = false;
 
     if (existingUser) {
       console.log(`User already exists: ${customerEmail}`);
       userId = existingUser.id;
-      
-      // User already exists, just send a reminder email
-      // (they may have forgotten their access)
     } else {
       // Create new user with default password
       console.log(`Creating new user: ${customerEmail}`);
       const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: customerEmail,
         password: DEFAULT_PASSWORD,
-        email_confirm: true, // Auto-confirm email
+        email_confirm: true,
         user_metadata: {
           name: customerName,
         },
@@ -118,10 +141,10 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       userId = authUser.user.id;
+      isNewUser = true;
       console.log(`User created successfully: ${userId}`);
 
-      // The profile should be created automatically by the trigger
-      // But let's update it with the name from Hubla just in case
+      // Update profile with name from Hubla
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
         .upsert({
@@ -132,7 +155,6 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (profileError) {
         console.error("Error updating profile:", profileError);
-        // Don't fail the webhook, profile might already exist
       }
     }
 
@@ -155,7 +177,6 @@ const handler = async (req: Request): Promise<Response> => {
     if (!emailResponse.ok) {
       const emailError = await emailResponse.text();
       console.error("Error sending welcome email:", emailError);
-      // Don't fail the webhook, user was created successfully
     } else {
       console.log("Welcome email sent successfully");
     }
@@ -163,8 +184,10 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: existingUser ? "User already exists, reminder sent" : "User created and email sent",
-        userId 
+        message: isNewUser ? "User created and email sent" : "User already exists, email sent",
+        userId,
+        email: customerEmail,
+        name: customerName
       }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
