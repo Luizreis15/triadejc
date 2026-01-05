@@ -52,15 +52,15 @@ function HeroSection() {
       </p>
 
       {/* Foto Samira com fade transparente */}
-      <div className="mt-8 relative">
+      <div className="mt-8 relative overflow-hidden">
         <div 
           className="absolute inset-0 pointer-events-none z-10"
           style={{
             background: `linear-gradient(
               to bottom,
               hsl(350 30% 95%) 0%,
-              transparent 15%,
-              transparent 85%,
+              transparent 40%,
+              transparent 60%,
               hsl(350 30% 95%) 100%
             )`
           }}
@@ -68,7 +68,8 @@ function HeroSection() {
         <img 
           src={samiraHero} 
           alt="Samira Gouvêa"
-          className="w-full max-w-sm mx-auto object-cover"
+          className="w-full max-w-sm mx-auto object-cover h-48"
+          style={{ objectPosition: 'center 100%' }}
         />
       </div>
     </section>
