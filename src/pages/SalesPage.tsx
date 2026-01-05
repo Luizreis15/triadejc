@@ -1,5 +1,6 @@
 import "@/styles/sales-page.css";
 import samiraHero from "@/assets/samira-hero.jpeg";
+import samiraAbout from "@/assets/samira-about.jpg";
 import logoCarrosseis from "@/assets/logo-carrosseis.png";
 import carousel1 from "@/assets/carousel/carousel-1.jpg";
 import carousel2 from "@/assets/carousel/carousel-2.jpg";
@@ -404,7 +405,11 @@ function OfferSection() {
 function AboutSection() {
   return (
     <section className="px-6 py-6">
-      <PlaceholderImage label="FOTO DA SAMIRA (card premium)" aspectRatio="4:5" className="mb-6" />
+      <img 
+        src={samiraAbout} 
+        alt="Samira Gouvêa" 
+        className="w-full rounded-lg shadow-lg mb-6"
+      />
       
       <h2 className="heading-playfair text-2xl text-center mb-4">
         Samira Gouvêa
