@@ -1,22 +1,21 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
+import logoCarrosseis from "@/assets/logo-carrosseis.png";
 
 const emailSchema = z.string().email("Digite um e-mail válido");
 const passwordSchema = z.string().min(6, "A senha deve ter pelo menos 6 caracteres");
 
 export default function Login() {
   const navigate = useNavigate();
-  const { user, signIn, signUp, signInWithPassword, loading } = useAuth();
+  const { user, signInWithPassword, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [useMagicLink, setUseMagicLink] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -38,66 +37,30 @@ export default function Login() {
       return;
     }
 
-    if (!useMagicLink) {
-      const passwordResult = passwordSchema.safeParse(password);
-      if (!passwordResult.success) {
-        toast({
-          title: "Erro",
-          description: passwordResult.error.errors[0].message,
-          variant: "destructive",
-        });
-        return;
-      }
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      toast({
+        title: "Erro",
+        description: passwordResult.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      if (useMagicLink) {
-        const { error } = await signIn(email);
-        if (error) {
-          toast({
-            title: "Erro ao enviar link",
-            description: error.message,
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Link enviado! ✨",
-            description: "Verifique seu e-mail para acessar.",
-          });
+      const { error } = await signInWithPassword(email, password);
+      if (error) {
+        let message = error.message;
+        if (error.message.includes("Invalid login credentials")) {
+          message = "E-mail ou senha incorretos.";
         }
-      } else if (isSignUp) {
-        const { error } = await signUp(email, password);
-        if (error) {
-          let message = error.message;
-          if (error.message.includes("already registered")) {
-            message = "Este e-mail já está cadastrado. Tente fazer login.";
-          }
-          toast({
-            title: "Erro ao criar conta",
-            description: message,
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Conta criada! 🎉",
-            description: "Você já pode acessar o caderno.",
-          });
-        }
-      } else {
-        const { error } = await signInWithPassword(email, password);
-        if (error) {
-          let message = error.message;
-          if (error.message.includes("Invalid login credentials")) {
-            message = "E-mail ou senha incorretos.";
-          }
-          toast({
-            title: "Erro ao entrar",
-            description: message,
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "Erro ao entrar",
+          description: message,
+          variant: "destructive",
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -121,28 +84,24 @@ export default function Login() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6">
-            <span className="text-3xl">📚</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-3">
-            Caderno Digital
-          </h1>
-          <p className="text-lg text-primary font-serif italic">
-            Carrosséis Magnéticos
-          </p>
+          <img 
+            src={logoCarrosseis} 
+            alt="Carrosséis Magnéticos" 
+            className="h-24 md:h-32 mx-auto mb-4"
+          />
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="w-full max-w-sm space-y-4"
+          className="w-full max-w-sm"
         >
           <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-card border border-border">
             <h2 className="text-xl font-serif font-semibold text-center mb-6">
-              {isSignUp ? "Crie sua conta" : "Acesse seu Caderno"}
+              Acesse seu Caderno
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -164,26 +123,24 @@ export default function Login() {
                 />
               </div>
 
-              {!useMagicLink && (
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-foreground mb-2"
-                  >
-                    Senha
-                  </label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12"
-                    required
-                    minLength={6}
-                  />
-                </div>
-              )}
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-foreground mb-2"
+                >
+                  Senha
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12"
+                  required
+                  minLength={6}
+                />
+              </div>
 
               <Button
                 type="submit"
@@ -197,49 +154,21 @@ export default function Login() {
                     <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                     Aguarde...
                   </span>
-                ) : useMagicLink ? (
-                  "Entrar com Link Mágico"
-                ) : isSignUp ? (
-                  "Criar Conta"
                 ) : (
                   "Entrar"
                 )}
               </Button>
             </form>
 
-            <div className="mt-4 space-y-2">
-              {useMagicLink ? (
-                <p className="text-xs text-muted-foreground text-center">
-                  Você receberá um link de acesso no seu e-mail
-                </p>
-              ) : null}
-
-              <button
-                type="button"
-                onClick={() => setUseMagicLink(!useMagicLink)}
-                className="w-full text-sm text-primary hover:underline"
+            <div className="mt-4 text-center">
+              <Link
+                to="/reset-password"
+                className="text-sm text-primary hover:underline"
               >
-                {useMagicLink ? "Usar e-mail e senha" : "Usar link mágico"}
-              </button>
-
-              {!useMagicLink && (
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="w-full text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {isSignUp ? "Já tem conta? Entre" : "Não tem conta? Cadastre-se"}
-                </button>
-              )}
+                Esqueci minha senha
+              </Link>
             </div>
           </div>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Ainda não é aluna?{" "}
-            <a href="#" className="text-primary font-medium hover:underline">
-              Saiba mais
-            </a>
-          </p>
         </motion.div>
       </div>
 
@@ -250,7 +179,7 @@ export default function Login() {
         className="py-6 text-center"
       >
         <p className="text-xs text-muted-foreground">
-          © 2025 Samira Coelho · Código Magnético
+          © 2025 Samira Gouvêa · Código Magnético
         </p>
       </motion.footer>
     </div>
