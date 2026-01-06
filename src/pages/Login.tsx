@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 import logoCarrosseis from "@/assets/logo-carrosseis.png";
 
 const emailSchema = z.string().email("Digite um e-mail válido");
@@ -17,12 +18,29 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingRole, setIsCheckingRole] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      navigate("/membrosvmcm/app", { replace: true });
+    if (user && !isCheckingRole) {
+      setIsCheckingRole(true);
+      
+      // Check if user is admin
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) {
+            navigate("/admin", { replace: true });
+          } else {
+            navigate("/membrosvmcm/app", { replace: true });
+          }
+          setIsCheckingRole(false);
+        });
     }
-  }, [user, navigate]);
+  }, [user, navigate, isCheckingRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
