@@ -253,7 +253,7 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     setRecordingTime(0);
   }, []);
 
-  // Download do vídeo
+  // Download do vídeo (desktop)
   const downloadVideo = useCallback((blob: Blob, filename?: string) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -262,7 +262,46 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, []);
+
+  // Compartilhar ou baixar vídeo (compatível com iOS/Android)
+  const shareOrDownloadVideo = useCallback(async (blob: Blob, filename?: string): Promise<{ success: boolean; method: 'share' | 'download' | 'cancelled' }> => {
+    const finalFilename = filename || `gravacao-${new Date().toISOString().slice(0, 10)}.webm`;
+    
+    // Verificar se Web Share API está disponível (iOS Safari, Android Chrome)
+    const file = new File([blob], finalFilename, { type: blob.type });
+    
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Minha Gravação',
+        });
+        return { success: true, method: 'share' };
+      } catch (err: any) {
+        // Usuário cancelou o share - não é erro
+        if (err.name === 'AbortError') {
+          return { success: false, method: 'cancelled' };
+        }
+        console.error('Erro ao compartilhar:', err);
+        // Fallback para download se share falhar
+      }
+    }
+    
+    // Fallback: Download tradicional (funciona em desktop)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = finalFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Delay antes de revogar para garantir que download iniciou
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    
+    return { success: true, method: 'download' };
   }, []);
 
   // Formatar tempo de gravação
@@ -317,6 +356,7 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     stopRecording,
     discardRecording,
     downloadVideo,
+    shareOrDownloadVideo,
     listCameras,
     setIsCameraMirrored,
     
