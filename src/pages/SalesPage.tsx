@@ -427,9 +427,16 @@ function OfferSection() {
         </div>
 
         {/* CTA */}
-        <ButtonOrange size="large" className="w-full">
-          QUERO ACESSAR
-        </ButtonOrange>
+        <a 
+          href="https://pay.hub.la/WaKnMJPyb6NZOD8PgNxg" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="block w-full"
+        >
+          <ButtonOrange size="large" className="w-full pointer-events-auto">
+            QUERO ACESSAR
+          </ButtonOrange>
+        </a>
         <p className="text-xs mt-3 opacity-70 body-inter">
           Acesso imediato após confirmação do pagamento.
         </p>
