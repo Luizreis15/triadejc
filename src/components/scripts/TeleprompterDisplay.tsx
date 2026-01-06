@@ -239,7 +239,7 @@ export function TeleprompterDisplay({
 
   const handleDownload = async () => {
     if (recordedBlob) {
-      const result = await shareOrDownloadVideo(recordedBlob, `gravacao-${Date.now()}.webm`);
+      const result = await shareOrDownloadVideo(recordedBlob);
       
       if (result.success) {
         if (result.method === 'share') {

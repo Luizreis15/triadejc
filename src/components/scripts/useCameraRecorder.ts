@@ -9,6 +9,9 @@ interface UseCameraRecorderOptions {
   onRecordingComplete?: (blob: Blob) => void;
 }
 
+// Detectar iOS
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
 export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -18,6 +21,7 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
   const [isCameraMirrored, setIsCameraMirrored] = useState(true);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<"prompt" | "granted" | "denied" | "unknown">("unknown");
+  const [recordingMimeType, setRecordingMimeType] = useState<string>("video/webm");
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -156,13 +160,21 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     try {
       recordedChunksRef.current = [];
       
-      // Verificar codecs suportados
-      const mimeTypes = [
-        "video/webm;codecs=vp9,opus",
-        "video/webm;codecs=vp8,opus",
-        "video/webm",
-        "video/mp4",
-      ];
+      // Verificar codecs suportados - iOS prioriza MP4
+      const mimeTypes = isIOS 
+        ? [
+            "video/mp4;codecs=avc1.424028,mp4a.40.2",
+            "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+            "video/mp4",
+            "video/webm;codecs=vp9,opus",
+            "video/webm",
+          ]
+        : [
+            "video/webm;codecs=vp9,opus",
+            "video/webm;codecs=vp8,opus",
+            "video/webm",
+            "video/mp4",
+          ];
       
       let selectedMimeType = "";
       for (const mimeType of mimeTypes) {
@@ -176,6 +188,9 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
         setCameraError("Seu navegador não suporta gravação de vídeo.");
         return false;
       }
+
+      // Guardar o mimeType para usar no blob depois
+      setRecordingMimeType(selectedMimeType);
 
       const mediaRecorder = new MediaRecorder(mediaStreamRef.current, {
         mimeType: selectedMimeType,
@@ -216,6 +231,12 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     }
   }, [options]);
 
+  // Obter extensão correta baseada no mimeType
+  const getFileExtension = useCallback((mimeType: string) => {
+    if (mimeType.includes("mp4")) return ".mp4";
+    return ".webm";
+  }, []);
+
   // Parar gravação - retorna Promise com o Blob
   const stopRecording = useCallback((): Promise<Blob | null> => {
     return new Promise((resolve) => {
@@ -233,7 +254,8 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
           originalOnStop.call(mediaRecorderRef.current, event);
         }
         
-        const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        // Usar o mimeType correto que foi gravado
+        const blob = new Blob(recordedChunksRef.current, { type: recordingMimeType });
         setIsRecording(false);
         
         if (recordingTimerRef.current) {
@@ -245,7 +267,7 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
 
       mediaRecorderRef.current.stop();
     });
-  }, []);
+  }, [recordingMimeType]);
 
   // Descartar gravação
   const discardRecording = useCallback(() => {
@@ -267,7 +289,8 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
 
   // Compartilhar ou baixar vídeo (compatível com iOS/Android)
   const shareOrDownloadVideo = useCallback(async (blob: Blob, filename?: string): Promise<{ success: boolean; method: 'share' | 'download' | 'cancelled' }> => {
-    const finalFilename = filename || `gravacao-${new Date().toISOString().slice(0, 10)}.webm`;
+    const extension = getFileExtension(recordingMimeType);
+    const finalFilename = filename || `gravacao-${new Date().toISOString().slice(0, 10)}${extension}`;
     
     // Verificar se Web Share API está disponível (iOS Safari, Android Chrome)
     const file = new File([blob], finalFilename, { type: blob.type });
@@ -302,7 +325,7 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     
     return { success: true, method: 'download' };
-  }, []);
+  }, [getFileExtension, recordingMimeType]);
 
   // Formatar tempo de gravação
   const formatTime = useCallback((seconds: number) => {
