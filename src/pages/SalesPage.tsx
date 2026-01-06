@@ -428,7 +428,7 @@ function OfferSection() {
 
         {/* CTA */}
         <a 
-          href="https://pay.hub.la/WaKnMJPyb6NZOD8PgNxg" 
+          href="https://pay.hub.la/9z98luhiloijFevXfgEZ"
           target="_blank" 
           rel="noopener noreferrer"
           className="block w-full"
