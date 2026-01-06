@@ -56,7 +56,7 @@ export default function ResetPassword() {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password?type=recovery`,
+        redirectTo: `${window.location.origin}/membrosvmcm/reset-password?type=recovery`,
       });
 
       if (error) {
@@ -117,7 +117,7 @@ export default function ResetPassword() {
           title: "Senha atualizada! 🎉",
           description: "Você já pode fazer login com sua nova senha.",
         });
-        navigate("/");
+        navigate("/membrosvmcm");
       }
     } finally {
       setIsSubmitting(false);
@@ -279,7 +279,7 @@ export default function ResetPassword() {
 
             <div className="mt-4 text-center">
               <Link
-                to="/"
+                to="/membrosvmcm"
                 className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
               >
                 <ArrowLeft className="w-4 h-4" />

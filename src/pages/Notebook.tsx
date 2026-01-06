@@ -282,7 +282,7 @@ export default function Notebook() {
           <Card
             variant="interactive"
             className="bg-secondary text-secondary-foreground"
-            onClick={() => navigate("/app/resultados")}
+            onClick={() => navigate("/membrosvmcm/app/resultados")}
           >
             <CardContent className="p-4 flex items-center gap-3">
               <Trophy className="h-5 w-5" />
