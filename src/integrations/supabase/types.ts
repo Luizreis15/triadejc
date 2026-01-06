@@ -349,6 +349,236 @@ export type Database = {
         }
         Relationships: []
       }
+      script_blocks: {
+        Row: {
+          allow_price: boolean | null
+          awareness_tags: string[] | null
+          created_at: string | null
+          est_seconds: number | null
+          goal_tags: string[] | null
+          id: string
+          is_active: boolean | null
+          product_id: string | null
+          text_content: string
+          tone_tags: string[] | null
+          type: string
+          usage_count: number | null
+        }
+        Insert: {
+          allow_price?: boolean | null
+          awareness_tags?: string[] | null
+          created_at?: string | null
+          est_seconds?: number | null
+          goal_tags?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          product_id?: string | null
+          text_content: string
+          tone_tags?: string[] | null
+          type: string
+          usage_count?: number | null
+        }
+        Update: {
+          allow_price?: boolean | null
+          awareness_tags?: string[] | null
+          created_at?: string | null
+          est_seconds?: number | null
+          goal_tags?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          product_id?: string | null
+          text_content?: string
+          tone_tags?: string[] | null
+          type?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_blocks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "script_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      script_products: {
+        Row: {
+          checkout_url: string | null
+          created_at: string | null
+          forbidden_words: string[] | null
+          guarantee_days: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          niche: string | null
+          price: number | null
+          promise: string | null
+          tone_tags: string[] | null
+          whatsapp_url: string | null
+        }
+        Insert: {
+          checkout_url?: string | null
+          created_at?: string | null
+          forbidden_words?: string[] | null
+          guarantee_days?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          niche?: string | null
+          price?: number | null
+          promise?: string | null
+          tone_tags?: string[] | null
+          whatsapp_url?: string | null
+        }
+        Update: {
+          checkout_url?: string | null
+          created_at?: string | null
+          forbidden_words?: string[] | null
+          guarantee_days?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          niche?: string | null
+          price?: number | null
+          promise?: string | null
+          tone_tags?: string[] | null
+          whatsapp_url?: string | null
+        }
+        Relationships: []
+      }
+      script_usage_events: {
+        Row: {
+          created_at: string | null
+          event_name: string
+          id: string
+          metadata: Json | null
+          script_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_name: string
+          id?: string
+          metadata?: Json | null
+          script_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_name?: string
+          id?: string
+          metadata?: Json | null
+          script_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_usage_events_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scripts: {
+        Row: {
+          body_block_id: string | null
+          created_at: string | null
+          cta_block_id: string | null
+          duration_seconds: number
+          final_text: string
+          goal: string
+          headline_block_id: string | null
+          id: string
+          is_favorite: boolean | null
+          offer_block_id: string | null
+          product_id: string | null
+          ps_block_id: string | null
+          status: string | null
+          style: string
+          user_id: string
+        }
+        Insert: {
+          body_block_id?: string | null
+          created_at?: string | null
+          cta_block_id?: string | null
+          duration_seconds: number
+          final_text: string
+          goal: string
+          headline_block_id?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          offer_block_id?: string | null
+          product_id?: string | null
+          ps_block_id?: string | null
+          status?: string | null
+          style: string
+          user_id: string
+        }
+        Update: {
+          body_block_id?: string | null
+          created_at?: string | null
+          cta_block_id?: string | null
+          duration_seconds?: number
+          final_text?: string
+          goal?: string
+          headline_block_id?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          offer_block_id?: string | null
+          product_id?: string | null
+          ps_block_id?: string | null
+          status?: string | null
+          style?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scripts_body_block_id_fkey"
+            columns: ["body_block_id"]
+            isOneToOne: false
+            referencedRelation: "script_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scripts_cta_block_id_fkey"
+            columns: ["cta_block_id"]
+            isOneToOne: false
+            referencedRelation: "script_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scripts_headline_block_id_fkey"
+            columns: ["headline_block_id"]
+            isOneToOne: false
+            referencedRelation: "script_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scripts_offer_block_id_fkey"
+            columns: ["offer_block_id"]
+            isOneToOne: false
+            referencedRelation: "script_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scripts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "script_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scripts_ps_block_id_fkey"
+            columns: ["ps_block_id"]
+            isOneToOne: false
+            referencedRelation: "script_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
