@@ -21,6 +21,8 @@ import MockupGenerator from "./pages/MockupGenerator";
 import ScriptGenerator from "./pages/ScriptGenerator";
 import Teleprompter from "./pages/Teleprompter";
 import MyScripts from "./pages/MyScripts";
+import MemberProfile from "./pages/MemberProfile";
+import AdminProfile from "./pages/AdminProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,8 +54,12 @@ const App = () => (
             <Route path="/membrosvmcm/app/roteiros" element={<ProtectedRoute><ScriptGenerator /></ProtectedRoute>} />
             <Route path="/membrosvmcm/app/meus-roteiros" element={<ProtectedRoute><MyScripts /></ProtectedRoute>} />
             <Route path="/membrosvmcm/app/teleprompter/:scriptId" element={<ProtectedRoute><Teleprompter /></ProtectedRoute>} />
+            <Route path="/membrosvmcm/app/perfil" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
+            
+            {/* Admin area */}
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/mockups" element={<AdminRoute><MockupGenerator /></AdminRoute>} />
+            <Route path="/admin/perfil" element={<AdminRoute><AdminProfile /></AdminRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

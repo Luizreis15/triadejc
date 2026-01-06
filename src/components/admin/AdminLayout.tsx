@@ -15,6 +15,7 @@ import {
   BarChart3,
   LogOut,
   Eye,
+  Settings,
 } from "lucide-react";
 import logoCarrosseis from "@/assets/logo-carrosseis.png";
 
@@ -35,6 +36,7 @@ const navItems = [
   { value: "script-products", label: "Produtos", icon: Wand2 },
   { value: "script-blocks", label: "Blocos", icon: Layers },
   { value: "script-metrics", label: "Métricas", icon: BarChart3 },
+  { value: "settings", label: "Configurações", icon: Settings },
 ];
 
 export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutProps) {
