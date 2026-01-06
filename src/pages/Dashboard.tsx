@@ -14,16 +14,19 @@ import {
   ChevronRight,
   Sparkles,
   LogOut,
-  Wand2
+  Wand2,
+  Settings
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdminRole();
 
   // Buscar perfil do usuário
   const { data: profile } = useQuery({
@@ -115,9 +118,16 @@ export default function Dashboard() {
               Seu Caderno Digital
             </h1>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleSignOut}>
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            {isAdmin && (
+              <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
+                <Settings className="h-5 w-5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </motion.header>
 
         {/* Card de Progresso */}
