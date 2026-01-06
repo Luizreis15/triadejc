@@ -52,8 +52,8 @@ const App = () => (
             <Route path="/membrosvmcm/app/roteiros" element={<ProtectedRoute><ScriptGenerator /></ProtectedRoute>} />
             <Route path="/membrosvmcm/app/meus-roteiros" element={<ProtectedRoute><MyScripts /></ProtectedRoute>} />
             <Route path="/membrosvmcm/app/teleprompter/:scriptId" element={<ProtectedRoute><Teleprompter /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/admin" element={<AdminRoute><Admin /></AdminRoute>} />
-            <Route path="/membrosvmcm/admin/mockups" element={<AdminRoute><MockupGenerator /></AdminRoute>} />
+            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+            <Route path="/admin/mockups" element={<AdminRoute><MockupGenerator /></AdminRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

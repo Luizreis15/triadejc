@@ -2,8 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, Layers, Library, Wand2, BarChart3 } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, Users, Shield, UserPlus, BookOpen, Layers, Library, Wand2, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { UsersAdmin } from "@/components/admin/UsersAdmin";
+import { AdminsManagement } from "@/components/admin/AdminsManagement";
+import { LeadsAdmin } from "@/components/admin/LeadsAdmin";
 import { ModulesAdmin } from "@/components/admin/ModulesAdmin";
 import { ModuleCardsAdmin } from "@/components/admin/ModuleCardsAdmin";
 import { LibraryAdmin } from "@/components/admin/LibraryAdmin";
@@ -13,7 +17,20 @@ import { ScriptMetricsAdmin } from "@/components/admin/ScriptMetricsAdmin";
 
 export default function Admin() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("modules");
+  const [activeTab, setActiveTab] = useState("dashboard");
+
+  const tabs = [
+    { value: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { value: "users", label: "Usuários", icon: Users },
+    { value: "admins", label: "Admins", icon: Shield },
+    { value: "leads", label: "Leads", icon: UserPlus },
+    { value: "modules", label: "Módulos", icon: BookOpen },
+    { value: "cards", label: "Cards", icon: Layers },
+    { value: "library", label: "Biblioteca", icon: Library },
+    { value: "script-products", label: "Produtos", icon: Wand2 },
+    { value: "script-blocks", label: "Blocos", icon: Layers },
+    { value: "script-metrics", label: "Métricas", icon: BarChart3 },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,7 +45,7 @@ export default function Admin() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-serif font-bold text-foreground">
-            Administração
+            Painel Administrativo
           </h1>
         </div>
       </header>
@@ -41,33 +58,31 @@ export default function Admin() {
           transition={{ duration: 0.3 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6 mb-6">
-              <TabsTrigger value="modules" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden sm:inline">Módulos</span>
-              </TabsTrigger>
-              <TabsTrigger value="cards" className="flex items-center gap-2">
-                <Layers className="h-4 w-4" />
-                <span className="hidden sm:inline">Cards</span>
-              </TabsTrigger>
-              <TabsTrigger value="library" className="flex items-center gap-2">
-                <Library className="h-4 w-4" />
-                <span className="hidden sm:inline">Biblioteca</span>
-              </TabsTrigger>
-              <TabsTrigger value="script-products" className="flex items-center gap-2">
-                <Wand2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Produtos</span>
-              </TabsTrigger>
-              <TabsTrigger value="script-blocks" className="flex items-center gap-2">
-                <Layers className="h-4 w-4" />
-                <span className="hidden sm:inline">Blocos</span>
-              </TabsTrigger>
-              <TabsTrigger value="script-metrics" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden sm:inline">Métricas</span>
-              </TabsTrigger>
+            <TabsList className="flex flex-wrap h-auto gap-1 mb-6 bg-muted/50 p-1">
+              {tabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="flex items-center gap-2 data-[state=active]:bg-background"
+                >
+                  <tab.icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </TabsTrigger>
+              ))}
             </TabsList>
 
+            <TabsContent value="dashboard">
+              <AdminDashboard />
+            </TabsContent>
+            <TabsContent value="users">
+              <UsersAdmin />
+            </TabsContent>
+            <TabsContent value="admins">
+              <AdminsManagement />
+            </TabsContent>
+            <TabsContent value="leads">
+              <LeadsAdmin />
+            </TabsContent>
             <TabsContent value="modules">
               <ModulesAdmin />
             </TabsContent>
