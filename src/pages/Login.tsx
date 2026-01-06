@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import logoCarrosseis from "@/assets/logo-carrosseis.png";
+import { AdminViewModal } from "@/components/admin/AdminViewModal";
 
 const emailSchema = z.string().email("Digite um e-mail válido");
 const passwordSchema = z.string().min(6, "A senha deve ter pelo menos 6 caracteres");
@@ -19,6 +20,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingRole, setIsCheckingRole] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (user && !isCheckingRole) {
@@ -33,14 +36,27 @@ export default function Login() {
         .maybeSingle()
         .then(({ data }) => {
           if (data) {
-            navigate("/admin", { replace: true });
+            // User is admin - show modal to choose view
+            setIsAdmin(true);
+            setShowViewModal(true);
           } else {
+            // Regular user - go directly to member area
             navigate("/membrosvmcm/app", { replace: true });
           }
           setIsCheckingRole(false);
         });
     }
   }, [user, navigate, isCheckingRole]);
+
+  const handleSelectAdmin = () => {
+    setShowViewModal(false);
+    navigate("/admin", { replace: true });
+  };
+
+  const handleSelectMember = () => {
+    setShowViewModal(false);
+    navigate("/membrosvmcm/app", { replace: true });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,12 +195,12 @@ export default function Login() {
             </form>
 
             <div className="mt-4 text-center">
-              <Link
-                to="/membrosvmcm/reset-password"
+              <a
+                href="/membrosvmcm/reset-password"
                 className="text-sm text-primary hover:underline"
               >
                 Esqueci minha senha
-              </Link>
+              </a>
             </div>
           </div>
         </motion.div>
@@ -200,6 +216,14 @@ export default function Login() {
           © 2025 Samira Gouvêa · Código Magnético
         </p>
       </motion.footer>
+
+      {/* Modal de seleção para admins */}
+      <AdminViewModal
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        onSelectAdmin={handleSelectAdmin}
+        onSelectMember={handleSelectMember}
+      />
     </div>
   );
 }
