@@ -12,9 +12,21 @@ import {
   Minus,
   Plus,
   RotateCcw,
-  Check
+  Check,
+  Video,
+  VideoOff,
+  Circle,
+  Square,
+  Download,
+  Trash2,
+  Camera,
+  SwitchCamera,
+  AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCameraRecorder } from "./useCameraRecorder";
+import { CameraSelector } from "./CameraSelector";
+import { useToast } from "@/hooks/use-toast";
 
 interface TeleprompterDisplayProps {
   text: string;
@@ -22,11 +34,17 @@ interface TeleprompterDisplayProps {
   onMarkRecorded?: () => void;
 }
 
+type TeleprompterMode = "practice" | "recording";
+
 export function TeleprompterDisplay({ 
   text, 
   onClose,
   onMarkRecorded 
 }: TeleprompterDisplayProps) {
+  const { toast } = useToast();
+  
+  // Estados do teleprompter
+  const [mode, setMode] = useState<TeleprompterMode>("practice");
   const [isPlaying, setIsPlaying] = useState(false);
   const [wpm, setWpm] = useState(140);
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
@@ -35,12 +53,46 @@ export function TeleprompterDisplay({
   const [countdown, setCountdown] = useState<number | null>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [showCameraSelector, setShowCameraSelector] = useState(false);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [textOpacity, setTextOpacity] = useState(0.85);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
   const wpmRef = useRef(wpm);
+
+  // Hook de câmera/gravação
+  const {
+    videoRef,
+    isCameraEnabled,
+    isRecording,
+    recordingTime,
+    availableCameras,
+    selectedCamera,
+    isCameraMirrored,
+    cameraError,
+    startCamera,
+    stopCamera,
+    switchCamera,
+    startRecording,
+    stopRecording,
+    discardRecording,
+    downloadVideo,
+    listCameras,
+    setIsCameraMirrored,
+    formatTime,
+    isSupported,
+  } = useCameraRecorder({
+    onRecordingComplete: (blob) => {
+      setRecordedBlob(blob);
+      toast({
+        title: "Gravação concluída!",
+        description: "Você pode baixar ou descartar o vídeo.",
+      });
+    },
+  });
 
   // Manter wpmRef atualizado
   useEffect(() => {
@@ -50,10 +102,38 @@ export function TeleprompterDisplay({
   const wordCount = text.split(/\s+/).length;
 
   const fontSizeClasses = {
-    small: 'text-2xl md:text-3xl',
-    medium: 'text-3xl md:text-4xl',
-    large: 'text-4xl md:text-5xl',
+    small: 'text-xl md:text-2xl',
+    medium: 'text-2xl md:text-3xl',
+    large: 'text-3xl md:text-4xl',
   };
+
+  // Ativar modo gravação
+  const enableRecordingMode = useCallback(async () => {
+    if (!isSupported()) {
+      toast({
+        title: "Navegador não suportado",
+        description: "Seu navegador não suporta gravação de vídeo. Tente usar Chrome, Firefox ou Edge.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const stream = await startCamera();
+    if (stream) {
+      setMode("recording");
+      await listCameras();
+    }
+  }, [startCamera, listCameras, isSupported, toast]);
+
+  // Desativar modo gravação
+  const disableRecordingMode = useCallback(() => {
+    if (isRecording) {
+      stopRecording();
+    }
+    stopCamera();
+    setMode("practice");
+    setRecordedBlob(null);
+  }, [isRecording, stopRecording, stopCamera]);
 
   const startPlayback = useCallback(() => {
     if (countdown !== null) return;
@@ -70,8 +150,13 @@ export function TeleprompterDisplay({
     } else {
       setCountdown(null);
       setIsPlaying(true);
+      
+      // Se no modo gravação e não está gravando, iniciar gravação
+      if (mode === "recording" && !isRecording && isCameraEnabled) {
+        startRecording();
+      }
     }
-  }, [countdown]);
+  }, [countdown, mode, isRecording, isCameraEnabled, startRecording]);
 
   // Animação de scroll usando delta time para suavidade
   useEffect(() => {
@@ -87,7 +172,6 @@ export function TeleprompterDisplay({
       const deltaTime = currentTime - lastTimeRef.current;
       lastTimeRef.current = currentTime;
 
-      // Calcular pixels por ms baseado no WPM atual
       const currentWpm = wpmRef.current;
       const totalDuration = (wordCount / currentWpm) * 60 * 1000;
       const pixelsPerMs = maxScroll / totalDuration;
@@ -98,6 +182,12 @@ export function TeleprompterDisplay({
         if (newPosition >= maxScroll) {
           setIsPlaying(false);
           setIsComplete(true);
+          
+          // Parar gravação automaticamente quando texto terminar
+          if (isRecording) {
+            stopRecording();
+          }
+          
           return maxScroll;
         }
         
@@ -114,16 +204,20 @@ export function TeleprompterDisplay({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, wordCount]);
+  }, [isPlaying, wordCount, isRecording, stopRecording]);
 
   const handlePlayPause = () => {
     if (isComplete) {
-      // Reset
       setScrollPosition(0);
       setIsComplete(false);
+      setRecordedBlob(null);
       startPlayback();
     } else if (isPlaying) {
       setIsPlaying(false);
+      // Pausar gravação também
+      if (isRecording) {
+        stopRecording();
+      }
     } else {
       startPlayback();
     }
@@ -134,6 +228,30 @@ export function TeleprompterDisplay({
     setScrollPosition(0);
     setIsComplete(false);
     setCountdown(null);
+    
+    if (isRecording) {
+      stopRecording();
+      discardRecording();
+    }
+    setRecordedBlob(null);
+  };
+
+  const handleDownload = () => {
+    if (recordedBlob) {
+      downloadVideo(recordedBlob);
+      toast({
+        title: "Download iniciado!",
+        description: "O vídeo está sendo baixado.",
+      });
+    }
+  };
+
+  const handleDiscard = () => {
+    setRecordedBlob(null);
+    discardRecording();
+    toast({
+      title: "Gravação descartada",
+    });
   };
 
   return (
@@ -143,22 +261,100 @@ export function TeleprompterDisplay({
         isDarkMode ? "bg-black text-white" : "bg-white text-black"
       )}
     >
+      {/* Vídeo da câmera em background (modo gravação) */}
+      {mode === "recording" && (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover",
+            isCameraMirrored && "scale-x-[-1]"
+          )}
+        />
+      )}
+
       {/* Header com controles */}
       <div className={cn(
-        "flex items-center justify-between p-4 border-b",
-        isDarkMode ? "border-white/10" : "border-black/10"
+        "relative flex items-center justify-between p-4 border-b z-10",
+        isDarkMode ? "border-white/10" : "border-black/10",
+        mode === "recording" && "bg-black/50"
       )}>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
-        >
-          <X className="h-6 w-6" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+
+          {/* Indicador de gravação */}
+          {isRecording && (
+            <div className="flex items-center gap-2 ml-2">
+              <motion.div
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="flex items-center gap-1.5"
+              >
+                <Circle className="h-3 w-3 fill-red-500 text-red-500" />
+                <span className="text-red-500 font-medium text-sm">REC</span>
+              </motion.div>
+              <span className="text-white/70 font-mono text-sm">
+                {formatTime(recordingTime)}
+              </span>
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
-          {/* Espelho */}
+          {/* Toggle Câmera */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={mode === "recording" ? disableRecordingMode : enableRecordingMode}
+            className={cn(
+              isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10",
+              mode === "recording" && "bg-red-500/20 text-red-400"
+            )}
+          >
+            {mode === "recording" ? (
+              <VideoOff className="h-5 w-5" />
+            ) : (
+              <Video className="h-5 w-5" />
+            )}
+          </Button>
+
+          {/* Seletor de câmera (só no modo gravação) */}
+          {mode === "recording" && availableCameras.length > 1 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowCameraSelector(true)}
+              className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+            >
+              <SwitchCamera className="h-5 w-5" />
+            </Button>
+          )}
+
+          {/* Espelho da câmera (só no modo gravação) */}
+          {mode === "recording" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCameraMirrored(!isCameraMirrored)}
+              className={cn(
+                isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10",
+                isCameraMirrored && "bg-primary/20"
+              )}
+            >
+              <Camera className="h-5 w-5" />
+            </Button>
+          )}
+
+          {/* Espelho do texto */}
           <Button
             variant="ghost"
             size="icon"
@@ -171,15 +367,17 @@ export function TeleprompterDisplay({
             <FlipHorizontal className="h-5 w-5" />
           </Button>
 
-          {/* Tema */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
-          >
-            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
+          {/* Tema (só no modo prática) */}
+          {mode === "practice" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          )}
 
           {/* Tamanho da fonte */}
           <Button
@@ -199,10 +397,20 @@ export function TeleprompterDisplay({
         </div>
       </div>
 
+      {/* Mensagem de erro da câmera */}
+      {cameraError && (
+        <div className="absolute top-20 left-4 right-4 z-20">
+          <div className="bg-red-500/90 text-white rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <p className="text-sm">{cameraError}</p>
+          </div>
+        </div>
+      )}
+
       {/* Área do texto */}
       <div 
         ref={containerRef}
-        className="flex-1 overflow-hidden relative"
+        className="flex-1 overflow-hidden relative z-10"
       >
         {/* Countdown overlay */}
         <AnimatePresence>
@@ -213,12 +421,51 @@ export function TeleprompterDisplay({
               exit={{ opacity: 0, scale: 0.5 }}
               className="absolute inset-0 flex items-center justify-center z-10"
             >
-              <span className={cn(
-                "text-9xl font-bold",
-                isDarkMode ? "text-white" : "text-black"
-              )}>
+              <span className="text-9xl font-bold text-white drop-shadow-lg">
                 {countdown}
               </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Overlay para gravação concluída */}
+        <AnimatePresence>
+          {recordedBlob && !isPlaying && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex items-center justify-center z-20 bg-black/80"
+            >
+              <div className="text-center space-y-6">
+                <div className="flex items-center justify-center gap-2 text-green-400">
+                  <Check className="h-8 w-8" />
+                  <span className="text-2xl font-semibold">Gravação Concluída!</span>
+                </div>
+                
+                <p className="text-white/70">
+                  Duração: {formatTime(recordingTime)}
+                </p>
+                
+                <div className="flex items-center justify-center gap-4">
+                  <Button
+                    variant="outline"
+                    onClick={handleDiscard}
+                    className="border-red-500 text-red-400 hover:bg-red-500/10"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Descartar
+                  </Button>
+                  
+                  <Button
+                    onClick={handleDownload}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar Vídeo
+                  </Button>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -229,13 +476,20 @@ export function TeleprompterDisplay({
           style={{ 
             transform: `translateY(-${scrollPosition}px) ${isMirrored ? 'scaleX(-1)' : ''}`,
             willChange: 'transform',
+            opacity: mode === "recording" ? textOpacity : 1,
           }}
           className={cn(
             "px-8 py-20",
             fontSizeClasses[fontSize],
-            "font-serif leading-relaxed text-center"
+            "font-serif leading-relaxed text-center",
+            mode === "recording" && "text-white drop-shadow-lg"
           )}
         >
+          {/* Background semi-transparente para texto no modo gravação */}
+          {mode === "recording" && (
+            <div className="absolute inset-0 bg-black/30 -z-10" />
+          )}
+          
           {text.split('\n').map((line, i) => (
             <p key={i} className="mb-6">
               {line || '\u00A0'}
@@ -249,31 +503,52 @@ export function TeleprompterDisplay({
         {/* Gradientes de fade */}
         <div className={cn(
           "absolute top-0 left-0 right-0 h-20 pointer-events-none",
-          isDarkMode 
-            ? "bg-gradient-to-b from-black to-transparent" 
-            : "bg-gradient-to-b from-white to-transparent"
+          mode === "recording"
+            ? "bg-gradient-to-b from-black/60 to-transparent"
+            : isDarkMode 
+              ? "bg-gradient-to-b from-black to-transparent" 
+              : "bg-gradient-to-b from-white to-transparent"
         )} />
         <div className={cn(
           "absolute bottom-0 left-0 right-0 h-20 pointer-events-none",
-          isDarkMode 
-            ? "bg-gradient-to-t from-black to-transparent" 
-            : "bg-gradient-to-t from-white to-transparent"
+          mode === "recording"
+            ? "bg-gradient-to-t from-black/60 to-transparent"
+            : isDarkMode 
+              ? "bg-gradient-to-t from-black to-transparent" 
+              : "bg-gradient-to-t from-white to-transparent"
         )} />
 
         {/* Linha guia central */}
         <div className="absolute top-1/3 left-0 right-0 pointer-events-none">
           <div className={cn(
-            "h-0.5 opacity-20",
-            isDarkMode ? "bg-white" : "bg-black"
+            "h-0.5 opacity-30",
+            mode === "recording" ? "bg-white" : isDarkMode ? "bg-white" : "bg-black"
           )} />
         </div>
       </div>
 
       {/* Footer com controles de playback */}
       <div className={cn(
-        "p-4 border-t space-y-4",
-        isDarkMode ? "border-white/10" : "border-black/10"
+        "relative p-4 border-t space-y-4 z-10",
+        isDarkMode ? "border-white/10" : "border-black/10",
+        mode === "recording" && "bg-black/50"
       )}>
+        {/* Slider de opacidade do texto (só no modo gravação) */}
+        {mode === "recording" && (
+          <div className="flex items-center gap-4 mb-2">
+            <span className="text-white/70 text-xs w-16">Texto</span>
+            <Slider
+              value={[textOpacity * 100]}
+              onValueChange={([value]) => setTextOpacity(value / 100)}
+              min={20}
+              max={100}
+              step={5}
+              className="flex-1"
+            />
+            <span className="text-white/70 text-xs w-12">{Math.round(textOpacity * 100)}%</span>
+          </div>
+        )}
+
         {/* Slider de velocidade */}
         <div className="flex items-center gap-4">
           <Button
@@ -327,37 +602,55 @@ export function TeleprompterDisplay({
           <Button
             size="lg"
             onClick={handlePlayPause}
+            disabled={!!recordedBlob}
             className={cn(
               "w-16 h-16 rounded-full",
-              isComplete 
-                ? "bg-green-600 hover:bg-green-700" 
-                : "bg-primary hover:bg-primary/90"
+              isRecording
+                ? "bg-red-600 hover:bg-red-700"
+                : isComplete 
+                  ? "bg-green-600 hover:bg-green-700" 
+                  : "bg-primary hover:bg-primary/90"
             )}
           >
             {isPlaying ? (
-              <Pause className="h-8 w-8" />
+              isRecording ? (
+                <Square className="h-6 w-6" />
+              ) : (
+                <Pause className="h-8 w-8" />
+              )
             ) : isComplete ? (
               <RotateCcw className="h-8 w-8" />
             ) : (
-              <Play className="h-8 w-8 ml-1" />
+              mode === "recording" ? (
+                <Circle className="h-8 w-8 fill-current" />
+              ) : (
+                <Play className="h-8 w-8 ml-1" />
+              )
             )}
           </Button>
 
-          {onMarkRecorded && isComplete && (
+          {onMarkRecorded && isComplete && !recordedBlob && (
             <Button
               variant="outline"
               size="icon"
               onClick={onMarkRecorded}
-              className={cn(
-                "border-green-500 text-green-500 hover:bg-green-500/10",
-                isDarkMode ? "" : ""
-              )}
+              className="border-green-500 text-green-500 hover:bg-green-500/10"
             >
               <Check className="h-5 w-5" />
             </Button>
           )}
         </div>
       </div>
+
+      {/* Modal de seleção de câmera */}
+      <CameraSelector
+        open={showCameraSelector}
+        onOpenChange={setShowCameraSelector}
+        cameras={availableCameras}
+        selectedCamera={selectedCamera}
+        onSelectCamera={switchCamera}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 }
