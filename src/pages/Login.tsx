@@ -20,7 +20,7 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate("/app", { replace: true });
+      navigate("/membrosvmcm/app", { replace: true });
     }
   }, [user, navigate]);
 
@@ -162,7 +162,7 @@ export default function Login() {
 
             <div className="mt-4 text-center">
               <Link
-                to="/reset-password"
+                to="/membrosvmcm/reset-password"
                 className="text-sm text-primary hover:underline"
               >
                 Esqueci minha senha

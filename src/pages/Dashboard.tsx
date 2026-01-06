@@ -83,7 +83,7 @@ export default function Dashboard() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    navigate("/membrosvmcm");
   };
 
   const container = {
@@ -142,7 +142,7 @@ export default function Dashboard() {
               <Button
                 variant="ghost"
                 className="w-full justify-between p-0 h-auto hover:bg-transparent"
-                onClick={() => currentModule && navigate(`/app/modulos/${currentModule.slug}`)}
+                onClick={() => currentModule && navigate(`/membrosvmcm/app/modulos/${currentModule.slug}`)}
               >
                 <div className="text-left">
                   <p className="text-xs text-muted-foreground mb-1">Continue de onde parou</p>
@@ -178,7 +178,7 @@ export default function Dashboard() {
                     variant="outline" 
                     size="sm"
                     className="border-secondary-foreground/30 text-secondary-foreground hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
-                    onClick={() => navigate("/app/biblioteca")}
+                    onClick={() => navigate("/membrosvmcm/app/biblioteca")}
                   >
                     Ver modelo
                   </Button>
@@ -204,7 +204,7 @@ export default function Dashboard() {
               icon={<BookOpen className="w-5 h-5" />}
               title="Módulos"
               subtitle={`${totalModules} módulos • ${completedModules} concluídos`}
-              onClick={() => navigate("/app/modulos")}
+              onClick={() => navigate("/membrosvmcm/app/modulos")}
             />
           </motion.div>
 
@@ -213,7 +213,7 @@ export default function Dashboard() {
               icon={<Library className="w-5 h-5" />}
               title="Biblioteca"
               subtitle="Modelos, ganchos e CTAs"
-              onClick={() => navigate("/app/biblioteca")}
+              onClick={() => navigate("/membrosvmcm/app/biblioteca")}
             />
           </motion.div>
 
@@ -222,7 +222,7 @@ export default function Dashboard() {
               icon={<MessageSquare className="w-5 h-5" />}
               title="Ganchos"
               subtitle="50+ ganchos magnéticos"
-              onClick={() => navigate("/app/biblioteca?tab=ganchos")}
+              onClick={() => navigate("/membrosvmcm/app/biblioteca?tab=ganchos")}
             />
           </motion.div>
 
@@ -231,7 +231,7 @@ export default function Dashboard() {
               icon={<NotebookPen className="w-5 h-5" />}
               title="Meu Caderno"
               subtitle="Suas anotações e rascunhos"
-              onClick={() => navigate("/app/caderno")}
+              onClick={() => navigate("/membrosvmcm/app/caderno")}
             />
           </motion.div>
 
@@ -240,7 +240,7 @@ export default function Dashboard() {
               icon={<Calendar className="w-5 h-5" />}
               title="Calendário 30 dias"
               subtitle="Planeje sua semana"
-              onClick={() => navigate("/app/calendario")}
+              onClick={() => navigate("/membrosvmcm/app/calendario")}
             />
           </motion.div>
         </motion.div>

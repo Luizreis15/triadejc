@@ -135,7 +135,7 @@ export default function Modules() {
                 description={module.description || ""}
                 status={status}
                 progress={progressPercent}
-                onClick={() => navigate(`/app/modulos/${module.slug}`)}
+                onClick={() => navigate(`/membrosvmcm/app/modulos/${module.slug}`)}
               />
             );
           })}

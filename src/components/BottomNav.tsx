@@ -3,11 +3,11 @@ import { Home, BookOpen, Library, NotebookPen, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { to: "/app", icon: Home, label: "Início" },
-  { to: "/app/modulos", icon: BookOpen, label: "Módulos" },
-  { to: "/app/biblioteca", icon: Library, label: "Biblioteca" },
-  { to: "/app/caderno", icon: NotebookPen, label: "Caderno" },
-  { to: "/app/calendario", icon: Calendar, label: "Calendário" },
+  { to: "/membrosvmcm/app", icon: Home, label: "Início" },
+  { to: "/membrosvmcm/app/modulos", icon: BookOpen, label: "Módulos" },
+  { to: "/membrosvmcm/app/biblioteca", icon: Library, label: "Biblioteca" },
+  { to: "/membrosvmcm/app/caderno", icon: NotebookPen, label: "Caderno" },
+  { to: "/membrosvmcm/app/calendario", icon: Calendar, label: "Calendário" },
 ];
 
 export function BottomNav() {
@@ -18,7 +18,7 @@ export function BottomNav() {
           <RouterNavLink
             key={item.to}
             to={item.to}
-            end={item.to === "/app"}
+            end={item.to === "/membrosvmcm/app"}
             className={({ isActive }) =>
               cn(
                 "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all duration-200",

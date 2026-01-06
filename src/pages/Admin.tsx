@@ -20,7 +20,7 @@ export default function Admin() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/app")}
+            onClick={() => navigate("/membrosvmcm/app")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>

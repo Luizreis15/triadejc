@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/app`;
+    const redirectUrl = `${window.location.origin}/membrosvmcm/app`;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/app`;
+    const redirectUrl = `${window.location.origin}/membrosvmcm/app`;
     const { error } = await supabase.auth.signUp({
       email,
       password,

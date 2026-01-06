@@ -187,7 +187,7 @@ export default function ModuleDetail() {
       <AppLayout showNav={false}>
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
           <h2 className="text-xl font-serif font-semibold mb-2">Módulo não encontrado</h2>
-          <Button variant="muted" onClick={() => navigate("/app/modulos")}>
+          <Button variant="muted" onClick={() => navigate("/membrosvmcm/app/modulos")}>
             Voltar aos módulos
           </Button>
         </div>
@@ -216,7 +216,7 @@ export default function ModuleDetail() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => navigate("/app/modulos")}
+                onClick={() => navigate("/membrosvmcm/app/modulos")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -333,7 +333,7 @@ export default function ModuleDetail() {
                       <Button
                         variant="gradient"
                         className="gap-2"
-                        onClick={() => navigate(`/app/modulos/${nextModule.slug}`)}
+                        onClick={() => navigate(`/membrosvmcm/app/modulos/${nextModule.slug}`)}
                       >
                         Próximo Módulo
                         <ArrowRight className="h-4 w-4" />
@@ -371,7 +371,7 @@ export default function ModuleDetail() {
             <Button
               variant="muted"
               className="flex-1"
-              onClick={() => prevModule ? navigate(`/app/modulos/${prevModule.slug}`) : navigate("/app/modulos")}
+              onClick={() => prevModule ? navigate(`/membrosvmcm/app/modulos/${prevModule.slug}`) : navigate("/membrosvmcm/app/modulos")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               {prevModule ? "Anterior" : "Voltar"}
@@ -380,7 +380,7 @@ export default function ModuleDetail() {
               <Button
                 variant="default"
                 className="flex-1"
-                onClick={() => navigate(`/app/modulos/${nextModule.slug}`)}
+                onClick={() => navigate(`/membrosvmcm/app/modulos/${nextModule.slug}`)}
               >
                 Próximo
                 <ArrowRight className="h-4 w-4 ml-2" />
