@@ -79,7 +79,7 @@ export function TeleprompterDisplay({
     startRecording,
     stopRecording,
     discardRecording,
-    downloadVideo,
+    shareOrDownloadVideo,
     listCameras,
     setIsCameraMirrored,
     formatTime,
@@ -237,13 +237,23 @@ export function TeleprompterDisplay({
     setRecordedBlob(null);
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (recordedBlob) {
-      downloadVideo(recordedBlob);
-      toast({
-        title: "Download iniciado!",
-        description: "O vídeo está sendo baixado.",
-      });
+      const result = await shareOrDownloadVideo(recordedBlob, `gravacao-${Date.now()}.webm`);
+      
+      if (result.success) {
+        if (result.method === 'share') {
+          toast({
+            title: "Vídeo pronto!",
+            description: "Escolha onde salvar seu vídeo.",
+          });
+        } else if (result.method === 'download') {
+          toast({
+            title: "Download iniciado!",
+            description: "O vídeo está sendo baixado.",
+          });
+        }
+      }
     }
   };
 
