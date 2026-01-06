@@ -17,9 +17,6 @@
       fbq('init', '1396809928500595');
       fbq('track', 'PageView');
     </script>
-    <noscript><img height="1" width="1" style="display:none"
-      src="https://www.facebook.com/tr?id=1396809928500595&ev=PageView&noscript=1"
-    /></noscript>
     <!-- End Meta Pixel Code -->
     <!-- TODO: Set the document title to the name of your application -->
     <title>Lovable App</title>
@@ -43,6 +40,8 @@
   </head>
 
   <body>
+    <!-- Meta Pixel noscript fallback -->
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1396809928500595&ev=PageView&noscript=1" /></noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
