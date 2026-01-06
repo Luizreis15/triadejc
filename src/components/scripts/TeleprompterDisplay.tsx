@@ -262,19 +262,18 @@ export function TeleprompterDisplay({
         isDarkMode ? "bg-black text-white" : "bg-white text-black"
       )}
     >
-      {/* Vídeo da câmera em background (modo gravação) */}
-      {mode === "recording" && (
-        <video
-          ref={cameraVideoRef}
-          autoPlay
-          playsInline
-          muted
-          className={cn(
-            "absolute inset-0 w-full h-full object-cover",
-            isCameraMirrored && "scale-x-[-1]"
-          )}
-        />
-      )}
+      {/* Vídeo da câmera - sempre no DOM para garantir que ref está disponível */}
+      <video
+        ref={cameraVideoRef}
+        autoPlay
+        playsInline
+        muted
+        className={cn(
+          "absolute inset-0 w-full h-full object-cover",
+          isCameraMirrored && "scale-x-[-1]",
+          mode !== "recording" && "hidden"
+        )}
+      />
 
       {/* Header com controles */}
       <div className={cn(
