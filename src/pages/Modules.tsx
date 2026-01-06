@@ -6,10 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminRole } from "@/hooks/useAdminRole";
 
 export default function Modules() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useAdminRole();
 
   // Buscar módulos
   const { data: modules, isLoading: modulesLoading } = useQuery({
@@ -45,6 +47,9 @@ export default function Modules() {
     
     if (progress?.completed) return "completed" as const;
     if (progress) return "in_progress" as const;
+    
+    // Admin: todos os módulos disponíveis para revisão
+    if (isAdmin) return "available" as const;
     
     // Primeiro módulo sempre disponível
     if (orderIndex === 1) return "available" as const;
