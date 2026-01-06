@@ -59,13 +59,13 @@ export function TeleprompterDisplay({
   
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
+  const cameraVideoRef = useRef<HTMLVideoElement>(null);
   const animationRef = useRef<number>();
   const lastTimeRef = useRef<number>(0);
   const wpmRef = useRef(wpm);
 
   // Hook de câmera/gravação
   const {
-    videoRef,
     isCameraEnabled,
     isRecording,
     recordingTime,
@@ -118,7 +118,8 @@ export function TeleprompterDisplay({
       return;
     }
 
-    const stream = await startCamera();
+    // Passar o elemento video para o hook
+    const stream = await startCamera(undefined, cameraVideoRef.current || undefined);
     if (stream) {
       setMode("recording");
       await listCameras();
@@ -126,9 +127,9 @@ export function TeleprompterDisplay({
   }, [startCamera, listCameras, isSupported, toast]);
 
   // Desativar modo gravação
-  const disableRecordingMode = useCallback(() => {
+  const disableRecordingMode = useCallback(async () => {
     if (isRecording) {
-      stopRecording();
+      await stopRecording();
     }
     stopCamera();
     setMode("practice");
@@ -264,7 +265,7 @@ export function TeleprompterDisplay({
       {/* Vídeo da câmera em background (modo gravação) */}
       {mode === "recording" && (
         <video
-          ref={videoRef}
+          ref={cameraVideoRef}
           autoPlay
           playsInline
           muted

@@ -55,8 +55,8 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     }
   }, [selectedCamera]);
 
-  // Iniciar câmera
-  const startCamera = useCallback(async (deviceId?: string) => {
+  // Iniciar câmera - recebe elemento video opcional
+  const startCamera = useCallback(async (deviceId?: string, videoElement?: HTMLVideoElement) => {
     try {
       setCameraError(null);
       
@@ -81,10 +81,22 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
       setIsCameraEnabled(true);
       setPermissionStatus("granted");
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.muted = true; // Evitar feedback de áudio
-        await videoRef.current.play();
+      // Usar elemento passado ou o ref interno
+      const targetVideo = videoElement || videoRef.current;
+      if (targetVideo) {
+        targetVideo.srcObject = stream;
+        targetVideo.muted = true; // Evitar feedback de áudio
+        
+        // Aguardar o vídeo estar pronto antes de dar play
+        await new Promise<void>((resolve, reject) => {
+          targetVideo.onloadedmetadata = () => {
+            targetVideo.play()
+              .then(() => resolve())
+              .catch(reject);
+          };
+          // Timeout de segurança
+          setTimeout(() => resolve(), 2000);
+        });
       }
 
       // Atualizar lista de câmeras (agora com labels)
@@ -204,16 +216,35 @@ export function useCameraRecorder(options: UseCameraRecorderOptions = {}) {
     }
   }, [options]);
 
-  // Parar gravação
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current);
+  // Parar gravação - retorna Promise com o Blob
+  const stopRecording = useCallback((): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === "inactive") {
+        setIsRecording(false);
+        resolve(null);
+        return;
       }
-    }
+
+      // Sobrescrever o handler onstop para resolver a promise
+      const originalOnStop = mediaRecorderRef.current.onstop;
+      mediaRecorderRef.current.onstop = (event) => {
+        // Chamar handler original se existir (para callback do hook)
+        if (originalOnStop) {
+          originalOnStop.call(mediaRecorderRef.current, event);
+        }
+        
+        const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        setIsRecording(false);
+        
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current);
+        }
+        
+        resolve(blob);
+      };
+
+      mediaRecorderRef.current.stop();
+    });
   }, []);
 
   // Descartar gravação
