@@ -1,13 +1,13 @@
 import { NavLink as RouterNavLink } from "react-router-dom";
-import { Home, BookOpen, Library, NotebookPen, Calendar } from "lucide-react";
+import { Home, BookOpen, Library, NotebookPen, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/membrosvmcm/app", icon: Home, label: "Início" },
   { to: "/membrosvmcm/app/modulos", icon: BookOpen, label: "Módulos" },
   { to: "/membrosvmcm/app/biblioteca", icon: Library, label: "Biblioteca" },
+  { to: "/membrosvmcm/app/roteiros", icon: FileText, label: "Roteiros" },
   { to: "/membrosvmcm/app/caderno", icon: NotebookPen, label: "Caderno" },
-  { to: "/membrosvmcm/app/calendario", icon: Calendar, label: "Calendário" },
 ];
 
 export function BottomNav() {
