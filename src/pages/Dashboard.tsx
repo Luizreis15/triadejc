@@ -13,7 +13,8 @@ import {
   Calendar,
   ChevronRight,
   Sparkles,
-  LogOut
+  LogOut,
+  Wand2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -241,6 +242,15 @@ export default function Dashboard() {
               title="Calendário 30 dias"
               subtitle="Planeje sua semana"
               onClick={() => navigate("/membrosvmcm/app/calendario")}
+            />
+          </motion.div>
+
+          <motion.div variants={item}>
+            <QuickActionCard
+              icon={<Wand2 className="w-5 h-5" />}
+              title="Fábrica de Roteiros"
+              subtitle="Gere roteiros infinitos"
+              onClick={() => navigate("/membrosvmcm/app/roteiros")}
             />
           </motion.div>
         </motion.div>

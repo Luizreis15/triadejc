@@ -18,6 +18,9 @@ import Results from "./pages/Results";
 import Admin from "./pages/Admin";
 import SalesPage from "./pages/SalesPage";
 import MockupGenerator from "./pages/MockupGenerator";
+import ScriptGenerator from "./pages/ScriptGenerator";
+import Teleprompter from "./pages/Teleprompter";
+import MyScripts from "./pages/MyScripts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +49,9 @@ const App = () => (
             <Route path="/membrosvmcm/app/caderno" element={<ProtectedRoute><Notebook /></ProtectedRoute>} />
             <Route path="/membrosvmcm/app/calendario" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
             <Route path="/membrosvmcm/app/resultados" element={<ProtectedRoute><Results /></ProtectedRoute>} />
+            <Route path="/membrosvmcm/app/roteiros" element={<ProtectedRoute><ScriptGenerator /></ProtectedRoute>} />
+            <Route path="/membrosvmcm/app/meus-roteiros" element={<ProtectedRoute><MyScripts /></ProtectedRoute>} />
+            <Route path="/membrosvmcm/app/teleprompter/:scriptId" element={<ProtectedRoute><Teleprompter /></ProtectedRoute>} />
             <Route path="/membrosvmcm/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/membrosvmcm/admin/mockups" element={<AdminRoute><MockupGenerator /></AdminRoute>} />
             
