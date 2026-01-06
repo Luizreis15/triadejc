@@ -39,10 +39,15 @@ export function TeleprompterDisplay({
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
+  const lastTimeRef = useRef<number>(0);
+  const wpmRef = useRef(wpm);
 
-  // Calcular velocidade de scroll baseado em WPM
+  // Manter wpmRef atualizado
+  useEffect(() => {
+    wpmRef.current = wpm;
+  }, [wpm]);
+
   const wordCount = text.split(/\s+/).length;
-  const totalDuration = (wordCount / wpm) * 60 * 1000; // em ms
 
   const fontSizeClasses = {
     small: 'text-2xl md:text-3xl',
@@ -52,8 +57,6 @@ export function TeleprompterDisplay({
 
   const startPlayback = useCallback(() => {
     if (countdown !== null) return;
-    
-    // Iniciar contagem regressiva
     setCountdown(3);
   }, [countdown]);
 
@@ -70,7 +73,7 @@ export function TeleprompterDisplay({
     }
   }, [countdown]);
 
-  // Animação de scroll
+  // Animação de scroll usando delta time para suavidade
   useEffect(() => {
     if (!isPlaying || !containerRef.current || !textRef.current) return;
 
@@ -78,21 +81,30 @@ export function TeleprompterDisplay({
     const textHeight = textRef.current.scrollHeight;
     const maxScroll = Math.max(0, textHeight - containerHeight + 100);
 
-    const startTime = Date.now() - (scrollPosition / maxScroll) * totalDuration;
+    lastTimeRef.current = performance.now();
 
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(1, elapsed / totalDuration);
-      const newPosition = progress * maxScroll;
-      
-      setScrollPosition(newPosition);
-      
-      if (progress >= 1) {
-        setIsPlaying(false);
-        setIsComplete(true);
-      } else {
-        animationRef.current = requestAnimationFrame(animate);
-      }
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastTimeRef.current;
+      lastTimeRef.current = currentTime;
+
+      // Calcular pixels por ms baseado no WPM atual
+      const currentWpm = wpmRef.current;
+      const totalDuration = (wordCount / currentWpm) * 60 * 1000;
+      const pixelsPerMs = maxScroll / totalDuration;
+
+      setScrollPosition(prev => {
+        const newPosition = prev + (pixelsPerMs * deltaTime);
+        
+        if (newPosition >= maxScroll) {
+          setIsPlaying(false);
+          setIsComplete(true);
+          return maxScroll;
+        }
+        
+        return newPosition;
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
     };
 
     animationRef.current = requestAnimationFrame(animate);
@@ -102,7 +114,7 @@ export function TeleprompterDisplay({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, totalDuration, wpm]);
+  }, [isPlaying, wordCount]);
 
   const handlePlayPause = () => {
     if (isComplete) {
@@ -216,9 +228,10 @@ export function TeleprompterDisplay({
           ref={textRef}
           style={{ 
             transform: `translateY(-${scrollPosition}px) ${isMirrored ? 'scaleX(-1)' : ''}`,
+            willChange: 'transform',
           }}
           className={cn(
-            "px-8 py-20 transition-transform duration-100",
+            "px-8 py-20",
             fontSizeClasses[fontSize],
             "font-serif leading-relaxed text-center"
           )}
