@@ -432,6 +432,15 @@ function OfferSection() {
           target="_blank" 
           rel="noopener noreferrer"
           className="block w-full"
+          onClick={() => {
+            if (typeof window !== 'undefined' && (window as any).fbq) {
+              (window as any).fbq('track', 'InitiateCheckout', {
+                content_name: 'Venda Mais com Carrosséis Magnéticos',
+                currency: 'BRL',
+                value: 27.00
+              });
+            }
+          }}
         >
           <ButtonOrange size="large" className="w-full pointer-events-auto">
             QUERO ACESSAR
