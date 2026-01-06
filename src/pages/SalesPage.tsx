@@ -18,6 +18,9 @@ import {
   MockupLibrary,
   MockupModules,
   MockupNotebook,
+  ScrollReveal,
+  StaggerContainer,
+  StaggerItem,
 } from "@/components/sales";
 import {
   Carousel,
@@ -99,20 +102,26 @@ function BenefitsSection() {
 
   return (
     <section className="px-6 py-6">
-      <h2 className="heading-playfair text-xl text-center mb-6">
-        Com o Venda Mais com Carrosséis Magnéticos, você vai ser capaz de:
-      </h2>
-      <div className="space-y-3">
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-6">
+          Com o Venda Mais com Carrosséis Magnéticos, você vai ser capaz de:
+        </h2>
+      </ScrollReveal>
+      <StaggerContainer className="space-y-3">
         {benefits.map((benefit, i) => (
-          <CardCream key={i} className="flex items-start gap-3">
-            <IconSquare icon="check" />
-            <p className="body-inter text-sm flex-1">{benefit}</p>
-          </CardCream>
+          <StaggerItem key={i}>
+            <CardCream className="flex items-start gap-3">
+              <IconSquare icon="check" />
+              <p className="body-inter text-sm flex-1">{benefit}</p>
+            </CardCream>
+          </StaggerItem>
         ))}
-      </div>
-      <div className="text-center mt-8">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
+      </StaggerContainer>
+      <ScrollReveal delay={0.3}>
+        <div className="text-center mt-8">
+          <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -130,24 +139,28 @@ function ExamplesSection() {
 
   return (
     <section className="px-6 py-6">
-      <h2 className="heading-playfair text-xl text-center mb-6">
-        Esses são alguns dos carrosséis que você vai aprender a fazer
-      </h2>
-      <Carousel className="w-full">
-        <CarouselContent>
-          {carouselImages.map((img, index) => (
-            <CarouselItem key={index} className="basis-4/5">
-              <img 
-                src={img} 
-                alt={`Exemplo de carrossel ${index + 1}`}
-                className="w-full rounded-lg shadow-md"
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="left-0" />
-        <CarouselNext className="right-0" />
-      </Carousel>
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-6">
+          Esses são alguns dos carrosséis que você vai aprender a fazer
+        </h2>
+      </ScrollReveal>
+      <ScrollReveal delay={0.2}>
+        <Carousel className="w-full">
+          <CarouselContent>
+            {carouselImages.map((img, index) => (
+              <CarouselItem key={index} className="basis-4/5">
+                <img 
+                  src={img} 
+                  alt={`Exemplo de carrossel ${index + 1}`}
+                  className="w-full rounded-lg shadow-md"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-0" />
+          <CarouselNext className="right-0" />
+        </Carousel>
+      </ScrollReveal>
     </section>
   );
 }
@@ -156,12 +169,14 @@ function ExamplesSection() {
 function CTABoxSection() {
   return (
     <section className="px-6 py-6">
-      <CardCream className="text-center py-8">
-        <p className="body-inter text-base mb-6 px-4">
-          Clique no botão abaixo para <strong>PARAR DE TRAVAR</strong> na hora de postar e ter acesso aos carrosséis (card a card) que mais me trouxeram resultado:
-        </p>
-        <ButtonOrange onClick={scrollToOffer}>QUERO ACESSAR</ButtonOrange>
-      </CardCream>
+      <ScrollReveal>
+        <CardCream className="text-center py-8">
+          <p className="body-inter text-base mb-6 px-4">
+            Clique no botão abaixo para <strong>PARAR DE TRAVAR</strong> na hora de postar e ter acesso aos carrosséis (card a card) que mais me trouxeram resultado:
+          </p>
+          <ButtonOrange onClick={scrollToOffer}>QUERO ACESSAR</ButtonOrange>
+        </CardCream>
+      </ScrollReveal>
     </section>
   );
 }
@@ -237,9 +252,11 @@ function AttentionSection() {
 function TransitionTitle() {
   return (
     <section className="px-6 py-6 text-center">
-      <h2 className="heading-playfair text-2xl">
-        Tudo o que você vai receber dentro do Venda Mais com Carrosséis Magnéticos:
-      </h2>
+      <ScrollReveal>
+        <h2 className="heading-playfair text-2xl">
+          Tudo o que você vai receber dentro do Venda Mais com Carrosséis Magnéticos:
+        </h2>
+      </ScrollReveal>
     </section>
   );
 }
@@ -258,25 +275,31 @@ function LibrarySection() {
 
   return (
     <section className="px-6 py-6">
-      <h2 className="heading-playfair text-xl text-center mb-6">
-        Biblioteca de Formatos de Carrosséis
-      </h2>
-      <div className="space-y-3">
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-6">
+          Biblioteca de Formatos de Carrosséis
+        </h2>
+      </ScrollReveal>
+      <StaggerContainer className="space-y-3">
         {formats.map((format, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <IconSquare icon="check" />
-            <p className="body-inter text-sm">
-              <strong>{format.title}</strong> — {format.desc}
-            </p>
-          </div>
+          <StaggerItem key={i}>
+            <div className="flex items-start gap-3">
+              <IconSquare icon="check" />
+              <p className="body-inter text-sm">
+                <strong>{format.title}</strong> — {format.desc}
+              </p>
+            </div>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
       <div className="mt-8">
         <MockupLibrary />
       </div>
-      <div className="text-center mt-6">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
+      <ScrollReveal delay={0.2}>
+        <div className="text-center mt-6">
+          <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -293,25 +316,31 @@ function StructureSection() {
 
   return (
     <section className="px-6 py-6">
-      <h2 className="heading-playfair text-xl text-center mb-6">
-        Estrutura de Uso de Cada Formato
-      </h2>
-      <div className="space-y-3">
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-6">
+          Estrutura de Uso de Cada Formato
+        </h2>
+      </ScrollReveal>
+      <StaggerContainer className="space-y-3">
         {items.map((item, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <IconSquare icon="check" />
-            <p className="body-inter text-sm">
-              <strong>{item.title}</strong> — {item.desc}
-            </p>
-          </div>
+          <StaggerItem key={i}>
+            <div className="flex items-start gap-3">
+              <IconSquare icon="check" />
+              <p className="body-inter text-sm">
+                <strong>{item.title}</strong> — {item.desc}
+              </p>
+            </div>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
       <div className="mt-8">
         <MockupModules />
       </div>
-      <div className="text-center mt-6">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
+      <ScrollReveal delay={0.2}>
+        <div className="text-center mt-6">
+          <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -328,25 +357,31 @@ function ToolsSection() {
 
   return (
     <section className="px-6 py-6">
-      <h2 className="heading-playfair text-xl text-center mb-6">
-        Ferramentas Extras
-      </h2>
-      <div className="space-y-3">
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-6">
+          Ferramentas Extras
+        </h2>
+      </ScrollReveal>
+      <StaggerContainer className="space-y-3">
         {tools.map((tool, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <IconSquare icon="check" />
-            <p className="body-inter text-sm">
-              <strong>{tool.title}</strong> — {tool.desc}
-            </p>
-          </div>
+          <StaggerItem key={i}>
+            <div className="flex items-start gap-3">
+              <IconSquare icon="check" />
+              <p className="body-inter text-sm">
+                <strong>{tool.title}</strong> — {tool.desc}
+              </p>
+            </div>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
       <div className="mt-8">
         <MockupNotebook />
       </div>
-      <div className="text-center mt-6">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
+      <ScrollReveal delay={0.2}>
+        <div className="text-center mt-6">
+          <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -407,39 +442,45 @@ function OfferSection() {
 function AboutSection() {
   return (
     <section className="px-6 py-6">
-      <div className="relative overflow-hidden mb-6">
-        <div 
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{
-            background: `linear-gradient(
-              to bottom,
-              hsl(350 30% 95%) 0%,
-              transparent 30%,
-              transparent 70%,
-              hsl(350 30% 95%) 100%
-            )`
-          }}
-        />
-        <img 
-          src={samiraAbout} 
-          alt="Samira Gouvêa" 
-          className="w-full object-cover"
-        />
-      </div>
+      <ScrollReveal>
+        <div className="relative overflow-hidden mb-6">
+          <div 
+            className="absolute inset-0 pointer-events-none z-10"
+            style={{
+              background: `linear-gradient(
+                to bottom,
+                hsl(350 30% 95%) 0%,
+                transparent 30%,
+                transparent 70%,
+                hsl(350 30% 95%) 100%
+              )`
+            }}
+          />
+          <img 
+            src={samiraAbout} 
+            alt="Samira Gouvêa" 
+            className="w-full object-cover"
+          />
+        </div>
+      </ScrollReveal>
       
-      <h2 className="heading-playfair text-2xl text-center mb-4">
-        Samira Gouvêa
-      </h2>
-      <p className="body-inter text-sm text-center mb-4">
-        Sou estrategista digital e especialista em posicionamento, branding e vendas no Instagram. Eu ensino empreendedoras a transformarem o perfil em uma vitrine de autoridade — com conteúdo que conduz, gera percepção e abre espaço pra venda acontecer com naturalidade.
-      </p>
-      <p className="body-inter text-center font-semibold italic">
-        "Carrossel não é post bonito. É construção de valor."
-      </p>
+      <ScrollReveal delay={0.2}>
+        <h2 className="heading-playfair text-2xl text-center mb-4">
+          Samira Gouvêa
+        </h2>
+        <p className="body-inter text-sm text-center mb-4">
+          Sou estrategista digital e especialista em posicionamento, branding e vendas no Instagram. Eu ensino empreendedoras a transformarem o perfil em uma vitrine de autoridade — com conteúdo que conduz, gera percepção e abre espaço pra venda acontecer com naturalidade.
+        </p>
+        <p className="body-inter text-center font-semibold italic">
+          "Carrossel não é post bonito. É construção de valor."
+        </p>
+      </ScrollReveal>
       
-      <div className="text-center mt-6">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
+      <ScrollReveal delay={0.3}>
+        <div className="text-center mt-6">
+          <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -457,10 +498,14 @@ function FAQSection() {
 
   return (
     <section className="px-6 py-6">
-      <h2 className="heading-playfair text-xl text-center mb-6">
-        Dúvidas rápidas
-      </h2>
-      <FAQAccordion items={faqItems} />
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-6">
+          Dúvidas rápidas
+        </h2>
+      </ScrollReveal>
+      <ScrollReveal delay={0.1}>
+        <FAQAccordion items={faqItems} />
+      </ScrollReveal>
     </section>
   );
 }
@@ -469,16 +514,20 @@ function FAQSection() {
 function FinalCTASection() {
   return (
     <section className="px-6 py-6 text-center">
-      <h2 className="heading-playfair text-xl mb-4">
-        Seu feed não precisa de mais posts. Precisa de mais intenção.
-      </h2>
-      <p className="body-inter text-sm mb-6 opacity-80">
-        Se você quer parar de travar e começar a postar com direção, esse caderno digital é seu próximo passo.
-      </p>
-      <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      <p className="text-xs mt-3 opacity-60 body-inter">
-        R$ 27 • Acesso imediato • Garantia 7 dias
-      </p>
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl mb-4">
+          Seu feed não precisa de mais posts. Precisa de mais intenção.
+        </h2>
+        <p className="body-inter text-sm mb-6 opacity-80">
+          Se você quer parar de travar e começar a postar com direção, esse caderno digital é seu próximo passo.
+        </p>
+      </ScrollReveal>
+      <ScrollReveal delay={0.2}>
+        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
+        <p className="text-xs mt-3 opacity-60 body-inter">
+          R$ 27 • Acesso imediato • Garantia 7 dias
+        </p>
+      </ScrollReveal>
     </section>
   );
 }

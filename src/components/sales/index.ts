@@ -9,3 +9,5 @@ export { FAQAccordion } from "./FAQAccordion";
 export { MockupLibrary } from "./MockupLibrary";
 export { MockupModules } from "./MockupModules";
 export { MockupNotebook } from "./MockupNotebook";
+export { ScrollReveal } from "./ScrollReveal";
+export { StaggerContainer, StaggerItem } from "./StaggerContainer";
