@@ -11,6 +11,7 @@ import { LibraryAdmin } from "@/components/admin/LibraryAdmin";
 import { ScriptProductsAdmin } from "@/components/admin/ScriptProductsAdmin";
 import { ScriptBlocksAdmin } from "@/components/admin/ScriptBlocksAdmin";
 import { ScriptMetricsAdmin } from "@/components/admin/ScriptMetricsAdmin";
+import { AdminSettingsContent } from "@/components/admin/AdminSettingsContent";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -47,6 +48,9 @@ export default function Admin() {
         </TabsContent>
         <TabsContent value="script-metrics" className="mt-0">
           <ScriptMetricsAdmin />
+        </TabsContent>
+        <TabsContent value="settings" className="mt-0">
+          <AdminSettingsContent onTabChange={setActiveTab} />
         </TabsContent>
       </Tabs>
     </AdminLayout>
