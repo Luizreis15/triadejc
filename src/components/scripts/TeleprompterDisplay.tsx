@@ -47,7 +47,8 @@ export function TeleprompterDisplay({
   const [mode, setMode] = useState<TeleprompterMode>("practice");
   const [isPlaying, setIsPlaying] = useState(false);
   const [wpm, setWpm] = useState(140);
-  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large' | 'xlarge'>('medium');
+  const [textWidth, setTextWidth] = useState<'narrow' | 'medium' | 'wide' | 'full'>('medium');
   const [isMirrored, setIsMirrored] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -105,6 +106,14 @@ export function TeleprompterDisplay({
     small: 'text-xl md:text-2xl',
     medium: 'text-2xl md:text-3xl',
     large: 'text-3xl md:text-4xl',
+    xlarge: 'text-4xl md:text-5xl',
+  };
+
+  const textWidthClasses = {
+    narrow: 'max-w-xl',   // ~576px - ideal para monitores grandes
+    medium: 'max-w-2xl',  // ~672px - balanceado
+    wide: 'max-w-4xl',    // ~896px - mais amplo
+    full: 'max-w-none',   // sem limite
   };
 
   // Ativar modo gravação
@@ -394,14 +403,32 @@ export function TeleprompterDisplay({
             variant="ghost"
             size="icon"
             onClick={() => {
-              const sizes: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
+              const sizes: ('small' | 'medium' | 'large' | 'xlarge')[] = ['small', 'medium', 'large', 'xlarge'];
               const currentIndex = sizes.indexOf(fontSize);
               setFontSize(sizes[(currentIndex + 1) % sizes.length]);
             }}
             className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+            title="Tamanho da fonte"
           >
             <span className="text-sm font-bold">
-              {fontSize === 'small' ? 'P' : fontSize === 'medium' ? 'M' : 'G'}
+              {fontSize === 'small' ? 'P' : fontSize === 'medium' ? 'M' : fontSize === 'large' ? 'G' : 'XG'}
+            </span>
+          </Button>
+
+          {/* Largura do texto */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const widths: ('narrow' | 'medium' | 'wide' | 'full')[] = ['narrow', 'medium', 'wide', 'full'];
+              const currentIndex = widths.indexOf(textWidth);
+              setTextWidth(widths[(currentIndex + 1) % widths.length]);
+            }}
+            className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+            title="Largura do texto"
+          >
+            <span className="text-sm font-bold">
+              {textWidth === 'narrow' ? 'E' : textWidth === 'medium' ? 'M' : textWidth === 'wide' ? 'L' : 'F'}
             </span>
           </Button>
         </div>
@@ -489,7 +516,8 @@ export function TeleprompterDisplay({
             opacity: mode === "recording" ? textOpacity : 1,
           }}
           className={cn(
-            "px-8 py-20",
+            "px-8 py-20 mx-auto",
+            textWidthClasses[textWidth],
             fontSizeClasses[fontSize],
             "font-serif leading-relaxed text-center",
             mode === "recording" && "text-white drop-shadow-lg"
