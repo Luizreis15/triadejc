@@ -169,6 +169,18 @@ export default function ModuleDetail() {
     enabled: !!module?.id,
   });
 
+  // Parsear conteúdo do mapa para lista de itens
+  const parseMapContent = (content: string): { number: string; title: string; description: string }[] => {
+    const lines = content.split('\n').filter(line => line.trim());
+    return lines.map(line => {
+      const match = line.match(/^(\d+)\.\s*([A-Z\s/]+)\s*=\s*(.+)$/i);
+      if (match) {
+        return { number: match[1], title: match[2].trim(), description: match[3].trim() };
+      }
+      return { number: '', title: '', description: line };
+    }).filter(item => item.title || item.description);
+  };
+
   // Organizar cards por tipo/seção
   const organizedContent = useMemo(() => {
     if (!cards) return null;
@@ -180,37 +192,57 @@ export default function ModuleDetail() {
     const downloadCards = cards.filter(c => c.type === "download");
     const tipCards = cards.filter(c => c.type === "tip");
     const summaryCards = cards.filter(c => c.type === "summary");
+    const mapCards = cards.filter(c => c.type === "map");
     
-    // Se não houver cards específicos de tip/summary, derivar de text cards
+    // Tip: usar card tipo "tip" ou derivar de text cards
     let tipContent: string | null = null;
+    if (tipCards.length > 0 && tipCards[0].content_md) {
+      tipContent = parseTipContent(tipCards[0].content_md);
+    } else {
+      const puloDoGatoCard = textCards.find(c => 
+        c.title.toLowerCase().includes("pulo do gato") || 
+        c.title.toLowerCase().includes("dica")
+      );
+      if (puloDoGatoCard?.content_md) {
+        tipContent = parseTipContent(puloDoGatoCard.content_md);
+      }
+    }
+    
+    // Summary: usar card tipo "summary" ou derivar de video card
     let summaryItems: string[] = [];
-    
-    // Procurar "Pulo do Gato" nos text cards
-    const puloDoGatoCard = textCards.find(c => 
-      c.title.toLowerCase().includes("pulo do gato") || 
-      c.title.toLowerCase().includes("dica")
-    );
-    if (puloDoGatoCard && puloDoGatoCard.content_md) {
-      tipContent = parseTipContent(puloDoGatoCard.content_md);
+    if (summaryCards.length > 0 && summaryCards[0].content_md) {
+      summaryItems = parseSummaryContent(summaryCards[0].content_md);
+    } else {
+      const firstVideoCard = videoCards[0];
+      if (firstVideoCard?.content_md && firstVideoCard.content_md.includes("•")) {
+        summaryItems = parseSummaryContent(firstVideoCard.content_md);
+      }
     }
     
-    // Usar primeiro video card para extrair resumo se houver bullet points
     const firstVideoCard = videoCards[0];
-    if (firstVideoCard?.content_md && firstVideoCard.content_md.includes("•")) {
-      summaryItems = parseSummaryContent(firstVideoCard.content_md);
-    }
+    const firstMapCard = mapCards[0];
+    
+    // Separar card de oficina prática dos outros textos
+    const oficinaCard = textCards.find(c => 
+      c.title.toLowerCase().includes("oficina") || 
+      c.title.toLowerCase().includes("entendendo o caso")
+    );
     
     return {
       video: firstVideoCard,
       videoDescription: firstVideoCard?.content_md?.split("\n")[0] || null,
       summary: summaryItems.length > 0 ? summaryItems : null,
       tip: tipContent,
+      map: firstMapCard,
+      oficina: oficinaCard,
       models: modelCards,
       exercises: exerciseCards,
       downloads: downloadCards,
       otherText: textCards.filter(c => 
         !c.title.toLowerCase().includes("pulo do gato") && 
-        !c.title.toLowerCase().includes("dica")
+        !c.title.toLowerCase().includes("dica") &&
+        !c.title.toLowerCase().includes("oficina") &&
+        !c.title.toLowerCase().includes("entendendo o caso")
       ),
     };
   }, [cards]);
@@ -423,6 +455,46 @@ export default function ModuleDetail() {
           {organizedContent?.tip && (
             <motion.div variants={item}>
               <TipCard tip={organizedContent.tip} />
+            </motion.div>
+          )}
+
+          {/* 📌 SEÇÃO: Mapa Visual da Anatomia */}
+          {organizedContent?.map && organizedContent.map.content_md && (
+            <motion.div variants={item} className="space-y-3">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <span>📌</span> {organizedContent.map.title}
+              </h2>
+              <Card variant="elevated" className="overflow-hidden">
+                <CardContent className="p-0">
+                  <ol className="divide-y divide-border">
+                    {parseMapContent(organizedContent.map.content_md).map((mapItem, idx) => (
+                      <li key={idx} className="flex items-start gap-3 p-3 hover:bg-muted/30 transition-colors">
+                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center">
+                          {mapItem.number || idx + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-semibold text-foreground">{mapItem.title}</span>
+                          {mapItem.description && (
+                            <span className="text-muted-foreground"> = {mapItem.description}</span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* 📖 SEÇÃO: Oficina Prática */}
+          {organizedContent?.oficina && (
+            <motion.div variants={item}>
+              <ContentCard
+                type="text"
+                title={organizedContent.oficina.title}
+                content={organizedContent.oficina.content_md || undefined}
+                showSaveToNotebook
+              />
             </motion.div>
           )}
 
