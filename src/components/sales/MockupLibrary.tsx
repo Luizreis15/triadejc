@@ -1,5 +1,4 @@
 import { Copy, Heart, Filter } from "lucide-react";
-import { motion } from "framer-motion";
 
 const mockItems = [
   {
@@ -27,14 +26,7 @@ const mockItems = [
 
 export function MockupLibrary() {
   return (
-    <motion.div 
-      className="relative mx-auto max-w-[280px]"
-      initial={{ y: 30, opacity: 0 }}
-      whileInView={{ y: 0, opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.8, ease: [0.25, 0.4, 0.25, 1] }}
-      whileHover={{ y: -8, scale: 1.02 }}
-    >
+    <div className="relative mx-auto max-w-[280px] animate-fade-in-up">
       {/* Phone Frame */}
       <div className="rounded-[2rem] bg-gray-900 p-2 shadow-2xl">
         <div className="rounded-[1.5rem] bg-[#F5F0EB] overflow-hidden">
@@ -115,6 +107,6 @@ export function MockupLibrary() {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

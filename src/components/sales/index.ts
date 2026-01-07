@@ -6,8 +6,5 @@ export { SectionRed } from "./SectionRed";
 export { PlaceholderImage } from "./PlaceholderImage";
 export { TestimonialCard } from "./TestimonialCard";
 export { FAQAccordion } from "./FAQAccordion";
-export { MockupLibrary } from "./MockupLibrary";
-export { MockupModules } from "./MockupModules";
-export { MockupNotebook } from "./MockupNotebook";
 export { ScrollReveal } from "./ScrollReveal";
-export { StaggerContainer, StaggerItem } from "./StaggerContainer";
+// MockupLibrary, MockupModules, MockupNotebook are now lazy loaded directly in SalesPage

@@ -68,15 +68,14 @@
 .card-cream {
   background-color: hsl(var(--sp-cream));
   border-radius: 24px;
-  transition: all 0.4s cubic-bezier(0.25, 0.4, 0.25, 1);
+  transition: transform 0.3s ease;
 }
 
 .card-cream:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(141, 21, 29, 0.1);
 }
 
-/* Button Base Styles */
+/* Button Base Styles - GPU accelerated */
 .btn-gold {
   background-color: hsl(var(--sp-gold));
   color: white;
@@ -89,16 +88,16 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s cubic-bezier(0.25, 0.4, 0.25, 1);
+  transition: transform 0.3s ease;
   border: 2px solid hsl(38 54% 72% / 0.6);
   cursor: pointer;
   font-size: 14px;
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    0 0 20px hsl(var(--sp-gold) / 0.3),
-    inset 0 1px 0 hsl(38 54% 72% / 0.4);
+  box-shadow: 0 0 20px hsl(var(--sp-gold) / 0.3);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .btn-gold::before {
@@ -114,17 +113,16 @@
     rgba(255,255,255,0.25) 50%,
     transparent 60%
   );
-  transform: translateX(-100%);
-  animation: shimmer 3s infinite;
+  transform: translateX(-100%) translateZ(0);
+}
+
+.btn-gold:hover::before {
+  animation: shimmer 1s ease-in-out;
 }
 
 .btn-gold:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 
-    0 0 35px hsl(var(--sp-gold) / 0.5),
-    0 12px 30px hsl(var(--sp-gold) / 0.35),
-    inset 0 1px 0 hsl(38 54% 72% / 0.5);
-  border-color: hsl(38 54% 82% / 0.8);
+  transform: translateY(-3px) scale(1.02) translateZ(0);
+  box-shadow: 0 0 35px hsl(var(--sp-gold) / 0.5);
 }
 
 .btn-orange {
@@ -139,17 +137,17 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s cubic-bezier(0.25, 0.4, 0.25, 1);
+  transition: transform 0.3s ease;
   border: 2px solid hsl(22 54% 58% / 0.6);
   cursor: pointer;
   font-size: 14px;
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    0 0 25px hsl(var(--sp-orange-cta) / 0.4),
-    inset 0 1px 0 hsl(22 54% 58% / 0.4);
+  box-shadow: 0 0 25px hsl(var(--sp-orange-cta) / 0.4);
   animation: pulse-glow 2.5s ease-in-out infinite;
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
 }
 
 .btn-orange::before {
@@ -165,35 +163,30 @@
     rgba(255,255,255,0.25) 50%,
     transparent 60%
   );
-  transform: translateX(-100%);
-  animation: shimmer 3s infinite;
+  transform: translateX(-100%) translateZ(0);
+}
+
+.btn-orange:hover::before {
+  animation: shimmer 1s ease-in-out;
 }
 
 .btn-orange:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 
-    0 0 40px hsl(var(--sp-orange-cta) / 0.55),
-    0 12px 30px hsl(var(--sp-orange-cta) / 0.35),
-    inset 0 1px 0 hsl(22 54% 58% / 0.5);
-  border-color: hsl(22 54% 68% / 0.8);
+  transform: translateY(-3px) scale(1.02) translateZ(0);
+  box-shadow: 0 0 40px hsl(var(--sp-orange-cta) / 0.55);
   animation: none;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% { transform: translateX(-100%) translateZ(0); }
+  100% { transform: translateX(100%) translateZ(0); }
 }
 
 @keyframes pulse-glow {
   0%, 100% { 
-    box-shadow: 
-      0 0 20px hsl(var(--sp-orange-cta) / 0.4),
-      inset 0 1px 0 hsl(22 54% 58% / 0.4);
+    box-shadow: 0 0 20px hsl(var(--sp-orange-cta) / 0.4);
   }
   50% { 
-    box-shadow: 
-      0 0 35px hsl(var(--sp-orange-cta) / 0.6),
-      inset 0 1px 0 hsl(22 54% 58% / 0.4);
+    box-shadow: 0 0 35px hsl(var(--sp-orange-cta) / 0.6);
   }
 }
 
@@ -229,7 +222,7 @@
   padding: 20px;
 }
 
-/* Guarantee Badge */
+/* Guarantee Badge - GPU accelerated */
 .guarantee-badge {
   background: linear-gradient(135deg, hsl(var(--sp-gold)) 0%, hsl(38 54% 52%) 100%);
   border-radius: 50%;
@@ -246,27 +239,30 @@
   text-align: center;
   box-shadow: 0 4px 20px hsl(var(--sp-gold) / 0.5);
   animation: badge-pulse 3s ease-in-out infinite;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 @keyframes badge-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
+  0%, 100% { transform: scale(1) translateZ(0); }
+  50% { transform: scale(1.08) translateZ(0); }
 }
 
-/* Animations */
+/* Animations - GPU accelerated */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(20px) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 }
 
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
 }
 
 /* Smooth scroll behavior */
