@@ -61,6 +61,7 @@ export function TeleprompterDisplay({
   const [showCameraSelector, setShowCameraSelector] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [textOpacity, setTextOpacity] = useState(0.85);
+  const [hasStarted, setHasStarted] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -190,8 +191,20 @@ export function TeleprompterDisplay({
 
   const startPlayback = useCallback(() => {
     if (countdown !== null) return;
-    setCountdown(3);
-  }, [countdown]);
+    
+    // Se já iniciou antes, resume direto sem countdown
+    if (hasStarted) {
+      setIsPlaying(true);
+      // Retomar gravação se estava gravando
+      if (mode === "recording" && isCameraEnabled && !isRecording) {
+        startRecording();
+      }
+    } else {
+      // Primeiro play - usa countdown
+      setCountdown(3);
+      setHasStarted(true);
+    }
+  }, [countdown, hasStarted, mode, isCameraEnabled, isRecording, startRecording]);
 
   // Contagem regressiva
   useEffect(() => {
@@ -273,6 +286,7 @@ export function TeleprompterDisplay({
               setScrollPosition(0);
               setIsComplete(false);
               setRecordedBlob(null);
+              setHasStarted(false);
               startPlayback();
             } else if (isPlaying) {
               setIsPlaying(false);
@@ -332,9 +346,11 @@ export function TeleprompterDisplay({
 
   const handlePlayPause = () => {
     if (isComplete) {
+      // Recomeçar do início - é um novo começo, terá countdown
       setScrollPosition(0);
       setIsComplete(false);
       setRecordedBlob(null);
+      setHasStarted(false);
       startPlayback();
     } else if (isPlaying) {
       setIsPlaying(false);
@@ -352,6 +368,7 @@ export function TeleprompterDisplay({
     setScrollPosition(0);
     setIsComplete(false);
     setCountdown(null);
+    setHasStarted(false);
     
     if (isRecording) {
       stopRecording();
