@@ -12,6 +12,7 @@ import { ScriptProductsAdmin } from "@/components/admin/ScriptProductsAdmin";
 import { ScriptBlocksAdmin } from "@/components/admin/ScriptBlocksAdmin";
 import { ScriptMetricsAdmin } from "@/components/admin/ScriptMetricsAdmin";
 import { AdminSettingsContent } from "@/components/admin/AdminSettingsContent";
+import { TeleprompterAdmin } from "@/components/admin/TeleprompterAdmin";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -48,6 +49,9 @@ export default function Admin() {
         </TabsContent>
         <TabsContent value="script-metrics" className="mt-0">
           <ScriptMetricsAdmin />
+        </TabsContent>
+        <TabsContent value="teleprompter" className="mt-0">
+          <TeleprompterAdmin />
         </TabsContent>
         <TabsContent value="settings" className="mt-0">
           <AdminSettingsContent onTabChange={setActiveTab} />
