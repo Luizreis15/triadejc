@@ -40,39 +40,76 @@ function parseModelContent(content: string, title: string): {
   whenToUse: string; 
   cards: string[] 
 } {
-  // Extrair objetivo do título (ex: "Modelo: Verdade Dura (Topo)" -> "Topo")
-  const titleMatch = title.match(/\(([^)]+)\)/);
-  const objective = titleMatch ? titleMatch[1] : "Engajamento";
-  
-  // Valor padrão para quando usar
-  const whenToUseMap: Record<string, string> = {
-    "Topo": "quando seu perfil precisa de clareza e posicionamento rápido",
-    "Salvamento": "quando você quer virar referência e aumentar saves",
-    "Topo / Salvamento": "quando você quer educar e elevar o nível do seu público",
-  };
-  const whenToUse = whenToUseMap[objective] || "quando você quer engajar sua audiência";
-  
-  // Parsear cards removendo "Slide X:" e "**Slide X:**"
   const lines = content.split('\n').filter(line => line.trim());
+  
+  // Extrair objetivo e quando usar do conteúdo (novo formato)
+  let objective = "Engajamento";
+  let whenToUse = "quando você quer engajar sua audiência";
+  
+  // Procurar por **Objetivo:** e **Quando usar:** no conteúdo
+  for (const line of lines) {
+    const objMatch = line.match(/^\*\*Objetivo:\*\*\s*(.+)/i);
+    if (objMatch) {
+      objective = objMatch[1].trim();
+      continue;
+    }
+    const whenMatch = line.match(/^\*\*Quando usar:\*\*\s*(.+)/i);
+    if (whenMatch) {
+      whenToUse = whenMatch[1].trim();
+      continue;
+    }
+  }
+  
+  // Fallback: extrair do título se não encontrou no conteúdo
+  if (objective === "Engajamento") {
+    const titleMatch = title.match(/\(([^)]+)\)/);
+    if (titleMatch) {
+      objective = titleMatch[1];
+    }
+  }
+  
+  // Parsear cards removendo "Card X:", "Slide X:", "**Card X:**", etc.
   const cards: string[] = [];
   const seenContent = new Set<string>();
+  let currentCard: string[] = [];
   
   for (const line of lines) {
-    // Ignorar linhas de título
-    if (line.includes('**Título:**') || line.startsWith('**Título:**')) {
+    // Ignorar linhas de metadados
+    if (line.match(/^\*\*(Objetivo|Quando usar|Título):\*\*/i)) {
       continue;
     }
     
-    // Remove padrões como "**Slide 1:**", "Slide 1:", "**CTA:**"
-    const cleanLine = line
-      .replace(/^\*\*(Slide \d+|CTA)(\s*\([^)]*\))?:\*\*\s*/i, '')
-      .replace(/^(Slide \d+|CTA)(\s*\([^)]*\))?:\s*/i, '')
-      .trim();
+    // Detectar início de novo card
+    const cardMatch = line.match(/^\*\*(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\*\*\s*/i) ||
+                      line.match(/^(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\s*/i);
     
-    // Evitar duplicatas (título pode repetir no slide 1)
-    if (cleanLine && !seenContent.has(cleanLine.toLowerCase())) {
-      seenContent.add(cleanLine.toLowerCase());
-      cards.push(cleanLine);
+    if (cardMatch) {
+      // Salvar card anterior se existir
+      if (currentCard.length > 0) {
+        const cardText = currentCard.join('\n').trim();
+        if (cardText && !seenContent.has(cardText.toLowerCase())) {
+          seenContent.add(cardText.toLowerCase());
+          cards.push(cardText);
+        }
+      }
+      // Iniciar novo card com conteúdo após o marcador
+      const contentAfterMarker = line
+        .replace(/^\*\*(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\*\*\s*/i, '')
+        .replace(/^(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\s*/i, '')
+        .trim();
+      currentCard = contentAfterMarker ? [contentAfterMarker] : [];
+    } else {
+      // Adicionar linha ao card atual
+      currentCard.push(line);
+    }
+  }
+  
+  // Salvar último card
+  if (currentCard.length > 0) {
+    const cardText = currentCard.join('\n').trim();
+    if (cardText && !seenContent.has(cardText.toLowerCase())) {
+      seenContent.add(cardText.toLowerCase());
+      cards.push(cardText);
     }
   }
   
