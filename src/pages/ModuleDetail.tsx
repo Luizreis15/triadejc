@@ -55,15 +55,23 @@ function parseModelContent(content: string, title: string): {
   // Parsear cards removendo "Slide X:" e "**Slide X:**"
   const lines = content.split('\n').filter(line => line.trim());
   const cards: string[] = [];
+  const seenContent = new Set<string>();
   
   for (const line of lines) {
-    // Remove padrões como "**Slide 1:**", "Slide 1:", "**Título:**"
+    // Ignorar linhas de título
+    if (line.includes('**Título:**') || line.startsWith('**Título:**')) {
+      continue;
+    }
+    
+    // Remove padrões como "**Slide 1:**", "Slide 1:", "**CTA:**"
     const cleanLine = line
-      .replace(/^\*\*(Slide \d+|Título|CTA)(\s*\([^)]*\))?:\*\*\s*/i, '')
-      .replace(/^(Slide \d+|Título|CTA)(\s*\([^)]*\))?:\s*/i, '')
+      .replace(/^\*\*(Slide \d+|CTA)(\s*\([^)]*\))?:\*\*\s*/i, '')
+      .replace(/^(Slide \d+|CTA)(\s*\([^)]*\))?:\s*/i, '')
       .trim();
     
-    if (cleanLine && !cleanLine.startsWith('**Título:**')) {
+    // Evitar duplicatas (título pode repetir no slide 1)
+    if (cleanLine && !seenContent.has(cleanLine.toLowerCase())) {
+      seenContent.add(cleanLine.toLowerCase());
       cards.push(cleanLine);
     }
   }
