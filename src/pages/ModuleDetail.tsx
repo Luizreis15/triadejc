@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
 import { ContentCard } from "@/components/ContentCard";
+import { ModelCard, SummaryCards, TipCard } from "@/components/modules";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, CheckCircle2, Download, Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,59 @@ type Module = {
   description: string | null;
   order_index: number;
 };
+
+// Parsear modelo de texto para estrutura
+function parseModelContent(content: string, title: string): { 
+  objective: string; 
+  whenToUse: string; 
+  cards: string[] 
+} {
+  // Extrair objetivo do título (ex: "Modelo: Verdade Dura (Topo)" -> "Topo")
+  const titleMatch = title.match(/\(([^)]+)\)/);
+  const objective = titleMatch ? titleMatch[1] : "Engajamento";
+  
+  // Valor padrão para quando usar
+  const whenToUseMap: Record<string, string> = {
+    "Topo": "quando seu perfil precisa de clareza e posicionamento rápido",
+    "Salvamento": "quando você quer virar referência e aumentar saves",
+    "Topo / Salvamento": "quando você quer educar e elevar o nível do seu público",
+  };
+  const whenToUse = whenToUseMap[objective] || "quando você quer engajar sua audiência";
+  
+  // Parsear cards removendo "Slide X:" e "**Slide X:**"
+  const lines = content.split('\n').filter(line => line.trim());
+  const cards: string[] = [];
+  
+  for (const line of lines) {
+    // Remove padrões como "**Slide 1:**", "Slide 1:", "**Título:**"
+    const cleanLine = line
+      .replace(/^\*\*(Slide \d+|Título|CTA)(\s*\([^)]*\))?:\*\*\s*/i, '')
+      .replace(/^(Slide \d+|Título|CTA)(\s*\([^)]*\))?:\s*/i, '')
+      .trim();
+    
+    if (cleanLine && !cleanLine.startsWith('**Título:**')) {
+      cards.push(cleanLine);
+    }
+  }
+  
+  return { objective, whenToUse, cards };
+}
+
+// Parsear resumo de bullet points para array
+function parseSummaryContent(content: string): string[] {
+  const lines = content.split('\n').filter(line => line.trim());
+  return lines.map(line => 
+    line.replace(/^[•\-\*]\s*/, '').trim()
+  ).filter(Boolean);
+}
+
+// Extrair dica principal do Pulo do Gato
+function parseTipContent(content: string): string {
+  const lines = content.split('\n').filter(line => line.trim());
+  // Pegar a primeira linha significativa
+  const firstLine = lines[0]?.replace(/^[•\-\*]\s*/, '').trim() || content;
+  return firstLine;
+}
 
 export default function ModuleDetail() {
   const navigate = useNavigate();
@@ -69,6 +123,52 @@ export default function ModuleDetail() {
     },
     enabled: !!module?.id,
   });
+
+  // Organizar cards por tipo/seção
+  const organizedContent = useMemo(() => {
+    if (!cards) return null;
+    
+    const videoCards = cards.filter(c => c.type === "video");
+    const textCards = cards.filter(c => c.type === "text");
+    const modelCards = cards.filter(c => c.type === "model");
+    const exerciseCards = cards.filter(c => c.type === "exercise");
+    const downloadCards = cards.filter(c => c.type === "download");
+    const tipCards = cards.filter(c => c.type === "tip");
+    const summaryCards = cards.filter(c => c.type === "summary");
+    
+    // Se não houver cards específicos de tip/summary, derivar de text cards
+    let tipContent: string | null = null;
+    let summaryItems: string[] = [];
+    
+    // Procurar "Pulo do Gato" nos text cards
+    const puloDoGatoCard = textCards.find(c => 
+      c.title.toLowerCase().includes("pulo do gato") || 
+      c.title.toLowerCase().includes("dica")
+    );
+    if (puloDoGatoCard && puloDoGatoCard.content_md) {
+      tipContent = parseTipContent(puloDoGatoCard.content_md);
+    }
+    
+    // Usar primeiro video card para extrair resumo se houver bullet points
+    const firstVideoCard = videoCards[0];
+    if (firstVideoCard?.content_md && firstVideoCard.content_md.includes("•")) {
+      summaryItems = parseSummaryContent(firstVideoCard.content_md);
+    }
+    
+    return {
+      video: firstVideoCard,
+      videoDescription: firstVideoCard?.content_md?.split("\n")[0] || null,
+      summary: summaryItems.length > 0 ? summaryItems : null,
+      tip: tipContent,
+      models: modelCards,
+      exercises: exerciseCards,
+      downloads: downloadCards,
+      otherText: textCards.filter(c => 
+        !c.title.toLowerCase().includes("pulo do gato") && 
+        !c.title.toLowerCase().includes("dica")
+      ),
+    };
+  }, [cards]);
 
   // Fetch user progress for this module
   const { data: progress } = useQuery({
@@ -239,12 +339,12 @@ export default function ModuleDetail() {
           </div>
         </motion.header>
 
-        {/* Conteúdo */}
+        {/* Conteúdo organizado por seções */}
         <motion.div
           variants={container}
           initial="hidden"
           animate="show"
-          className="px-4 py-6 max-w-lg mx-auto space-y-4"
+          className="px-4 py-6 max-w-lg mx-auto space-y-6"
         >
           {/* Descrição do módulo */}
           {module.description && (
@@ -253,11 +353,66 @@ export default function ModuleDetail() {
             </motion.p>
           )}
 
-          {/* Cards de conteúdo */}
-          {cards?.map((card) => (
-            <motion.div key={card.id} variants={item}>
-              {card.type === "exercise" ? (
-                <ContentCard type="exercise" title={card.title}>
+          {/* 🎬 SEÇÃO: Aula (vídeo) */}
+          {organizedContent?.video && (
+            <motion.div variants={item}>
+              <ContentCard
+                type="video"
+                title={organizedContent.video.title}
+                content={organizedContent.videoDescription || undefined}
+                videoUrl={organizedContent.video.video_url && organizedContent.video.video_url !== "[LINK]" 
+                  ? organizedContent.video.video_url 
+                  : undefined}
+              />
+            </motion.div>
+          )}
+
+          {/* ✅ SEÇÃO: Resumo do Módulo */}
+          {organizedContent?.summary && organizedContent.summary.length > 0 && (
+            <motion.div variants={item}>
+              <SummaryCards items={organizedContent.summary} />
+            </motion.div>
+          )}
+
+          {/* 📝 SEÇÃO: Pulo do Gato */}
+          {organizedContent?.tip && (
+            <motion.div variants={item}>
+              <TipCard tip={organizedContent.tip} />
+            </motion.div>
+          )}
+
+          {/* ✨ SEÇÃO: Modelos Prontos */}
+          {organizedContent?.models && organizedContent.models.length > 0 && (
+            <motion.div variants={item} className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <span>✨</span> Modelos Prontos
+              </h2>
+              {organizedContent.models.map((modelCard) => {
+                const parsed = parseModelContent(
+                  modelCard.content_md || "", 
+                  modelCard.title
+                );
+                return (
+                  <ModelCard
+                    key={modelCard.id}
+                    title={modelCard.title.replace(/^Modelo:\s*/i, '')}
+                    objective={parsed.objective}
+                    whenToUse={parsed.whenToUse}
+                    cards={parsed.cards}
+                  />
+                );
+              })}
+            </motion.div>
+          )}
+
+          {/* 💪 SEÇÃO: Exercícios */}
+          {organizedContent?.exercises && organizedContent.exercises.length > 0 && (
+            <motion.div variants={item} className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <span>💪</span> Exercício
+              </h2>
+              {organizedContent.exercises.map((card) => (
+                <ContentCard key={card.id} type="exercise" title={card.title.replace(/^Exercício:\s*/i, '')}>
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                       {card.content_md}
@@ -278,46 +433,62 @@ export default function ModuleDetail() {
                     </Button>
                   </div>
                 </ContentCard>
-              ) : card.type === "download" ? (
-                <ContentCard type="download" title={card.title}>
-                  <p className="text-sm text-muted-foreground mb-4 whitespace-pre-wrap">{card.content_md}</p>
-                  <Button 
-                    variant="outline" 
-                    className="gap-2"
-                    onClick={() => {
-                      if (card.cta_url && card.cta_url !== "[LINK]") {
-                        window.open(card.cta_url, "_blank");
-                      } else {
-                        toast({ title: "Link em breve!", description: "O template será disponibilizado em breve." });
-                      }
-                    }}
-                  >
-                    <Download className="h-4 w-4" />
-                    {card.cta_label || "Abrir no Canva"}
-                  </Button>
-                </ContentCard>
-              ) : card.type === "video" ? (
-                <ContentCard
-                  type="video"
-                  title={card.title}
-                  content={card.content_md || undefined}
-                  videoUrl={card.video_url && card.video_url !== "[LINK]" ? card.video_url : undefined}
-                />
-              ) : (
-                <ContentCard
-                  type={card.type as "text" | "model"}
-                  title={card.title}
-                  content={card.content_md || undefined}
-                  showCopy={card.type === "model"}
-                  showFavorite={card.type === "model"}
-                  showSaveToNotebook={card.type === "model" || card.type === "text"}
-                />
-              )}
+              ))}
             </motion.div>
-          ))}
+          )}
 
-          {/* Card de conclusão */}
+          {/* 📥 SEÇÃO: Templates */}
+          {organizedContent?.downloads && organizedContent.downloads.length > 0 && (
+            <motion.div variants={item} className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <span>📥</span> Templates
+              </h2>
+              {organizedContent.downloads.map((card) => (
+                <ContentCard key={card.id} type="download" title={card.title}>
+                  <p className="text-sm text-muted-foreground mb-4 whitespace-pre-wrap">
+                    {card.content_md?.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\[LINK\]/g, 'Em breve')}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => {
+                        if (card.cta_url && card.cta_url !== "[LINK]") {
+                          window.open(card.cta_url, "_blank");
+                        } else {
+                          toast({ title: "Link em breve!", description: "O template será disponibilizado em breve." });
+                        }
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                      Abrir no Canva
+                    </Button>
+                  </div>
+                </ContentCard>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Outros cards de texto */}
+          {organizedContent?.otherText && organizedContent.otherText.length > 0 && (
+            organizedContent.otherText.map((card) => (
+              <motion.div key={card.id} variants={item}>
+                <ContentCard
+                  type="text"
+                  title={card.title}
+                  content={card.content_md || undefined}
+                  showSaveToNotebook
+                />
+              </motion.div>
+            ))
+          )}
+
+          {/* ✅ SEÇÃO: Progresso/Conclusão */}
           <motion.div variants={item}>
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+              <span>✅</span> Progresso
+            </h2>
             <Card variant="elevated" className="border-2 border-dashed border-primary/30">
               <CardContent className="p-5 text-center">
                 {isCompleted ? (
