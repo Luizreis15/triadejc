@@ -21,7 +21,11 @@ import {
   Trash2,
   Camera,
   SwitchCamera,
-  AlertCircle
+  AlertCircle,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUp,
+  ChevronsDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCameraRecorder } from "./useCameraRecorder";
@@ -115,6 +119,45 @@ export function TeleprompterDisplay({
     wide: 'max-w-4xl',    // ~896px - mais amplo
     full: 'max-w-none',   // sem limite
   };
+
+  // Constantes para scroll manual
+  const SCROLL_STEP = 100;
+  const SCROLL_STEP_LARGE = 500;
+
+  // Funções de scroll manual
+  const getMaxScroll = useCallback(() => {
+    const textHeight = textRef.current?.scrollHeight || 0;
+    const containerHeight = containerRef.current?.clientHeight || 0;
+    return Math.max(0, textHeight - containerHeight + 100);
+  }, []);
+
+  const handleManualScroll = useCallback((direction: 'up' | 'down', large = false) => {
+    if (isPlaying) return;
+    
+    const step = large ? SCROLL_STEP_LARGE : SCROLL_STEP;
+    const maxScroll = getMaxScroll();
+    
+    setScrollPosition(prev => {
+      if (direction === 'up') {
+        return Math.max(0, prev - step);
+      } else {
+        return Math.min(maxScroll, prev + step);
+      }
+    });
+    setIsComplete(false);
+  }, [isPlaying, getMaxScroll]);
+
+  const handleGoToStart = useCallback(() => {
+    if (isPlaying) return;
+    setScrollPosition(0);
+    setIsComplete(false);
+  }, [isPlaying]);
+
+  const handleGoToEnd = useCallback(() => {
+    if (isPlaying) return;
+    const maxScroll = getMaxScroll();
+    setScrollPosition(maxScroll);
+  }, [isPlaying, getMaxScroll]);
 
   // Ativar modo gravação
   const enableRecordingMode = useCallback(async () => {
@@ -215,6 +258,77 @@ export function TeleprompterDisplay({
       }
     };
   }, [isPlaying, wordCount, isRecording, stopRecording]);
+
+  // Listener de teclado para controles
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignorar se estiver em um input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          if (!recordedBlob) {
+            if (isComplete) {
+              setScrollPosition(0);
+              setIsComplete(false);
+              setRecordedBlob(null);
+              startPlayback();
+            } else if (isPlaying) {
+              setIsPlaying(false);
+              if (isRecording) stopRecording();
+            } else {
+              startPlayback();
+            }
+          }
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          handleManualScroll('up');
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          handleManualScroll('down');
+          break;
+        case 'PageUp':
+          e.preventDefault();
+          handleManualScroll('up', true);
+          break;
+        case 'PageDown':
+          e.preventDefault();
+          handleManualScroll('down', true);
+          break;
+        case 'Home':
+          e.preventDefault();
+          handleGoToStart();
+          break;
+        case 'End':
+          e.preventDefault();
+          handleGoToEnd();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, isComplete, recordedBlob, isRecording, stopRecording, startPlayback, handleManualScroll, handleGoToStart, handleGoToEnd]);
+
+  // Listener de mouse wheel para scroll manual quando pausado
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (isPlaying) return;
+      e.preventDefault();
+      
+      const isLargeScroll = Math.abs(e.deltaY) > 50;
+      handleManualScroll(e.deltaY > 0 ? 'down' : 'up', isLargeScroll);
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [isPlaying, handleManualScroll]);
 
   const handlePlayPause = () => {
     if (isComplete) {
@@ -628,6 +742,30 @@ export function TeleprompterDisplay({
 
         {/* Botões de controle */}
         <div className="flex items-center justify-center gap-4">
+          {/* Controles de navegação manual - aparecem quando pausado */}
+          {!isPlaying && !countdown && !recordedBlob && (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleGoToStart}
+                className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+                title="Voltar ao início (Home)"
+              >
+                <ChevronsUp className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleManualScroll('up', true)}
+                className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+                title="Subir (Page Up)"
+              >
+                <ChevronUp className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -666,6 +804,30 @@ export function TeleprompterDisplay({
               )
             )}
           </Button>
+
+          {/* Controles de navegação manual - aparecem quando pausado */}
+          {!isPlaying && !countdown && !recordedBlob && (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleManualScroll('down', true)}
+                className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+                title="Descer (Page Down)"
+              >
+                <ChevronDown className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleGoToEnd}
+                className={isDarkMode ? "text-white hover:bg-white/10" : "text-black hover:bg-black/10"}
+                title="Ir ao final (End)"
+              >
+                <ChevronsDown className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
 
           {onMarkRecorded && isComplete && !recordedBlob && (
             <Button
