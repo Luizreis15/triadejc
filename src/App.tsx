@@ -35,26 +35,26 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Redirect root to sales page (temporary until institutional site is ready) */}
-            <Route path="/" element={<Navigate to="/vmcm" replace />} />
+            {/* Redirect root to sales page */}
+            <Route path="/" element={<Navigate to="/jornada" replace />} />
             
             {/* Sales page */}
-            <Route path="/vmcm" element={<SalesPage />} />
+            <Route path="/jornada" element={<SalesPage />} />
             
             {/* Members area */}
-            <Route path="/membrosvmcm" element={<Login />} />
-            <Route path="/membrosvmcm/reset-password" element={<ResetPassword />} />
-            <Route path="/membrosvmcm/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/modulos" element={<ProtectedRoute><Modules /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/modulos/:slug" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/biblioteca" element={<ProtectedRoute><Library /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/caderno" element={<ProtectedRoute><Notebook /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/calendario" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/resultados" element={<ProtectedRoute><Results /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/roteiros" element={<ProtectedRoute><ScriptGenerator /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/meus-roteiros" element={<ProtectedRoute><MyScripts /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/teleprompter/:scriptId" element={<ProtectedRoute><Teleprompter /></ProtectedRoute>} />
-            <Route path="/membrosvmcm/app/perfil" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
+            <Route path="/membros" element={<Login />} />
+            <Route path="/membros/reset-password" element={<ResetPassword />} />
+            <Route path="/membros/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/membros/app/modulos" element={<ProtectedRoute><Modules /></ProtectedRoute>} />
+            <Route path="/membros/app/modulos/:slug" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
+            <Route path="/membros/app/biblioteca" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+            <Route path="/membros/app/caderno" element={<ProtectedRoute><Notebook /></ProtectedRoute>} />
+            <Route path="/membros/app/calendario" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+            <Route path="/membros/app/resultados" element={<ProtectedRoute><Results /></ProtectedRoute>} />
+            <Route path="/membros/app/roteiros" element={<ProtectedRoute><ScriptGenerator /></ProtectedRoute>} />
+            <Route path="/membros/app/meus-roteiros" element={<ProtectedRoute><MyScripts /></ProtectedRoute>} />
+            <Route path="/membros/app/teleprompter/:scriptId" element={<ProtectedRoute><Teleprompter /></ProtectedRoute>} />
+            <Route path="/membros/app/perfil" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
             
             {/* Admin area */}
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
