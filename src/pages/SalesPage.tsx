@@ -51,9 +51,9 @@ function HeroSection() {
           style={{
             background: `linear-gradient(
               to bottom,
-              hsl(30 20% 97%) 0%,
-              transparent 30%,
-              transparent 70%,
+              hsl(30 20% 97% / 0.4) 0%,
+              transparent 15%,
+              transparent 85%,
               hsl(30 20% 97%) 100%
             )`
           }}
@@ -374,9 +374,9 @@ function AboutSection() {
             style={{
               background: `linear-gradient(
                 to bottom,
-                hsl(30 20% 97%) 0%,
-                transparent 30%,
-                transparent 70%,
+                hsl(30 20% 97% / 0.4) 0%,
+                transparent 15%,
+                transparent 85%,
                 hsl(30 20% 97%) 100%
               )`
             }}
