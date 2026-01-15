@@ -1,14 +1,6 @@
 import "@/styles/sales-page.css";
-import { lazy, Suspense } from "react";
-import samiraHero from "@/assets/samira-hero.jpeg";
-import samiraAbout from "@/assets/samira-about.jpg";
-import logoCarrosseis from "@/assets/logo-carrosseis.png";
-import carousel1 from "@/assets/carousel/carousel-1.jpg";
-import carousel2 from "@/assets/carousel/carousel-2.jpg";
-import carousel3 from "@/assets/carousel/carousel-3.jpg";
-import carousel4 from "@/assets/carousel/carousel-4.jpg";
-import carousel5 from "@/assets/carousel/carousel-5.jpg";
-import carousel6 from "@/assets/carousel/carousel-6.jpg";
+import samiraHero from "@/assets/samira-hero.jpeg"; // TODO: substituir por jordana-hero
+import samiraAbout from "@/assets/samira-about.jpg"; // TODO: substituir por jordana-about
 import {
   ButtonGold,
   ButtonOrange,
@@ -18,26 +10,7 @@ import {
   FAQAccordion,
   ScrollReveal,
 } from "@/components/sales";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Check, X, Shield } from "lucide-react";
-
-// Lazy load heavy mockup components
-const MockupLibrary = lazy(() => import("@/components/sales/MockupLibrary").then(m => ({ default: m.MockupLibrary })));
-const MockupModules = lazy(() => import("@/components/sales/MockupModules").then(m => ({ default: m.MockupModules })));
-const MockupNotebook = lazy(() => import("@/components/sales/MockupNotebook").then(m => ({ default: m.MockupNotebook })));
-
-// Mockup loading skeleton
-function MockupSkeleton() {
-  return (
-    <div className="mx-auto max-w-[280px] h-[480px] bg-gray-100 rounded-[2rem] animate-pulse" />
-  );
-}
+import { Shield, Heart, Brain, Sun, HelpCircle } from "lucide-react";
 
 const scrollToOffer = () => {
   document.getElementById("oferta")?.scrollIntoView({ behavior: "smooth" });
@@ -46,52 +19,48 @@ const scrollToOffer = () => {
 // Seção 1: Hero
 function HeroSection() {
   return (
-    <section className="px-6 py-6 text-center">
-      {/* Logo */}
-      <div className="mb-3">
-        <img 
-          src={logoCarrosseis} 
-          alt="Carroséis Magnéticos - Venda Mais Com" 
-          width={224}
-          height={80}
-          className="w-56 mx-auto"
-        />
-        <p className="text-xs mt-1 opacity-70 body-inter">Caderno Digital • Mobile e PC</p>
+    <section className="px-6 py-8 text-center">
+      {/* Logo/Título */}
+      <div className="mb-4">
+        <h1 className="heading-playfair text-3xl md:text-4xl mb-1" style={{ color: 'hsl(195 52% 23%)' }}>
+          Jornada Única
+        </h1>
+        <p className="text-xs mt-1 opacity-70 body-inter">Experiência Guiada • Digital</p>
       </div>
 
-      {/* Headlines */}
-      <h1 className="heading-playfair text-2xl md:text-3xl mb-2 px-2">
-        As estruturas de carrossel que mais vendem e mais posicionam, prontas pra você copiar e colar.
-      </h1>
-      <p className="body-inter text-base mb-4 opacity-80">
-        Clique no botão abaixo e tenha acesso imediato às estruturas que mais me deram resultado — prontas pra copiar e adaptar.
+      {/* Headline Principal */}
+      <h2 className="heading-playfair text-2xl md:text-3xl mb-3 px-2">
+        Organize O Que Está Por Dentro — Com Clareza, Presença e Calma
+      </h2>
+      <p className="body-inter text-base mb-5 opacity-80 px-2">
+        Uma experiência guiada para mulheres que querem viver sua fé sem sobrecarga emocional — com mais serenidade, entendimento e leveza no dia a dia.
       </p>
 
       {/* CTA */}
       <ButtonGold onClick={scrollToOffer} className="w-full max-w-xs mx-auto">
-        QUERO ACESSAR
+        QUERO ACESSAR A JORNADA POR R$ 97
       </ButtonGold>
       <p className="text-xs mt-2 opacity-60 body-inter">
-        Acesso imediato • R$ 27 • Garantia de 7 dias
+        Acesso imediato • Garantia de 7 dias
       </p>
 
-      {/* Foto Samira com fade transparente - LCP image */}
-      <div className="mt-4 relative overflow-hidden">
+      {/* Foto Jordana com fade transparente */}
+      <div className="mt-6 relative overflow-hidden">
         <div 
           className="absolute inset-0 pointer-events-none z-10"
           style={{
             background: `linear-gradient(
               to bottom,
-              hsl(350 30% 95%) 0%,
+              hsl(30 20% 97%) 0%,
               transparent 30%,
               transparent 70%,
-              hsl(350 30% 95%) 100%
+              hsl(30 20% 97%) 100%
             )`
           }}
         />
         <img 
           src={samiraHero} 
-          alt="Samira Gouvêa"
+          alt="Jordana Cantarelli"
           width={460}
           height={600}
           fetchPriority="high"
@@ -102,326 +71,231 @@ function HeroSection() {
   );
 }
 
-// Seção 2: Benefícios
-function BenefitsSection() {
-  const benefits = [
-    "Escolher o formato certo de carrossel de acordo com o objetivo do post.",
-    "Copiar estruturas que já funcionam, sem medo de 'estar fazendo errado'.",
-    "Adaptar rapidamente o texto ao seu nicho, mantendo lógica e força persuasiva.",
-    "Publicar com intenção clara, sem ficar exausta ou perdida.",
-    "Variar o conteúdo sem perder identidade, usando formatos estratégicos.",
-    "Criar consistência de posicionamento e vendas usando carrosséis como pilar.",
+// Seção 2: Identificação Rápida
+function IdentificationSection() {
+  const questions = [
+    "Sentido a mente acelerada mesmo orando?",
+    "Percebido que pensar demais suga sua paz?",
+    "Sentido culpa por não conseguir permanecer em tranquilidade?",
+    "Quer viver sua fé com mais presença e menos tensão?",
   ];
 
   return (
-    <section className="px-6 py-6">
+    <section className="px-6 py-8">
       <ScrollReveal>
         <h2 className="heading-playfair text-xl text-center mb-6">
-          Com o Venda Mais com Carrosséis Magnéticos, você vai ser capaz de:
+          Você Sente Isso?
+        </h2>
+      </ScrollReveal>
+      <div className="space-y-3">
+        {questions.map((question, i) => (
+          <div 
+            key={i} 
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
+            <CardCream className="flex items-start gap-3 p-4">
+              <div className="w-8 h-8 min-w-[32px] rounded-full flex items-center justify-center" style={{ backgroundColor: 'hsl(350 30% 58% / 0.15)' }}>
+                <HelpCircle className="w-5 h-5" style={{ color: 'hsl(350 30% 58%)' }} />
+              </div>
+              <p className="body-inter text-sm flex-1">Você já {question.toLowerCase()}</p>
+            </CardCream>
+          </div>
+        ))}
+      </div>
+      <ScrollReveal delay={0.3}>
+        <p className="body-inter text-center mt-6 font-semibold" style={{ color: 'hsl(195 52% 23%)' }}>
+          Não é falta de fé. É falta de clareza interna.
+        </p>
+      </ScrollReveal>
+    </section>
+  );
+}
+
+// Seção 3: Por Que Essa Jornada Existe
+function WhyExistsSection() {
+  return (
+    <section className="px-6 py-8">
+      <CardCream className="py-8 px-5">
+        <ScrollReveal>
+          <h2 className="heading-playfair text-xl text-center mb-4" style={{ color: 'hsl(195 52% 23%)' }}>
+            Por Que Essa Jornada Existe
+          </h2>
+          <p className="body-inter text-sm text-center mb-4">
+            Essa jornada nasceu da experiência de <strong>Jordana Cantarelli</strong> — Pastora e Psicanalista Clínica com mais de 10 anos de atuação — ao perceber que muitas mulheres amam a Deus com sinceridade, mas não encontram direção interna para organizar o que sentem por dentro.
+          </p>
+          <p className="body-inter text-sm text-center opacity-80">
+            Aqui não se promete cura milagrosa.<br />
+            Aqui se oferece um espaço para entender, acolher e organizar sua vida emocional e espiritual com responsabilidade e carinho.
+          </p>
+        </ScrollReveal>
+        <div className="text-center mt-6">
+          <ButtonOrange onClick={scrollToOffer}>QUERO ACESSAR</ButtonOrange>
+        </div>
+      </CardCream>
+    </section>
+  );
+}
+
+// Seção 4: O Que Está Incluído (Benefícios)
+function BenefitsSection() {
+  const benefits = [
+    { icon: Heart, text: "Clareza emocional para entender o que sente" },
+    { icon: Brain, text: "Organização interna para lidar com pensamentos acelerados" },
+    { icon: Sun, text: "Presença espiritual que acolhe sem culpa" },
+    { icon: Heart, text: "Estratégias práticas que se aplicam ao seu cotidiano" },
+    { icon: Sun, text: "Guia e suporte leve para você caminhar no seu tempo" },
+  ];
+
+  return (
+    <section className="px-6 py-8">
+      <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-6">
+          O Que Está Incluído
         </h2>
       </ScrollReveal>
       <div className="space-y-3">
         {benefits.map((benefit, i) => (
           <div 
             key={i} 
-            className="animate-fade-in-up"
-            style={{ animationDelay: `${i * 80}ms` }}
+            className="flex items-start gap-3 animate-fade-in-up"
+            style={{ animationDelay: `${i * 60}ms` }}
           >
-            <CardCream className="flex items-start gap-3">
-              <IconSquare icon="check" />
-              <p className="body-inter text-sm flex-1">{benefit}</p>
-            </CardCream>
+            <IconSquare icon="check" />
+            <p className="body-inter text-sm flex-1">{benefit.text}</p>
           </div>
         ))}
       </div>
-      <div className="text-center mt-8 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+      <div className="text-center mt-8">
         <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
       </div>
     </section>
   );
 }
 
-// Seção 3: Exemplos Slider
-function ExamplesSection() {
-  const carouselImages = [
-    carousel1,
-    carousel2,
-    carousel3,
-    carousel4,
-    carousel5,
-    carousel6,
-  ];
-
-  return (
-    <section className="px-6 py-6">
-      <ScrollReveal>
-        <h2 className="heading-playfair text-xl text-center mb-6">
-          Esses são alguns dos carrosséis que você vai aprender a fazer
-        </h2>
-      </ScrollReveal>
-      <Carousel className="w-full">
-        <CarouselContent>
-          {carouselImages.map((img, index) => (
-            <CarouselItem key={index} className="basis-4/5">
-              <img 
-                src={img} 
-                alt={`Exemplo de carrossel ${index + 1}`}
-                width={368}
-                height={460}
-                loading="lazy"
-                decoding="async"
-                className="w-full rounded-lg shadow-md"
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="left-0" />
-        <CarouselNext className="right-0" />
-      </Carousel>
-    </section>
-  );
-}
-
-// Seção 4: CTA Box Creme
-function CTABoxSection() {
-  return (
-    <section className="px-6 py-6">
-      <CardCream className="text-center py-8">
-        <p className="body-inter text-base mb-6 px-4">
-          Clique no botão abaixo para <strong>PARAR DE TRAVAR</strong> na hora de postar e ter acesso aos carrosséis (card a card) que mais me trouxeram resultado:
-        </p>
-        <ButtonOrange onClick={scrollToOffer}>QUERO ACESSAR</ButtonOrange>
-      </CardCream>
-    </section>
-  );
-}
-
-// Seção 5: Bloco Vermelho ATENÇÃO
-function AttentionSection() {
-  const forYou = [
-    "Você tem conteúdo, mas trava na hora de organizar em uma estrutura clara.",
-    "Você quer transformar o Instagram em vitrine de autoridade (não só posts soltos).",
-    "Você quer parar de improvisar e começar a repetir o que funciona.",
-    "Você quer DMs com intenção (não só curtidas).",
-    "Você quer vender com naturalidade, porque seu perfil passa confiança.",
-  ];
-
-  const notForYou = [
-    "Você não pretende usar o Instagram como ferramenta de negócio.",
-    "Você odeia seguir estrutura e prefere criar do zero toda vez (mesmo travando).",
-    "Você quer só 'frases prontas' sem lógica e condução.",
-    "Você não está disposta a aplicar nem 20 minutos pra adaptar e postar.",
-  ];
-
-  return (
-    <SectionRed>
-      <h2 className="heading-playfair text-xl text-center mb-6">
-        ATENÇÃO! Antes de garantir seu acesso, veja se esse método combina com você…
-      </h2>
-
-      {/* For You */}
-      <div className="card-wine p-5 mb-4">
-        <h3 className="body-inter font-semibold text-base mb-4">
-          Vai fazer MUITO sentido pra você se…
-        </h3>
-        <div className="space-y-3">
-          {forYou.map((item, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className="w-6 h-6 min-w-[24px] rounded-full bg-green-500 flex items-center justify-center">
-                <Check className="w-4 h-4 text-white" />
-              </div>
-              <p className="body-inter text-sm">{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Not For You */}
-      <div className="card-wine p-5 mb-6">
-        <h3 className="body-inter font-semibold text-base mb-4">
-          Talvez não seja pra você se…
-        </h3>
-        <div className="space-y-3">
-          {notForYou.map((item, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className="w-6 h-6 min-w-[24px] rounded-full bg-red-400 flex items-center justify-center">
-                <X className="w-4 h-4 text-white" />
-              </div>
-              <p className="body-inter text-sm">{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <p className="body-inter text-center text-sm mb-6">
-        Clique no botão abaixo para <strong>PARAR DE TRAVAR</strong> e ter acesso imediato ao caderno digital.
-      </p>
-      <div className="text-center">
-        <ButtonOrange onClick={scrollToOffer}>QUERO ACESSAR</ButtonOrange>
-      </div>
-    </SectionRed>
-  );
-}
-
-// Seção 6: Título Transição
+// Seção 5: Título Transição
 function TransitionTitle() {
   return (
     <section className="px-6 py-6 text-center">
       <ScrollReveal>
-        <h2 className="heading-playfair text-2xl">
-          Tudo o que você vai receber dentro do Venda Mais com Carrosséis Magnéticos:
+        <h2 className="heading-playfair text-2xl" style={{ color: 'hsl(195 52% 23%)' }}>
+          O Que Você Vai Receber Dentro
         </h2>
       </ScrollReveal>
     </section>
   );
 }
 
-// Seção 7: Biblioteca de Formatos
-function LibrarySection() {
-  const formats = [
-    { title: "Contraste", desc: "para gerar consciência e mudar percepção." },
-    { title: "Comparação", desc: "para quebrar objeções e posicionar autoridade com clareza." },
-    { title: "Autoridade silenciosa", desc: "para elevar valor percebido sem autopromoção." },
-    { title: "Narrativa", desc: "para criar conexão e conduzir até uma conclusão." },
-    { title: "Análise", desc: "para gerar debate e posicionamento inteligente." },
-    { title: "Conexão", desc: "para fortalecer comunidade e pertencimento." },
-    { title: "Venda com critério", desc: "para vender com elegância e intenção clara." },
+// Seção 6: Sessões
+function SessionsSection() {
+  const sessions = [
+    {
+      number: 1,
+      title: "Entendimento Interno",
+      description: "Ferramentas para nomear sentimentos, reconhecer padrões e trazer paz de mente.",
+      icon: Brain,
+    },
+    {
+      number: 2,
+      title: "Reorganização do Mundo Interno",
+      description: "Práticas para transformar seu diálogo interno e alinhar sua fé com sua vida emocional.",
+      icon: Heart,
+    },
+    {
+      number: 3,
+      title: "Construindo Presença",
+      description: "Rotinas simples e biblicamente ancoradas para viver com mais calma e presença no dia a dia.",
+      icon: Sun,
+    },
   ];
 
   return (
     <section className="px-6 py-6">
-      <ScrollReveal>
-        <h2 className="heading-playfair text-xl text-center mb-6">
-          Biblioteca de Formatos de Carrosséis
-        </h2>
-      </ScrollReveal>
-      <div className="space-y-3">
-        {formats.map((format, i) => (
-          <div 
-            key={i} 
-            className="flex items-start gap-3 animate-fade-in-up"
-            style={{ animationDelay: `${i * 60}ms` }}
-          >
-            <IconSquare icon="check" />
-            <p className="body-inter text-sm">
-              <strong>{format.title}</strong> — {format.desc}
-            </p>
-          </div>
+      <div className="space-y-4">
+        {sessions.map((session, i) => (
+          <ScrollReveal key={i} delay={i * 0.1}>
+            <div className="session-card">
+              <div className="flex items-center gap-3 mb-3">
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'hsl(350 30% 58%)' }}
+                >
+                  <session.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg">
+                  Sessão {session.number} — {session.title}
+                </h3>
+              </div>
+              <p className="body-inter text-sm opacity-80 pl-13">
+                {session.description}
+              </p>
+            </div>
+          </ScrollReveal>
         ))}
       </div>
-      <div className="mt-8">
-        <Suspense fallback={<MockupSkeleton />}>
-          <MockupLibrary />
-        </Suspense>
-      </div>
-      <div className="text-center mt-6">
+      <div className="text-center mt-8">
         <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
       </div>
     </section>
   );
 }
 
-// Seção 8: Estrutura de Uso
-function StructureSection() {
-  const items = [
-    { title: "Guia 'Quando usar'", desc: "para escolher o formato certo pelo objetivo do post." },
-    { title: "Objetivo estratégico", desc: "para parar de postar no automático." },
-    { title: "Estrutura card a card", desc: "do slide 1 ao final com ritmo e condução." },
-    { title: "Exemplos de headlines", desc: "para acelerar a adaptação sem perder força." },
-    { title: "CTAs recomendadas", desc: "para conduzir salvar, comentar, DM e venda." },
+// Seção 7: Depoimentos
+function TestimonialsSection() {
+  const testimonials = [
+    {
+      text: "Pela primeira vez entendi o que sinto por dentro, sem culpa e com direção.",
+      author: "Mulher, 34 anos",
+    },
+    {
+      text: "Não é promessa, é clareza. Me ajudou a acalmar a mente e viver com mais serenidade.",
+      author: "Mulher, 41 anos",
+    },
+    {
+      text: "A forma como a Jordana aplica fé + clareza emocional fez sentido pra mim.",
+      author: "Mulher, 38 anos",
+    },
   ];
 
   return (
-    <section className="px-6 py-6">
+    <section className="px-6 py-8" style={{ backgroundColor: 'hsl(30 25% 94%)' }}>
       <ScrollReveal>
         <h2 className="heading-playfair text-xl text-center mb-6">
-          Estrutura de Uso de Cada Formato
+          O Que Elas Dizem
         </h2>
       </ScrollReveal>
-      <div className="space-y-3">
-        {items.map((item, i) => (
-          <div 
-            key={i} 
-            className="flex items-start gap-3 animate-fade-in-up"
-            style={{ animationDelay: `${i * 60}ms` }}
-          >
-            <IconSquare icon="check" />
-            <p className="body-inter text-sm">
-              <strong>{item.title}</strong> — {item.desc}
-            </p>
-          </div>
+      <div className="space-y-4">
+        {testimonials.map((testimonial, i) => (
+          <ScrollReveal key={i} delay={i * 0.1}>
+            <div className="testimonial-card">
+              <p className="body-inter text-sm mb-3 pl-6 italic">
+                "{testimonial.text}"
+              </p>
+              <p className="body-inter text-xs opacity-60 text-right">
+                — {testimonial.author}
+              </p>
+            </div>
+          </ScrollReveal>
         ))}
-      </div>
-      <div className="mt-8">
-        <Suspense fallback={<MockupSkeleton />}>
-          <MockupModules />
-        </Suspense>
-      </div>
-      <div className="text-center mt-6">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
       </div>
     </section>
   );
 }
 
-// Seção 9: Ferramentas Extras
-function ToolsSection() {
-  const tools = [
-    { title: "Mapa de decisão de formato", desc: "qual carrossel usar em cada dia." },
-    { title: "Checklist rápido de adaptação", desc: "adapte sem enfraquecer a mensagem." },
-    { title: "Banco de headlines", desc: "capas que param o dedo." },
-    { title: "Banco de CTAs estratégicas", desc: "feche todo post com intenção clara." },
-    { title: "Modelo de organização semanal", desc: "visão e consistência sem desgaste." },
-  ];
-
-  return (
-    <section className="px-6 py-6">
-      <ScrollReveal>
-        <h2 className="heading-playfair text-xl text-center mb-6">
-          Ferramentas Extras
-        </h2>
-      </ScrollReveal>
-      <div className="space-y-3">
-        {tools.map((tool, i) => (
-          <div 
-            key={i} 
-            className="flex items-start gap-3 animate-fade-in-up"
-            style={{ animationDelay: `${i * 60}ms` }}
-          >
-            <IconSquare icon="check" />
-            <p className="body-inter text-sm">
-              <strong>{tool.title}</strong> — {tool.desc}
-            </p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-8">
-        <Suspense fallback={<MockupSkeleton />}>
-          <MockupNotebook />
-        </Suspense>
-      </div>
-      <div className="text-center mt-6">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
-      </div>
-    </section>
-  );
-}
-
-
-// Seção 11: Card de Oferta
+// Seção 8: Card de Oferta
 function OfferSection() {
   const benefits = [
-    "Biblioteca de Formatos de Carrosséis (pra copiar e colar)",
-    "Estrutura de Uso de Cada Formato (card a card)",
-    "Ferramentas Extras (mapas, checklists, bancos)",
-    "Acesso imediato",
+    "3 Sessões Completas de Jornada Guiada",
+    "Ferramentas práticas de autoconhecimento",
+    "Integração fé + clareza emocional",
+    "Acesso imediato e vitalício",
   ];
 
   return (
     <SectionRed id="oferta" className="py-12">
       <div className="card-wine p-6 text-center">
         <h2 className="heading-playfair text-2xl mb-6">
-          Venda Mais com Carrosséis Magnéticos
+          Jornada Única
         </h2>
         
         <div className="space-y-3 mb-6 text-left">
@@ -441,30 +315,38 @@ function OfferSection() {
           </div>
         </div>
 
+        <p className="body-inter text-sm mb-4 opacity-80">
+          Você tem 7 dias para testar sem risco. Se durante esse período você sentir que essa jornada não foi o que você esperava, devolvemos 100% do seu investimento — sem perguntas.
+        </p>
+
+        <p className="body-inter text-xs italic opacity-70 mb-6">
+          💡 Sua paz interna merece uma chance — sem risco, sem pressão.
+        </p>
+
         {/* Preço */}
         <div className="mb-6">
           <p className="text-sm line-through opacity-60 body-inter">de R$ 197,00</p>
-          <p className="heading-playfair text-3xl">por apenas R$ 27</p>
+          <p className="heading-playfair text-3xl">por apenas R$ 97</p>
         </div>
 
-        {/* CTA */}
+        {/* CTA - TODO: atualizar link de pagamento */}
         <a 
-          href="https://pay.hub.la/9z98luhiloijFevXfgEZ"
+          href="https://pay.hub.la/LINK_JORDANA"
           target="_blank" 
           rel="noopener noreferrer"
           className="block w-full"
           onClick={() => {
             if (typeof window !== 'undefined' && (window as any).fbq) {
               (window as any).fbq('track', 'InitiateCheckout', {
-                content_name: 'Venda Mais com Carrosséis Magnéticos',
+                content_name: 'Jornada Única - Jordana Cantarelli',
                 currency: 'BRL',
-                value: 27.00
+                value: 97.00
               });
             }
           }}
         >
           <ButtonOrange size="large" className="w-full pointer-events-auto">
-            QUERO ACESSAR
+            QUERO ACESSAR A JORNADA POR R$ 97
           </ButtonOrange>
         </a>
         <p className="text-xs mt-3 opacity-70 body-inter">
@@ -475,45 +357,51 @@ function OfferSection() {
   );
 }
 
-// Seção 11: Quem é Samira
+// Seção 9: Quem é Jordana
 function AboutSection() {
   return (
-    <section className="px-6 py-6">
+    <section className="px-6 py-8">
       <ScrollReveal>
+        <h2 className="heading-playfair text-xl text-center mb-4" style={{ color: 'hsl(195 52% 23%)' }}>
+          Quem Te Acompanha Nessa Jornada
+        </h2>
+      </ScrollReveal>
+      
+      <ScrollReveal delay={0.1}>
         <div className="relative overflow-hidden mb-6">
           <div 
             className="absolute inset-0 pointer-events-none z-10"
             style={{
               background: `linear-gradient(
                 to bottom,
-                hsl(350 30% 95%) 0%,
+                hsl(30 20% 97%) 0%,
                 transparent 30%,
                 transparent 70%,
-                hsl(350 30% 95%) 100%
+                hsl(30 20% 97%) 100%
               )`
             }}
           />
           <img 
             src={samiraAbout} 
-            alt="Samira Gouvêa" 
+            alt="Jordana Cantarelli" 
             width={460}
             height={400}
             loading="lazy"
             decoding="async"
-            className="w-full object-cover"
+            className="w-full object-cover rounded-2xl"
           />
         </div>
       </ScrollReveal>
       
       <ScrollReveal delay={0.2}>
-        <h2 className="heading-playfair text-2xl text-center mb-4">
-          Samira Gouvêa
-        </h2>
+        <h3 className="heading-playfair text-2xl text-center mb-4" style={{ color: 'hsl(195 52% 23%)' }}>
+          Jordana Cantarelli
+        </h3>
         <p className="body-inter text-sm text-center mb-4">
-          Sou estrategista digital e especialista em posicionamento, branding e vendas no Instagram. Eu ensino empreendedoras a transformarem o perfil em uma vitrine de autoridade — com conteúdo que conduz, gera percepção e abre espaço pra venda acontecer com naturalidade.
+          Pastora, Psicanalista Clínica e Mentora de Mulheres com mais de 10 anos de experiência.
         </p>
-        <p className="body-inter text-center font-semibold italic">
-          "Carrossel não é post bonito. É construção de valor."
+        <p className="body-inter text-sm text-center opacity-80">
+          Ela une fé, sensibilidade humana e ciência emocional para guiar mulheres que desejam viver sua fé com calma interior e organização emocional prática.
         </p>
       </ScrollReveal>
       
@@ -524,22 +412,40 @@ function AboutSection() {
   );
 }
 
-// Seção 13: FAQ
+// Seção 10: FAQ
 function FAQSection() {
   const faqItems = [
-    { question: "Serve pro meu nicho?", answer: "Sim. Os formatos são universais. Você adapta pro seu mercado." },
-    { question: "Preciso aparecer?", answer: "Não. Carrossel é autoridade silenciosa." },
-    { question: "Preciso ser designer?", answer: "Não. O que vende é clareza, condução e CTA. O visual você encaixa depois." },
-    { question: "Em quanto tempo eu aplico?", answer: "Hoje. Você copia um formato, adapta e posta." },
-    { question: "Como recebo o acesso?", answer: "Acesso imediato após a confirmação do pagamento." },
-    { question: "Tem garantia?", answer: "Sim. 7 dias de garantia incondicional." },
+    { 
+      question: "Para quem é essa jornada?", 
+      answer: "Para mulheres que querem viver sua fé com mais clareza emocional, menos sobrecarga e mais presença no dia a dia." 
+    },
+    { 
+      question: "Preciso ter conhecimento prévio?", 
+      answer: "Não. A jornada foi pensada para ser acessível a qualquer mulher, independente do nível de conhecimento." 
+    },
+    { 
+      question: "É conteúdo religioso ou psicológico?", 
+      answer: "É uma integração sensível entre fé e ciência emocional, sem extremos. Uma abordagem prática e acolhedora." 
+    },
+    { 
+      question: "Em quanto tempo vejo resultados?", 
+      answer: "Cada pessoa tem seu tempo. Algumas relatam clareza desde a primeira sessão, outras precisam de mais tempo para processar." 
+    },
+    { 
+      question: "Como recebo o acesso?", 
+      answer: "Acesso imediato após a confirmação do pagamento, direto no seu e-mail." 
+    },
+    { 
+      question: "Tem garantia?", 
+      answer: "Sim. 7 dias de garantia incondicional. Se não gostar, devolvemos 100% do valor." 
+    },
   ];
 
   return (
-    <section className="px-6 py-6">
+    <section className="px-6 py-8">
       <ScrollReveal>
         <h2 className="heading-playfair text-xl text-center mb-6">
-          Dúvidas rápidas
+          Dúvidas Frequentes
         </h2>
       </ScrollReveal>
       <FAQAccordion items={faqItems} />
@@ -547,42 +453,43 @@ function FAQSection() {
   );
 }
 
-// Seção 13: CTA Final
+// Seção 11: CTA Final
 function FinalCTASection() {
   return (
-    <section className="px-6 py-6 text-center">
+    <section className="px-6 py-8 text-center" style={{ backgroundColor: 'hsl(30 25% 94%)' }}>
       <ScrollReveal>
-        <h2 className="heading-playfair text-xl mb-4">
-          Seu feed não precisa de mais posts. Precisa de mais intenção.
+        <h2 className="heading-playfair text-xl mb-4" style={{ color: 'hsl(195 52% 23%)' }}>
+          Esse é um passo que sua alma pode agradecer amanhã.
         </h2>
-        <p className="body-inter text-sm mb-6 opacity-80">
-          Se você quer parar de travar e começar a postar com direção, esse caderno digital é seu próximo passo.
+        <p className="body-inter text-base mb-6 opacity-80">
+          Não é sobre ser perfeita — é sobre viver com presença.
         </p>
       </ScrollReveal>
       <div className="text-center">
-        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR</ButtonGold>
+        <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR A JORNADA</ButtonGold>
         <p className="text-xs mt-3 opacity-60 body-inter">
-          R$ 27 • Acesso imediato • Garantia 7 dias
+          R$ 97 • Acesso imediato • Garantia 7 dias
         </p>
       </div>
     </section>
   );
 }
 
-// Seção 14: Rodapé
+// Seção 12: Rodapé
 function FooterSection() {
   return (
-    <footer className="px-6 py-6 text-center border-t border-[hsl(var(--sp-gold)/0.2)]">
+    <footer className="px-6 py-6 text-center border-t border-[hsl(350_30%_58%/0.2)]">
       <div className="mb-4">
         <p className="body-inter text-sm font-semibold mb-2">Suporte</p>
-        <p className="body-inter text-sm opacity-70">contato@samiragouvea.com.br</p>
+        {/* TODO: atualizar email */}
+        <p className="body-inter text-sm opacity-70">contato@jordanacantarelli.com.br</p>
       </div>
       <div className="mb-4 space-x-4">
         <a href="#" className="body-inter text-xs underline opacity-60 hover:opacity-100">Política de Privacidade</a>
         <a href="#" className="body-inter text-xs underline opacity-60 hover:opacity-100">Termos de Uso</a>
       </div>
       <p className="body-inter text-xs opacity-50">
-        © Samira Gouvêa — Todos os direitos reservados
+        © Jordana Cantarelli — Todos os direitos reservados
       </p>
     </footer>
   );
@@ -594,14 +501,12 @@ export default function SalesPage() {
     <div className="sales-page">
       <div className="sales-container">
         <HeroSection />
+        <IdentificationSection />
+        <WhyExistsSection />
         <BenefitsSection />
-        <ExamplesSection />
-        <CTABoxSection />
-        <AttentionSection />
         <TransitionTitle />
-        <LibrarySection />
-        <StructureSection />
-        <ToolsSection />
+        <SessionsSection />
+        <TestimonialsSection />
         <OfferSection />
         <AboutSection />
         <FAQSection />
