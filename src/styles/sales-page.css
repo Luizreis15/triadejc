@@ -1,14 +1,20 @@
-/* Sales Page Design System Tokens */
+/* Sales Page Design System Tokens - Jornada Única (Jordana Cantarelli) */
 :root {
-  /* Sales Page Colors */
-  --sp-bg-page: 353 45% 93%; /* #F2E6E7 - blush background */
-  --sp-paper: 350 42% 96%; /* #FAF3F5 - paper white/pink */
-  --sp-red-primary: 354 73% 32%; /* #8D151D - strong red */
-  --sp-red-secondary: 354 67% 34%; /* #901B22 - secondary red */
-  --sp-gold: 38 54% 62%; /* #D4AC65 - gold */
-  --sp-orange-cta: 22 54% 48%; /* #C6622F - orange CTA */
-  --sp-cream: 28 45% 93%; /* #F7EEE6 - cream cards */
-  --sp-text-dark: 0 0% 17%; /* #2C2C2C - dark text */
+  /* Sales Page Colors - Nova Paleta */
+  --sp-bg-page: 30 25% 94%; /* Nude claro - fundo receptivo */
+  --sp-paper: 30 20% 97%; /* Branco quente/off-white */
+  --sp-petrol-primary: 195 52% 23%; /* #1B4D5C - azul petróleo */
+  --sp-petrol-secondary: 195 52% 18%; /* Azul petróleo escuro */
+  --sp-rose: 350 30% 58%; /* #B76E79 - rosa queimado */
+  --sp-rose-light: 350 30% 68%; /* Rosa queimado claro */
+  --sp-cream: 30 30% 93%; /* Creme claro para cards */
+  --sp-text-dark: 0 0% 17%; /* #2C2C2C - texto escuro */
+  
+  /* Legacy aliases for compatibility */
+  --sp-red-primary: var(--sp-petrol-primary);
+  --sp-red-secondary: var(--sp-petrol-secondary);
+  --sp-gold: var(--sp-rose);
+  --sp-orange-cta: var(--sp-rose);
   
   /* Sales Page Typography */
   --font-playfair: 'Playfair Display', serif;
@@ -43,9 +49,23 @@
   line-height: 1.6;
 }
 
-/* Section Red */
+/* Section Petrol (antes section-red) */
+.section-petrol {
+  background-color: hsl(var(--sp-petrol-primary));
+  color: white;
+}
+
+.section-petrol .heading-playfair {
+  color: white;
+}
+
+.section-petrol .body-inter {
+  color: white;
+}
+
+/* Legacy support for section-red */
 .section-red {
-  background-color: hsl(var(--sp-red-primary));
+  background-color: hsl(var(--sp-petrol-primary));
   color: white;
 }
 
@@ -57,10 +77,17 @@
   color: white;
 }
 
-/* Card inside red section */
+/* Card inside petrol section */
+.card-petrol {
+  background-color: hsl(195 52% 18%);
+  border: 1px solid hsl(var(--sp-petrol-secondary));
+  border-radius: 20px;
+}
+
+/* Legacy support for card-wine */
 .card-wine {
-  background-color: hsl(354 73% 28%);
-  border: 1px solid hsl(var(--sp-red-secondary));
+  background-color: hsl(195 52% 18%);
+  border: 1px solid hsl(var(--sp-petrol-secondary));
   border-radius: 20px;
 }
 
@@ -77,7 +104,7 @@
 
 /* Button Base Styles - GPU accelerated */
 .btn-gold {
-  background-color: hsl(var(--sp-gold));
+  background-color: hsl(var(--sp-rose));
   color: white;
   font-family: var(--font-inter);
   font-weight: 700;
@@ -89,13 +116,13 @@
   justify-content: center;
   gap: 8px;
   transition: transform 0.3s ease;
-  border: 2px solid hsl(38 54% 72% / 0.6);
+  border: 2px solid hsl(350 30% 68% / 0.6);
   cursor: pointer;
   font-size: 14px;
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 20px hsl(var(--sp-gold) / 0.3);
+  box-shadow: 0 0 20px hsl(var(--sp-rose) / 0.3);
   transform: translateZ(0);
   will-change: transform;
 }
@@ -122,11 +149,11 @@
 
 .btn-gold:hover {
   transform: translateY(-3px) scale(1.02) translateZ(0);
-  box-shadow: 0 0 35px hsl(var(--sp-gold) / 0.5);
+  box-shadow: 0 0 35px hsl(var(--sp-rose) / 0.5);
 }
 
 .btn-orange {
-  background-color: hsl(var(--sp-orange-cta));
+  background-color: hsl(var(--sp-rose));
   color: white;
   font-family: var(--font-inter);
   font-weight: 700;
@@ -138,13 +165,13 @@
   justify-content: center;
   gap: 8px;
   transition: transform 0.3s ease;
-  border: 2px solid hsl(22 54% 58% / 0.6);
+  border: 2px solid hsl(350 30% 68% / 0.6);
   cursor: pointer;
   font-size: 14px;
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 25px hsl(var(--sp-orange-cta) / 0.4);
+  box-shadow: 0 0 25px hsl(var(--sp-rose) / 0.4);
   animation: pulse-glow 2.5s ease-in-out infinite;
   transform: translateZ(0);
   will-change: transform, box-shadow;
@@ -172,7 +199,7 @@
 
 .btn-orange:hover {
   transform: translateY(-3px) scale(1.02) translateZ(0);
-  box-shadow: 0 0 40px hsl(var(--sp-orange-cta) / 0.55);
+  box-shadow: 0 0 40px hsl(var(--sp-rose) / 0.55);
   animation: none;
 }
 
@@ -183,10 +210,10 @@
 
 @keyframes pulse-glow {
   0%, 100% { 
-    box-shadow: 0 0 20px hsl(var(--sp-orange-cta) / 0.4);
+    box-shadow: 0 0 20px hsl(var(--sp-rose) / 0.4);
   }
   50% { 
-    box-shadow: 0 0 35px hsl(var(--sp-orange-cta) / 0.6);
+    box-shadow: 0 0 35px hsl(var(--sp-rose) / 0.6);
   }
 }
 
@@ -195,7 +222,7 @@
   width: 32px;
   height: 32px;
   min-width: 32px;
-  background-color: hsl(var(--sp-gold));
+  background-color: hsl(var(--sp-rose));
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -210,7 +237,7 @@
     hsl(var(--sp-cream)) 0%,
     hsl(var(--sp-bg-page)) 100%
   );
-  border: 2px dashed hsl(var(--sp-gold) / 0.5);
+  border: 2px dashed hsl(var(--sp-rose) / 0.5);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -224,7 +251,7 @@
 
 /* Guarantee Badge - GPU accelerated */
 .guarantee-badge {
-  background: linear-gradient(135deg, hsl(var(--sp-gold)) 0%, hsl(38 54% 52%) 100%);
+  background: linear-gradient(135deg, hsl(var(--sp-rose)) 0%, hsl(350 30% 48%) 100%);
   border-radius: 50%;
   width: 80px;
   height: 80px;
@@ -237,7 +264,7 @@
   font-weight: 700;
   font-size: 12px;
   text-align: center;
-  box-shadow: 0 4px 20px hsl(var(--sp-gold) / 0.5);
+  box-shadow: 0 4px 20px hsl(var(--sp-rose) / 0.5);
   animation: badge-pulse 3s ease-in-out infinite;
   transform: translateZ(0);
   will-change: transform;
@@ -268,4 +295,37 @@
 /* Smooth scroll behavior */
 html {
   scroll-behavior: smooth;
+}
+
+/* Testimonial Card */
+.testimonial-card {
+  background-color: hsl(var(--sp-cream));
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+}
+
+.testimonial-card::before {
+  content: '"';
+  font-family: var(--font-playfair);
+  font-size: 48px;
+  color: hsl(var(--sp-rose) / 0.3);
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  line-height: 1;
+}
+
+/* Session Card */
+.session-card {
+  background-color: hsl(var(--sp-cream));
+  border-radius: 20px;
+  padding: 24px;
+  border-left: 4px solid hsl(var(--sp-rose));
+}
+
+.session-card h3 {
+  color: hsl(var(--sp-petrol-primary));
+  font-family: var(--font-playfair);
+  font-weight: 600;
 }
