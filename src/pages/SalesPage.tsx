@@ -1,6 +1,6 @@
 import "@/styles/sales-page.css";
 import jordanaHero from "@/assets/jordana-hero.jpg";
-import samiraAbout from "@/assets/samira-about.jpg"; // TODO: substituir por jordana-about
+import jordanaAbout from "@/assets/jordana-about.jpg";
 import {
   ButtonGold,
   ButtonOrange,
@@ -382,8 +382,8 @@ function AboutSection() {
             }}
           />
           <img 
-            src={samiraAbout} 
-            alt="Jordana Cantarelli" 
+            src={jordanaAbout} 
+            alt="Jordana Cantarelli"
             width={460}
             height={400}
             loading="lazy"
