@@ -38,7 +38,7 @@ function HeroSection() {
 
       {/* CTA */}
       <ButtonGold onClick={scrollToOffer} className="w-full max-w-xs mx-auto">
-        QUERO ACESSAR A JORNADA POR R$ 97
+        QUERO ACESSAR A JORNADA
       </ButtonGold>
       <p className="text-xs mt-2 opacity-60 body-inter">
         Acesso imediato • Garantia de 7 dias
@@ -346,7 +346,7 @@ function OfferSection() {
           }}
         >
           <ButtonOrange size="large" className="w-full pointer-events-auto">
-            QUERO ACESSAR A JORNADA POR R$ 97
+            QUERO ACESSAR A JORNADA
           </ButtonOrange>
         </a>
         <p className="text-xs mt-3 opacity-70 body-inter">
