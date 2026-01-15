@@ -51,8 +51,8 @@ function HeroSection() {
           style={{
             background: `linear-gradient(
               to bottom,
-              hsl(30 20% 97% / 0.4) 0%,
-              transparent 15%,
+              hsl(30 20% 97% / 0.6) 0%,
+              transparent 20%,
               transparent 85%,
               hsl(30 20% 97%) 100%
             )`
