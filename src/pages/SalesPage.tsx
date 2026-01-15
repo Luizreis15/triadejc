@@ -1,5 +1,5 @@
 import "@/styles/sales-page.css";
-import samiraHero from "@/assets/samira-hero.jpeg"; // TODO: substituir por jordana-hero
+import jordanaHero from "@/assets/jordana-hero.jpg";
 import samiraAbout from "@/assets/samira-about.jpg"; // TODO: substituir por jordana-about
 import {
   ButtonGold,
@@ -59,7 +59,7 @@ function HeroSection() {
           }}
         />
         <img 
-          src={samiraHero} 
+          src={jordanaHero} 
           alt="Jordana Cantarelli"
           width={460}
           height={600}
