@@ -18,7 +18,7 @@ import {
   Settings,
   Video,
 } from "lucide-react";
-import logoCarrosseis from "@/assets/logo-carrosseis.png";
+import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -61,8 +61,8 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
         {/* Logo */}
         <div className="p-4 border-b border-border">
           <img 
-            src={logoCarrosseis} 
-            alt="Carrosséis Magnéticos" 
+            src={logoJornadaUnica} 
+            alt="Jornada Única" 
             className="h-12 mx-auto"
           />
           <p className="text-xs text-muted-foreground text-center mt-2">Painel Admin</p>
@@ -113,7 +113,7 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
         <header className="md:hidden sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center justify-between px-4 h-14">
             <div className="flex items-center gap-2">
-              <img src={logoCarrosseis} alt="Logo" className="h-8" />
+              <img src={logoJornadaUnica} alt="Jornada Única" className="h-8" />
               <span className="text-sm font-medium text-muted-foreground">Admin</span>
             </div>
             <div className="flex items-center gap-1">

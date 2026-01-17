@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
-import logoCarrosseis from "@/assets/logo-carrosseis.png";
+import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
 import { ArrowLeft } from "lucide-react";
 
 const emailSchema = z.string().email("Digite um e-mail válido");
@@ -136,8 +136,8 @@ export default function ResetPassword() {
           className="text-center mb-8"
         >
           <img 
-            src={logoCarrosseis} 
-            alt="Carrosséis Magnéticos" 
+            src={logoJornadaUnica} 
+            alt="Jornada Única" 
             className="h-24 md:h-32 mx-auto mb-4"
           />
         </motion.div>
@@ -296,7 +296,7 @@ export default function ResetPassword() {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="py-6 text-center"
       >
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-white">
           © 2025 Jordana Cantarelli · Jornada Única
         </p>
       </motion.footer>
