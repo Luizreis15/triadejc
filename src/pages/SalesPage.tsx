@@ -1,6 +1,7 @@
 import "@/styles/sales-page.css";
 import jordanaHero from "@/assets/jordana-hero.jpg";
 import jordanaAbout from "@/assets/jordana-about.jpg";
+import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
 import {
   ButtonGold,
   ButtonOrange,
@@ -22,9 +23,11 @@ function HeroSection() {
     <section className="px-6 py-8 text-center">
       {/* Logo/Título */}
       <div className="mb-4">
-        <h1 className="heading-playfair text-3xl md:text-4xl mb-1" style={{ color: 'hsl(195 52% 23%)' }}>
-          Jornada Única
-        </h1>
+        <img 
+          src={logoJornadaUnica} 
+          alt="Jornada Única" 
+          className="h-20 md:h-24 mx-auto mb-2"
+        />
         <p className="text-xs mt-1 opacity-70 body-inter">Experiência Guiada • Digital</p>
       </div>
 
