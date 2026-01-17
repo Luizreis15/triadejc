@@ -6,24 +6,26 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
+
+// Public pages
+import SalesPage from "./pages/SalesPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import NotFound from "./pages/NotFound";
+
+// Member pages
 import Dashboard from "./pages/Dashboard";
 import Modules from "./pages/Modules";
 import ModuleDetail from "./pages/ModuleDetail";
-import Library from "./pages/Library";
+import ReadingView from "./pages/ReadingView";
 import Notebook from "./pages/Notebook";
-import CalendarPage from "./pages/Calendar";
-import Results from "./pages/Results";
-import Admin from "./pages/Admin";
-import SalesPage from "./pages/SalesPage";
-import MockupGenerator from "./pages/MockupGenerator";
-import ScriptGenerator from "./pages/ScriptGenerator";
-import Teleprompter from "./pages/Teleprompter";
-import MyScripts from "./pages/MyScripts";
+import Library from "./pages/Library";
 import MemberProfile from "./pages/MemberProfile";
+
+// Admin pages
+import Admin from "./pages/Admin";
 import AdminProfile from "./pages/AdminProfile";
-import NotFound from "./pages/NotFound";
+import MockupGenerator from "./pages/MockupGenerator";
 
 const queryClient = new QueryClient();
 
@@ -38,28 +40,30 @@ const App = () => (
             {/* Redirect root to sales page */}
             <Route path="/" element={<Navigate to="/jornada" replace />} />
             
-            {/* Sales page */}
+            {/* Public routes */}
             <Route path="/jornada" element={<SalesPage />} />
             
-            {/* Members area */}
+            {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
             <Route path="/membros/reset-password" element={<ResetPassword />} />
+            
+            {/* Protected member routes */}
             <Route path="/membros/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/membros/app/modulos" element={<ProtectedRoute><Modules /></ProtectedRoute>} />
             <Route path="/membros/app/modulos/:slug" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
-            <Route path="/membros/app/biblioteca" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+            <Route path="/membros/app/modulos/:slug/leitura/:cardId" element={<ProtectedRoute><ReadingView /></ProtectedRoute>} />
             <Route path="/membros/app/caderno" element={<ProtectedRoute><Notebook /></ProtectedRoute>} />
-            <Route path="/membros/app/calendario" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-            <Route path="/membros/app/resultados" element={<ProtectedRoute><Results /></ProtectedRoute>} />
-            <Route path="/membros/app/roteiros" element={<ProtectedRoute><ScriptGenerator /></ProtectedRoute>} />
-            <Route path="/membros/app/meus-roteiros" element={<ProtectedRoute><MyScripts /></ProtectedRoute>} />
-            <Route path="/membros/app/teleprompter/:scriptId" element={<ProtectedRoute><Teleprompter /></ProtectedRoute>} />
+            <Route path="/membros/app/biblioteca" element={<ProtectedRoute><Library /></ProtectedRoute>} />
             <Route path="/membros/app/perfil" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
             
-            {/* Admin area */}
+            {/* Admin routes */}
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/mockups" element={<AdminRoute><MockupGenerator /></AdminRoute>} />
             <Route path="/admin/perfil" element={<AdminRoute><AdminProfile /></AdminRoute>} />
+            
+            {/* Legacy routes redirect */}
+            <Route path="/membrosvmcm/*" element={<Navigate to="/membros" replace />} />
+            <Route path="/vmcm" element={<Navigate to="/jornada" replace />} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

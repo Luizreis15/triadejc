@@ -55,6 +55,45 @@ export type Database = {
           },
         ]
       }
+      daily_checkins: {
+        Row: {
+          created_at: string | null
+          date: string
+          how_am_i: string | null
+          id: string
+          mood: number | null
+          need_from_god: string | null
+          recurring_thought: string | null
+          updated_at: string | null
+          user_id: string
+          what_feeling: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          how_am_i?: string | null
+          id?: string
+          mood?: number | null
+          need_from_god?: string | null
+          recurring_thought?: string | null
+          updated_at?: string | null
+          user_id: string
+          what_feeling?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          how_am_i?: string | null
+          id?: string
+          mood?: number | null
+          need_from_god?: string | null
+          recurring_thought?: string | null
+          updated_at?: string | null
+          user_id?: string
+          what_feeling?: string | null
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -203,6 +242,41 @@ export type Database = {
           },
         ]
       }
+      module_pdfs: {
+        Row: {
+          created_at: string | null
+          file_url: string
+          id: string
+          module_id: string | null
+          order_index: number | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_url: string
+          id?: string
+          module_id?: string | null
+          order_index?: number | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          file_url?: string
+          id?: string
+          module_id?: string | null
+          order_index?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_pdfs_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           cover_image_url: string | null
@@ -213,6 +287,7 @@ export type Database = {
           order_index: number
           slug: string
           title: string
+          welcome_video_url: string | null
         }
         Insert: {
           cover_image_url?: string | null
@@ -223,6 +298,7 @@ export type Database = {
           order_index: number
           slug: string
           title: string
+          welcome_video_url?: string | null
         }
         Update: {
           cover_image_url?: string | null
@@ -233,6 +309,7 @@ export type Database = {
           order_index?: number
           slug?: string
           title?: string
+          welcome_video_url?: string | null
         }
         Relationships: []
       }
@@ -240,7 +317,9 @@ export type Database = {
         Row: {
           content_md: string | null
           created_at: string
+          exercise_type: string | null
           id: string
+          module_slug: string | null
           section: string
           title: string | null
           updated_at: string
@@ -249,7 +328,9 @@ export type Database = {
         Insert: {
           content_md?: string | null
           created_at?: string
+          exercise_type?: string | null
           id?: string
+          module_slug?: string | null
           section: string
           title?: string | null
           updated_at?: string
@@ -258,7 +339,9 @@ export type Database = {
         Update: {
           content_md?: string | null
           created_at?: string
+          exercise_type?: string | null
           id?: string
+          module_slug?: string | null
           section?: string
           title?: string | null
           updated_at?: string
