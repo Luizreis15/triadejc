@@ -15,20 +15,24 @@ import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
-// Member pages
-import Dashboard from "./pages/Dashboard";
-import Modules from "./pages/Modules";
-import ModuleDetail from "./pages/ModuleDetail";
-import ReadingView from "./pages/ReadingView";
-import Notebook from "./pages/Notebook";
-import NotebookActivity from "./pages/NotebookActivity";
-import Library from "./pages/Library";
-import MemberProfile from "./pages/MemberProfile";
-
 // Admin pages
 import Admin from "./pages/Admin";
 import AdminProfile from "./pages/AdminProfile";
-import MockupGenerator from "./pages/MockupGenerator";
+
+// Placeholder for member area (to be rebuilt)
+const MemberAreaPlaceholder = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="text-center space-y-4 max-w-md">
+      <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+        <span className="text-3xl">🚧</span>
+      </div>
+      <h1 className="text-2xl font-bold text-foreground">Área em Construção</h1>
+      <p className="text-muted-foreground">
+        Estamos preparando algo especial para você. Em breve, a Jornada Única estará disponível aqui.
+      </p>
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -51,20 +55,13 @@ const App = () => (
             <Route path="/membros/signup" element={<Signup />} />
             <Route path="/membros/reset-password" element={<ResetPassword />} />
             
-            {/* Protected member routes */}
-            <Route path="/membros/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/membros/app/modulos" element={<ProtectedRoute><Modules /></ProtectedRoute>} />
-            <Route path="/membros/app/modulos/:slug" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
-            <Route path="/membros/app/modulos/:slug/leitura/:cardId" element={<ProtectedRoute><ReadingView /></ProtectedRoute>} />
-            <Route path="/membros/app/caderno" element={<ProtectedRoute><Notebook /></ProtectedRoute>} />
-            <Route path="/membros/app/caderno/atividade/:moduleSlug" element={<ProtectedRoute><NotebookActivity /></ProtectedRoute>} />
-            <Route path="/membros/app/biblioteca" element={<ProtectedRoute><Library /></ProtectedRoute>} />
-            <Route path="/membros/app/perfil" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
+            {/* Protected member routes - placeholder while rebuilding */}
+            <Route path="/membros/app" element={<ProtectedRoute><MemberAreaPlaceholder /></ProtectedRoute>} />
+            <Route path="/membros/app/*" element={<ProtectedRoute><MemberAreaPlaceholder /></ProtectedRoute>} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
-            <Route path="/admin/mockups" element={<AdminRoute><MockupGenerator /></AdminRoute>} />
             <Route path="/admin/perfil" element={<AdminRoute><AdminProfile /></AdminRoute>} />
             
             {/* Legacy routes redirect */}

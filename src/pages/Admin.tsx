@@ -8,11 +8,7 @@ import { LeadsAdmin } from "@/components/admin/LeadsAdmin";
 import { ModulesAdmin } from "@/components/admin/ModulesAdmin";
 import { ModuleCardsAdmin } from "@/components/admin/ModuleCardsAdmin";
 import { LibraryAdmin } from "@/components/admin/LibraryAdmin";
-import { ScriptProductsAdmin } from "@/components/admin/ScriptProductsAdmin";
-import { ScriptBlocksAdmin } from "@/components/admin/ScriptBlocksAdmin";
-import { ScriptMetricsAdmin } from "@/components/admin/ScriptMetricsAdmin";
 import { AdminSettingsContent } from "@/components/admin/AdminSettingsContent";
-import { TeleprompterAdmin } from "@/components/admin/TeleprompterAdmin";
 import { FinanceAdmin } from "@/components/admin/FinanceAdmin";
 import { EmailAdmin } from "@/components/admin/EmailAdmin";
 import { ModulePdfsAdmin } from "@/components/admin/ModulePdfsAdmin";
@@ -52,18 +48,6 @@ export default function Admin() {
         </TabsContent>
         <TabsContent value="library" className="mt-0">
           <LibraryAdmin />
-        </TabsContent>
-        <TabsContent value="script-products" className="mt-0">
-          <ScriptProductsAdmin />
-        </TabsContent>
-        <TabsContent value="script-blocks" className="mt-0">
-          <ScriptBlocksAdmin />
-        </TabsContent>
-        <TabsContent value="script-metrics" className="mt-0">
-          <ScriptMetricsAdmin />
-        </TabsContent>
-        <TabsContent value="teleprompter" className="mt-0">
-          <TeleprompterAdmin />
         </TabsContent>
         <TabsContent value="settings" className="mt-0">
           <AdminSettingsContent onTabChange={setActiveTab} />

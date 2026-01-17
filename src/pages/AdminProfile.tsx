@@ -47,36 +47,36 @@ export default function AdminProfile() {
 
   // Fetch system statistics
   const { data: stats } = useQuery({
-    queryKey: ["admin-stats"],
+    queryKey: ["admin-profile-stats"],
     queryFn: async () => {
-      const [usersResult, leadsResult, scriptsResult, modulesResult, libraryResult] = await Promise.all([
+      const [usersResult, leadsResult, modulesResult, libraryResult, notebookResult] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("leads").select("*", { count: "exact", head: true }),
-        supabase.from("scripts").select("*", { count: "exact", head: true }),
         supabase.from("modules").select("*", { count: "exact", head: true }),
         supabase.from("library_items").select("*", { count: "exact", head: true }),
+        supabase.from("notebook_entries").select("*", { count: "exact", head: true }),
       ]);
       
       return {
         users: usersResult.count || 0,
         leads: leadsResult.count || 0,
-        scripts: scriptsResult.count || 0,
         modules: modulesResult.count || 0,
         library: libraryResult.count || 0,
+        notebook: notebookResult.count || 0,
       };
     },
   });
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/membrosvmcm");
+    navigate("/membros");
   };
 
   const handleResetPassword = async () => {
     if (!user?.email) return;
     
     const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-      redirectTo: `${window.location.origin}/membrosvmcm/reset-password`,
+      redirectTo: `${window.location.origin}/membros/reset-password`,
     });
     
     if (error) {
@@ -96,7 +96,6 @@ export default function AdminProfile() {
     { label: "Gerenciar Leads", icon: UserPlus, tab: "leads" },
     { label: "Gerenciar Módulos", icon: BookOpen, tab: "modules" },
     { label: "Gerenciar Biblioteca", icon: Library, tab: "library" },
-    { label: "Métricas de Roteiros", icon: BarChart3, tab: "script-metrics" },
   ];
 
   return (
@@ -158,15 +157,11 @@ export default function AdminProfile() {
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <p className="text-2xl font-bold text-foreground">{stats?.users || 0}</p>
-                  <p className="text-xs text-muted-foreground">Usuários</p>
+                  <p className="text-xs text-muted-foreground">Membros</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <p className="text-2xl font-bold text-foreground">{stats?.leads || 0}</p>
                   <p className="text-xs text-muted-foreground">Leads</p>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <p className="text-2xl font-bold text-foreground">{stats?.scripts || 0}</p>
-                  <p className="text-xs text-muted-foreground">Roteiros</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <p className="text-2xl font-bold text-foreground">{stats?.modules || 0}</p>
@@ -175,6 +170,10 @@ export default function AdminProfile() {
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <p className="text-2xl font-bold text-foreground">{stats?.library || 0}</p>
                   <p className="text-xs text-muted-foreground">Biblioteca</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <p className="text-2xl font-bold text-foreground">{stats?.notebook || 0}</p>
+                  <p className="text-xs text-muted-foreground">Caderno</p>
                 </div>
               </div>
             </CardContent>
