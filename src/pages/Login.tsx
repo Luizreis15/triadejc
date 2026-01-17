@@ -24,28 +24,40 @@ export default function Login() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (user && !isCheckingRole) {
+    const checkUserRole = async () => {
+      if (!user || isCheckingRole) return;
+      
       setIsCheckingRole(true);
       
-      // Check if user is admin
-      supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) {
-            // User is admin - show modal to choose view
-            setIsAdmin(true);
-            setShowViewModal(true);
-          } else {
-            // Regular user - go directly to member area
-            navigate("/membrosvmcm/app", { replace: true });
-          }
-          setIsCheckingRole(false);
-        });
-    }
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error checking role:", error);
+          navigate("/membrosvmcm/app", { replace: true });
+          return;
+        }
+        
+        if (data) {
+          setIsAdmin(true);
+          setShowViewModal(true);
+        } else {
+          navigate("/membrosvmcm/app", { replace: true });
+        }
+      } catch (err) {
+        console.error("Network error checking role:", err);
+        navigate("/membrosvmcm/app", { replace: true });
+      } finally {
+        setIsCheckingRole(false);
+      }
+    };
+
+    checkUserRole();
   }, [user, navigate, isCheckingRole]);
 
   const handleSelectAdmin = () => {
