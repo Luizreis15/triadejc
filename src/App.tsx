@@ -11,6 +11,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 import SalesPage from "./pages/SalesPage";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
 // Member pages
@@ -45,6 +46,7 @@ const App = () => (
             
             {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
+            <Route path="/membros/signup" element={<Signup />} />
             <Route path="/membros/reset-password" element={<ResetPassword />} />
             
             {/* Protected member routes */}

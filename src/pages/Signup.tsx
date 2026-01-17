@@ -6,57 +6,25 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
 import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
-import { AdminViewModal } from "@/components/admin/AdminViewModal";
 
 const emailSchema = z.string().email("Digite um e-mail válido");
 const passwordSchema = z.string().min(6, "A senha deve ter pelo menos 6 caracteres");
 
-export default function Login() {
+export default function Signup() {
   const navigate = useNavigate();
-  const { user, signInWithPassword, loading } = useAuth();
+  const { user, signUp, loading } = useAuth();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingRole, setIsCheckingRole] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (user && !isCheckingRole) {
-      setIsCheckingRole(true);
-      
-      // Check if user is admin
-      supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) {
-            // User is admin - show modal to choose view
-            setIsAdmin(true);
-            setShowViewModal(true);
-          } else {
-            // Regular user - go directly to member area
-            navigate("/membrosvmcm/app", { replace: true });
-          }
-          setIsCheckingRole(false);
-        });
+    if (user) {
+      navigate("/membrosvmcm/app", { replace: true });
     }
-  }, [user, navigate, isCheckingRole]);
-
-  const handleSelectAdmin = () => {
-    setShowViewModal(false);
-    navigate("/admin", { replace: true });
-  };
-
-  const handleSelectMember = () => {
-    setShowViewModal(false);
-    navigate("/membrosvmcm/app", { replace: true });
-  };
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,19 +49,33 @@ export default function Login() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const { error } = await signInWithPassword(email, password);
+      const { error } = await signUp(email, password);
       if (error) {
         let message = error.message;
-        if (error.message.includes("Invalid login credentials")) {
-          message = "E-mail ou senha incorretos.";
+        if (error.message.includes("User already registered")) {
+          message = "Este e-mail já está cadastrado.";
         }
         toast({
-          title: "Erro ao entrar",
+          title: "Erro ao criar conta",
           description: message,
           variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Conta criada!",
+          description: "Você será redirecionado para a área de membros.",
         });
       }
     } finally {
@@ -134,10 +116,28 @@ export default function Login() {
         >
           <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-card border border-border">
             <h2 className="text-xl font-serif font-semibold text-center mb-6 text-[#253244]">
-              Acesse sua Jornada
+              Criar sua conta
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-[#253244] mb-2"
+                >
+                  Nome
+                </label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Seu nome"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-12"
+                  required
+                />
+              </div>
+
               <div>
                 <label
                   htmlFor="email"
@@ -166,9 +166,28 @@ export default function Login() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Mínimo 6 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-12"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-[#253244] mb-2"
+                >
+                  Confirmar senha
+                </label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Digite a senha novamente"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="h-12"
                   required
                   minLength={6}
@@ -185,29 +204,22 @@ export default function Login() {
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                    Aguarde...
+                    Criando...
                   </span>
                 ) : (
-                  "Entrar"
+                  "Criar conta"
                 )}
               </Button>
             </form>
 
-            <div className="mt-4 text-center space-y-2">
+            <div className="mt-4 text-center">
+              <span className="text-sm text-muted-foreground">Já tem uma conta? </span>
               <a
-                href="/membros/reset-password"
-                className="text-sm text-primary hover:underline block"
+                href="/membros"
+                className="text-sm text-primary hover:underline"
               >
-                Esqueci minha senha
+                Entrar
               </a>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => navigate("/membros/signup")}
-              >
-                Criar conta
-              </Button>
             </div>
           </div>
         </motion.div>
@@ -223,14 +235,6 @@ export default function Login() {
           © 2026 Jordana Cantarelli · Jornada Única
         </p>
       </motion.footer>
-
-      {/* Modal de seleção para admins */}
-      <AdminViewModal
-        isOpen={showViewModal}
-        onClose={() => setShowViewModal(false)}
-        onSelectAdmin={handleSelectAdmin}
-        onSelectMember={handleSelectMember}
-      />
     </div>
   );
 }
