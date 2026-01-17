@@ -26,41 +26,41 @@ interface AuthEmailPayload {
 }
 
 const getEmailContent = (type: string, email: string, name: string, actionUrl: string) => {
-  const firstName = name ? name.split(" ")[0] : "usuária";
+  const firstName = name ? name.split(" ")[0] : "querida";
   
   const templates: Record<string, { subject: string; title: string; message: string; buttonText: string; warning: string }> = {
     recovery: {
-      subject: "🔐 Redefinição de Senha - Carrosséis Magnéticos",
+      subject: "🔐 Redefinição de Senha - Jornada Única",
       title: "Redefinição de Senha",
       message: `Olá, ${firstName}! Você solicitou a redefinição da sua senha. Clique no botão abaixo para criar uma nova senha segura.`,
       buttonText: "REDEFINIR MINHA SENHA",
       warning: "⚠️ Este link expira em 1 hora. Se você não solicitou esta alteração, ignore este email."
     },
     signup: {
-      subject: "✨ Confirme seu cadastro - Carrosséis Magnéticos",
+      subject: "✨ Confirme seu cadastro - Jornada Única",
       title: "Confirme seu E-mail",
-      message: `Olá, ${firstName}! Estamos quase lá! Clique no botão abaixo para confirmar seu cadastro e ter acesso ao Caderno Digital Carrosséis Magnéticos.`,
+      message: `Olá, ${firstName}! Estamos quase lá! Clique no botão abaixo para confirmar seu cadastro e ter acesso à Jornada Única.`,
       buttonText: "CONFIRMAR MEU CADASTRO",
       warning: "⚠️ Este link expira em 24 horas."
     },
     magiclink: {
-      subject: "🔑 Seu link de acesso - Carrosséis Magnéticos",
+      subject: "🔑 Seu link de acesso - Jornada Única",
       title: "Link de Acesso",
       message: `Olá, ${firstName}! Você solicitou um link mágico para acessar sua conta. Clique no botão abaixo para entrar.`,
       buttonText: "ACESSAR MINHA CONTA",
       warning: "⚠️ Este link expira em 1 hora e só pode ser usado uma vez."
     },
     email_change: {
-      subject: "📧 Confirme seu novo e-mail - Carrosséis Magnéticos",
+      subject: "📧 Confirme seu novo e-mail - Jornada Única",
       title: "Confirme a Alteração de E-mail",
       message: `Olá, ${firstName}! Você solicitou a alteração do seu e-mail. Clique no botão abaixo para confirmar o novo endereço.`,
       buttonText: "CONFIRMAR NOVO E-MAIL",
       warning: "⚠️ Este link expira em 24 horas. Se você não solicitou esta alteração, ignore este email."
     },
     invite: {
-      subject: "🎉 Você foi convidada! - Carrosséis Magnéticos",
-      title: "Convite para o Carrosséis Magnéticos",
-      message: `Olá! Você foi convidada para fazer parte do Caderno Digital Carrosséis Magnéticos. Clique no botão abaixo para criar sua conta.`,
+      subject: "🌸 Você foi convidada! - Jornada Única",
+      title: "Convite para a Jornada Única",
+      message: `Olá! Você foi convidada para fazer parte da Jornada Única. Clique no botão abaixo para criar sua conta.`,
       buttonText: "ACEITAR CONVITE",
       warning: "⚠️ Este link expira em 7 dias."
     }
@@ -78,7 +78,7 @@ const getEmailContent = (type: string, email: string, name: string, actionUrl: s
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${template.title}</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F6EFEA;">
+<body style="margin: 0; padding: 0; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F0E2D2;">
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -86,12 +86,12 @@ const getEmailContent = (type: string, email: string, name: string, actionUrl: s
           
           <!-- Header -->
           <tr>
-            <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #B21F2D 0%, #7E121D 100%); border-radius: 16px 16px 0 0;">
+            <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #253244 0%, #3a4a5c 100%); border-radius: 16px 16px 0 0;">
               <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; color: #FFFFFF;">
-                Carrosséis Magnéticos
+                Jornada Única
               </h1>
               <p style="margin: 8px 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">
-                por Samira Gouvêa
+                por Jordana Cantarelli
               </p>
             </td>
           </tr>
@@ -99,11 +99,11 @@ const getEmailContent = (type: string, email: string, name: string, actionUrl: s
           <!-- Content -->
           <tr>
             <td style="padding: 40px;">
-              <h2 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: #1C1B1A;">
+              <h2 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: #253244;">
                 ${template.title}
               </h2>
               
-              <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #4B2E2A;">
+              <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #253244;">
                 ${template.message}
               </p>
               
@@ -111,7 +111,7 @@ const getEmailContent = (type: string, email: string, name: string, actionUrl: s
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td align="center" style="padding: 8px 0 24px;">
-                    <a href="${actionUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #C4A052 0%, #E8D6B0 50%, #C4A052 100%); color: #1C1B1A; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <a href="${actionUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #D49E9E 0%, #e8b8b8 50%, #D49E9E 100%); color: #253244; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
                       ${template.buttonText}
                     </a>
                   </td>
@@ -119,10 +119,10 @@ const getEmailContent = (type: string, email: string, name: string, actionUrl: s
               </table>
               
               <!-- Warning Box -->
-              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #FEF9E7; border-radius: 12px; border: 2px solid #C4A052;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #F0E2D2; border-radius: 12px; border: 2px solid #D49E9E;">
                 <tr>
                   <td style="padding: 16px 24px;">
-                    <p style="margin: 0; font-size: 14px; color: #4B2E2A; line-height: 1.5;">
+                    <p style="margin: 0; font-size: 14px; color: #253244; line-height: 1.5;">
                       ${template.warning}
                     </p>
                   </td>
@@ -132,21 +132,21 @@ const getEmailContent = (type: string, email: string, name: string, actionUrl: s
               <p style="margin: 24px 0 0; font-size: 13px; line-height: 1.6; color: #6B6561;">
                 Se o botão não funcionar, copie e cole este link no seu navegador:
               </p>
-              <p style="margin: 8px 0 0; font-size: 12px; color: #B21F2D; word-break: break-all;">
+              <p style="margin: 8px 0 0; font-size: 12px; color: #682A0C; word-break: break-all;">
                 ${actionUrl}
               </p>
               
               <p style="margin: 24px 0 0; font-size: 14px; line-height: 1.6; color: #6B6561;">
-                Qualquer dúvida, é só entrar em contato pelo <a href="mailto:contato@samiragouvea.com.br" style="color: #B21F2D;">contato@samiragouvea.com.br</a>
+                Qualquer dúvida, é só entrar em contato pelo <a href="mailto:info@jordanacantarelli.com.br" style="color: #682A0C;">info@jordanacantarelli.com.br</a>
               </p>
             </td>
           </tr>
           
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 40px; text-align: center; background-color: #F6EFEA; border-radius: 0 0 16px 16px; border-top: 1px solid #E8D6C8;">
+            <td style="padding: 24px 40px; text-align: center; background-color: #F0E2D2; border-radius: 0 0 16px 16px; border-top: 1px solid #D49E9E;">
               <p style="margin: 0; font-size: 12px; color: #6B6561;">
-                © ${new Date().getFullYear()} Samira Gouvêa. Todos os direitos reservados.
+                © ${new Date().getFullYear()} Jordana Cantarelli. Todos os direitos reservados.
               </p>
             </td>
           </tr>
@@ -212,7 +212,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Samira Gouvêa <noreply@samiragouvea.com.br>",
+        from: "Jordana Cantarelli <noreply@jordanacantarelli.com.br>",
         to: [email],
         subject,
         html,

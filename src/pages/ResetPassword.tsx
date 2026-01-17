@@ -297,7 +297,7 @@ export default function ResetPassword() {
         className="py-6 text-center"
       >
         <p className="text-xs text-muted-foreground">
-          © 2025 Samira Gouvêa · Código Magnético
+          © 2025 Jordana Cantarelli · Jornada Única
         </p>
       </motion.footer>
     </div>

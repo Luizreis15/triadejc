@@ -35,8 +35,8 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const firstName = name ? name.split(" ")[0] : "aluna";
-    const accessUrl = loginUrl || "https://app.samiragouvea.com.br/";
+    const firstName = name ? name.split(" ")[0] : "querida";
+    const accessUrl = loginUrl || "https://jornada.jordanacantarelli.com.br/membros";
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -44,9 +44,9 @@ const handler = async (req: Request): Promise<Response> => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bem-vinda ao Carrosséis Magnéticos</title>
+  <title>Bem-vinda à Jornada Única</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F6EFEA;">
+<body style="margin: 0; padding: 0; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F0E2D2;">
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -54,12 +54,12 @@ const handler = async (req: Request): Promise<Response> => {
           
           <!-- Header -->
           <tr>
-            <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #B21F2D 0%, #7E121D 100%); border-radius: 16px 16px 0 0;">
+            <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #253244 0%, #3a4a5c 100%); border-radius: 16px 16px 0 0;">
               <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; color: #FFFFFF;">
-                Carrosséis Magnéticos
+                Jornada Única
               </h1>
               <p style="margin: 8px 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">
-                por Samira Gouvêa
+                por Jordana Cantarelli
               </p>
             </td>
           </tr>
@@ -67,32 +67,32 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Content -->
           <tr>
             <td style="padding: 40px;">
-              <h2 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: #1C1B1A;">
-                Olá, ${firstName}! 🎉
+              <h2 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: #253244;">
+                Olá, ${firstName}! 🌸
               </h2>
               
-              <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4B2E2A;">
-                Seu acesso ao <strong>Caderno Digital Carrosséis Magnéticos</strong> está liberado!
+              <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #253244;">
+                Seu acesso à <strong>Jornada Única</strong> está liberado!
               </p>
               
-              <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #4B2E2A;">
-                Agora você tem em mãos tudo que precisa para criar carrosséis que conectam, engajam e vendem no Instagram.
+              <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #253244;">
+                Uma experiência guiada para mulheres que querem viver sua fé sem sobrecarga emocional — com mais serenidade, entendimento e leveza no dia a dia.
               </p>
               
               <!-- Credentials Box -->
-              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #FEF9E7; border-radius: 12px; border: 2px solid #C4A052; margin-bottom: 24px;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #F0E2D2; border-radius: 12px; border: 2px solid #D49E9E; margin-bottom: 24px;">
                 <tr>
                   <td style="padding: 24px;">
-                    <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #1C1B1A;">
+                    <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #253244;">
                       🔐 Seus dados de acesso:
                     </h3>
-                    <p style="margin: 0 0 8px; font-size: 15px; color: #4B2E2A;">
+                    <p style="margin: 0 0 8px; font-size: 15px; color: #253244;">
                       <strong>E-mail:</strong> ${email}
                     </p>
-                    <p style="margin: 0 0 16px; font-size: 15px; color: #4B2E2A;">
+                    <p style="margin: 0 0 16px; font-size: 15px; color: #253244;">
                       <strong>Senha:</strong> ${password}
                     </p>
-                    <p style="margin: 0; font-size: 13px; color: #B21F2D; font-weight: 500;">
+                    <p style="margin: 0; font-size: 13px; color: #682A0C; font-weight: 500;">
                       ⚠️ Recomendamos que você troque sua senha no primeiro acesso por uma senha de sua preferência.
                     </p>
                   </td>
@@ -103,41 +103,41 @@ const handler = async (req: Request): Promise<Response> => {
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td align="center" style="padding: 8px 0 32px;">
-                    <a href="${accessUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #C4A052 0%, #E8D6B0 50%, #C4A052 100%); color: #1C1B1A; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-                      ACESSAR MEU CADERNO
+                    <a href="${accessUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #D49E9E 0%, #e8b8b8 50%, #D49E9E 100%); color: #253244; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                      ACESSAR MINHA JORNADA
                     </a>
                   </td>
                 </tr>
               </table>
               
               <!-- Instructions Box -->
-              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #F6EFEA; border-radius: 12px;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #F0E2D2; border-radius: 12px;">
                 <tr>
                   <td style="padding: 24px;">
-                    <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #1C1B1A;">
+                    <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #253244;">
                       📚 Como começar:
                     </h3>
-                    <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8; color: #4B2E2A;">
+                    <ol style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8; color: #253244;">
                       <li>Clique no botão acima para acessar</li>
                       <li>Faça login com o e-mail e senha acima</li>
                       <li>Troque sua senha por uma de sua preferência</li>
-                      <li>Explore os módulos e comece pelo que fizer mais sentido pra você</li>
+                      <li>Explore os módulos e comece sua jornada</li>
                     </ol>
                   </td>
                 </tr>
               </table>
               
               <p style="margin: 32px 0 0; font-size: 14px; line-height: 1.6; color: #6B6561;">
-                Qualquer dúvida, é só responder este email ou entrar em contato pelo <a href="mailto:contato@samiragouvea.com.br" style="color: #B21F2D;">contato@samiragouvea.com.br</a>
+                Qualquer dúvida, é só responder este email ou entrar em contato pelo <a href="mailto:info@jordanacantarelli.com.br" style="color: #682A0C;">info@jordanacantarelli.com.br</a>
               </p>
             </td>
           </tr>
           
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 40px; text-align: center; background-color: #F6EFEA; border-radius: 0 0 16px 16px; border-top: 1px solid #E8D6C8;">
+            <td style="padding: 24px 40px; text-align: center; background-color: #F0E2D2; border-radius: 0 0 16px 16px; border-top: 1px solid #D49E9E;">
               <p style="margin: 0; font-size: 12px; color: #6B6561;">
-                © ${new Date().getFullYear()} Samira Gouvêa. Todos os direitos reservados.
+                © ${new Date().getFullYear()} Jordana Cantarelli. Todos os direitos reservados.
               </p>
             </td>
           </tr>
@@ -157,9 +157,9 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Samira Gouvêa <noreply@samiragouvea.com.br>",
+        from: "Jordana Cantarelli <noreply@jordanacantarelli.com.br>",
         to: [email],
-        subject: "🎉 Bem-vinda ao Carrosséis Magnéticos! Seus dados de acesso",
+        subject: "🌸 Bem-vinda à Jornada Única! Seus dados de acesso",
         html: emailHtml,
       }),
     });
