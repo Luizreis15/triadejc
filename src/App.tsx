@@ -19,20 +19,9 @@ import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import AdminProfile from "./pages/AdminProfile";
 
-// Placeholder for member area (to be rebuilt)
-const MemberAreaPlaceholder = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center p-6">
-    <div className="text-center space-y-4 max-w-md">
-      <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-        <span className="text-3xl">🚧</span>
-      </div>
-      <h1 className="text-2xl font-bold text-foreground">Área em Construção</h1>
-      <p className="text-muted-foreground">
-        Estamos preparando algo especial para você. Em breve, a Jornada Única estará disponível aqui.
-      </p>
-    </div>
-  </div>
-);
+// Member pages
+import { AppLayout } from "@/components/member/AppLayout";
+import { Home, Modules, ModuleDetail, ReadingView, Notebook, Library, Profile } from "./pages/member";
 
 const queryClient = new QueryClient();
 
@@ -55,9 +44,14 @@ const App = () => (
             <Route path="/membros/signup" element={<Signup />} />
             <Route path="/membros/reset-password" element={<ResetPassword />} />
             
-            {/* Protected member routes - placeholder while rebuilding */}
-            <Route path="/membros/app" element={<ProtectedRoute><MemberAreaPlaceholder /></ProtectedRoute>} />
-            <Route path="/membros/app/*" element={<ProtectedRoute><MemberAreaPlaceholder /></ProtectedRoute>} />
+            {/* Protected member routes */}
+            <Route path="/membros/app" element={<ProtectedRoute><AppLayout><Home /></AppLayout></ProtectedRoute>} />
+            <Route path="/membros/app/modulos" element={<ProtectedRoute><AppLayout><Modules /></AppLayout></ProtectedRoute>} />
+            <Route path="/membros/app/modulos/:slug" element={<ProtectedRoute><AppLayout><ModuleDetail /></AppLayout></ProtectedRoute>} />
+            <Route path="/membros/app/modulos/:slug/leitura/:cardId" element={<ProtectedRoute><AppLayout><ReadingView /></AppLayout></ProtectedRoute>} />
+            <Route path="/membros/app/caderno" element={<ProtectedRoute><AppLayout><Notebook /></AppLayout></ProtectedRoute>} />
+            <Route path="/membros/app/biblioteca" element={<ProtectedRoute><AppLayout><Library /></AppLayout></ProtectedRoute>} />
+            <Route path="/membros/app/perfil" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
