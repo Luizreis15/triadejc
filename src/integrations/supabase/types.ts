@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      card_completions: {
+        Row: {
+          card_id: string
+          completed_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          completed_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          completed_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_completions_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "module_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_campaigns: {
         Row: {
           click_count: number | null

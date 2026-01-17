@@ -1,17 +1,15 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, PenLine, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
+import { useProgress } from "@/hooks/useProgress";
 
 export default function ReadingView() {
   const { slug, cardId } = useParams<{ slug: string; cardId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
 
   // Fetch card
   const { data: card, isLoading } = useQuery({
@@ -21,56 +19,39 @@ export default function ReadingView() {
         .from("module_cards")
         .select("*, modules(*)")
         .eq("id", cardId)
-        .single();
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
     enabled: !!cardId,
   });
 
-  // Mark as completed mutation
-  const markComplete = useMutation({
-    mutationFn: async () => {
-      if (!user?.id || !card?.module_id) return;
-      
-      // Check if progress exists
-      const { data: existing } = await supabase
-        .from("progress")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("module_id", card.module_id)
-        .single();
+  // Use progress hook
+  const { isCardCompleted, markCardComplete } = useProgress(card?.module_id);
+  const isCompleted = cardId ? isCardCompleted(cardId) : false;
 
-      if (existing) {
-        // Update progress
-        const newIndex = Math.max(existing.last_seen_card_index || 0, card.order_index + 1);
-        await supabase
-          .from("progress")
-          .update({ 
-            last_seen_card_index: newIndex,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", existing.id);
-      } else {
-        // Create progress
-        await supabase
-          .from("progress")
-          .insert({
-            user_id: user.id,
-            module_id: card.module_id,
-            last_seen_card_index: card.order_index + 1,
-          });
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["progress"] });
+  // Mark as completed
+  const handleComplete = async () => {
+    if (!cardId || !card?.module_id) return;
+    
+    try {
+      await markCardComplete.mutateAsync({ 
+        cardId, 
+        moduleId: card.module_id 
+      });
       toast({
         title: "Leitura concluída! ✨",
         description: "Seu progresso foi salvo.",
       });
       navigate(`/membros/app/modulos/${slug}`);
-    },
-  });
+    } catch {
+      toast({
+        title: "Erro ao salvar",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -153,14 +134,25 @@ export default function ReadingView() {
               Registrar no Caderno
             </Button>
           </Link>
-          <Button 
-            className="flex-1 h-12"
-            onClick={() => markComplete.mutate()}
-            disabled={markComplete.isPending}
-          >
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Concluir
-          </Button>
+          {isCompleted ? (
+            <Button 
+              variant="secondary"
+              className="flex-1 h-12"
+              disabled
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Concluído
+            </Button>
+          ) : (
+            <Button 
+              className="flex-1 h-12"
+              onClick={handleComplete}
+              disabled={markCardComplete.isPending}
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Concluir
+            </Button>
+          )}
         </div>
       </footer>
     </div>
