@@ -1,3 +1,10 @@
 export { ModelCard } from "./ModelCard";
 export { SummaryCards } from "./SummaryCards";
 export { TipCard } from "./TipCard";
+export { SelahCard } from "./SelahCard";
+export { ReadingCard } from "./ReadingCard";
+export { IntroCard } from "./IntroCard";
+export { QuickActionsModule } from "./QuickActionsModule";
+export { DownloadCard } from "./DownloadCard";
+export { ModuleVideoHero } from "./ModuleVideoHero";
+export { ActivityCard } from "./ActivityCard";
