@@ -1,1 +1,19 @@
 project_id = "kggwatdbzbgnndvytbzw"
+
+[functions.create-admin-user]
+verify_jwt = false
+
+[functions.generate-mockup]
+verify_jwt = false
+
+[functions.hubla-webhook]
+verify_jwt = false
+
+[functions.send-auth-email]
+verify_jwt = false
+
+[functions.send-campaign]
+verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
