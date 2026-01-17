@@ -21,6 +21,7 @@ import Modules from "./pages/Modules";
 import ModuleDetail from "./pages/ModuleDetail";
 import ReadingView from "./pages/ReadingView";
 import Notebook from "./pages/Notebook";
+import NotebookActivity from "./pages/NotebookActivity";
 import Library from "./pages/Library";
 import MemberProfile from "./pages/MemberProfile";
 
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/membros/app/modulos/:slug" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
             <Route path="/membros/app/modulos/:slug/leitura/:cardId" element={<ProtectedRoute><ReadingView /></ProtectedRoute>} />
             <Route path="/membros/app/caderno" element={<ProtectedRoute><Notebook /></ProtectedRoute>} />
+            <Route path="/membros/app/caderno/atividade/:moduleSlug" element={<ProtectedRoute><NotebookActivity /></ProtectedRoute>} />
             <Route path="/membros/app/biblioteca" element={<ProtectedRoute><Library /></ProtectedRoute>} />
             <Route path="/membros/app/perfil" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
             

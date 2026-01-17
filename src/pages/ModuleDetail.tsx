@@ -1,19 +1,32 @@
 import { motion } from "framer-motion";
+import { useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { ContentCard } from "@/components/ContentCard";
-import { ModelCard, SummaryCards, TipCard } from "@/components/modules";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, CheckCircle2, Download, Loader2 } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  CheckCircle2, 
+  Loader2,
+  Play
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { 
+  ReadingCard, 
+  SelahCard, 
+  IntroCard, 
+  QuickActionsModule, 
+  DownloadCard,
+  ModuleVideoHero,
+  ActivityCard
+} from "@/components/modules";
 
 type ModuleCard = {
   id: string;
@@ -32,112 +45,27 @@ type Module = {
   title: string;
   description: string | null;
   order_index: number;
+  welcome_video_url: string | null;
 };
 
-// Parsear modelo de texto para estrutura
-function parseModelContent(content: string, title: string): { 
-  objective: string; 
-  whenToUse: string; 
-  cards: string[] 
-} {
-  const lines = content.split('\n').filter(line => line.trim());
-  
-  // Extrair objetivo e quando usar do conteúdo (novo formato)
-  let objective = "Engajamento";
-  let whenToUse = "quando você quer engajar sua audiência";
-  
-  // Procurar por **Objetivo:** e **Quando usar:** no conteúdo
-  for (const line of lines) {
-    const objMatch = line.match(/^\*\*Objetivo:\*\*\s*(.+)/i);
-    if (objMatch) {
-      objective = objMatch[1].trim();
-      continue;
-    }
-    const whenMatch = line.match(/^\*\*Quando usar:\*\*\s*(.+)/i);
-    if (whenMatch) {
-      whenToUse = whenMatch[1].trim();
-      continue;
-    }
-  }
-  
-  // Fallback: extrair do título se não encontrou no conteúdo
-  if (objective === "Engajamento") {
-    const titleMatch = title.match(/\(([^)]+)\)/);
-    if (titleMatch) {
-      objective = titleMatch[1];
-    }
-  }
-  
-  // Parsear cards removendo "Card X:", "Slide X:", "**Card X:**", etc.
-  const cards: string[] = [];
-  const seenContent = new Set<string>();
-  let currentCard: string[] = [];
-  
-  for (const line of lines) {
-    // Ignorar linhas de metadados
-    if (line.match(/^\*\*(Objetivo|Quando usar|Título):\*\*/i)) {
-      continue;
-    }
-    
-    // Detectar início de novo card
-    const cardMatch = line.match(/^\*\*(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\*\*\s*/i) ||
-                      line.match(/^(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\s*/i);
-    
-    if (cardMatch) {
-      // Salvar card anterior se existir
-      if (currentCard.length > 0) {
-        const cardText = currentCard.join('\n').trim();
-        if (cardText && !seenContent.has(cardText.toLowerCase())) {
-          seenContent.add(cardText.toLowerCase());
-          cards.push(cardText);
-        }
-      }
-      // Iniciar novo card com conteúdo após o marcador
-      const contentAfterMarker = line
-        .replace(/^\*\*(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\*\*\s*/i, '')
-        .replace(/^(Card \d+|Slide \d+|CTA)(\s*\([^)]*\))?:\s*/i, '')
-        .trim();
-      currentCard = contentAfterMarker ? [contentAfterMarker] : [];
-    } else {
-      // Adicionar linha ao card atual
-      currentCard.push(line);
-    }
-  }
-  
-  // Salvar último card
-  if (currentCard.length > 0) {
-    const cardText = currentCard.join('\n').trim();
-    if (cardText && !seenContent.has(cardText.toLowerCase())) {
-      seenContent.add(cardText.toLowerCase());
-      cards.push(cardText);
-    }
-  }
-  
-  return { objective, whenToUse, cards };
-}
-
-// Parsear resumo de bullet points para array
-function parseSummaryContent(content: string): string[] {
-  const lines = content.split('\n').filter(line => line.trim());
-  return lines.map(line => 
-    line.replace(/^[•\-\*]\s*/, '').trim()
-  ).filter(Boolean);
-}
-
-// Extrair dica principal do Pulo do Gato
-function parseTipContent(content: string): string {
-  const lines = content.split('\n').filter(line => line.trim());
-  // Pegar a primeira linha significativa
-  const firstLine = lines[0]?.replace(/^[•\-\*]\s*/, '').trim() || content;
-  return firstLine;
-}
+// Configuração de atividade por módulo
+const MODULE_ACTIVITIES: Record<string, { title: string; description: string }> = {
+  "cadeias-invisiveis": {
+    title: "Atividade do Módulo 1",
+    description: "Escreva para organizar: o que eu sinto, o que se repete e onde isso toca em mim.",
+  },
+};
 
 export default function ModuleDetail() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [exerciseTexts, setExerciseTexts] = useState<Record<string, string>>({});
+  
+  // Refs para scroll
+  const selahSectionRef = useRef<HTMLDivElement>(null);
+  const downloadsSectionRef = useRef<HTMLDivElement>(null);
+  const introSectionRef = useRef<HTMLDivElement>(null);
 
   // Fetch module data
   const { data: module, isLoading: moduleLoading } = useQuery({
@@ -169,84 +97,6 @@ export default function ModuleDetail() {
     enabled: !!module?.id,
   });
 
-  // Parsear conteúdo do mapa para lista de itens
-  const parseMapContent = (content: string): { number: string; title: string; description: string }[] => {
-    const lines = content.split('\n').filter(line => line.trim());
-    return lines.map(line => {
-      const match = line.match(/^(\d+)\.\s*([A-Z\s/]+)\s*=\s*(.+)$/i);
-      if (match) {
-        return { number: match[1], title: match[2].trim(), description: match[3].trim() };
-      }
-      return { number: '', title: '', description: line };
-    }).filter(item => item.title || item.description);
-  };
-
-  // Organizar cards por tipo/seção
-  const organizedContent = useMemo(() => {
-    if (!cards) return null;
-    
-    const videoCards = cards.filter(c => c.type === "video");
-    const textCards = cards.filter(c => c.type === "text");
-    const modelCards = cards.filter(c => c.type === "model");
-    const exerciseCards = cards.filter(c => c.type === "exercise");
-    const downloadCards = cards.filter(c => c.type === "download");
-    const tipCards = cards.filter(c => c.type === "tip");
-    const summaryCards = cards.filter(c => c.type === "summary");
-    const mapCards = cards.filter(c => c.type === "map");
-    
-    // Tip: usar card tipo "tip" ou derivar de text cards
-    let tipContent: string | null = null;
-    if (tipCards.length > 0 && tipCards[0].content_md) {
-      tipContent = parseTipContent(tipCards[0].content_md);
-    } else {
-      const puloDoGatoCard = textCards.find(c => 
-        c.title.toLowerCase().includes("pulo do gato") || 
-        c.title.toLowerCase().includes("dica")
-      );
-      if (puloDoGatoCard?.content_md) {
-        tipContent = parseTipContent(puloDoGatoCard.content_md);
-      }
-    }
-    
-    // Summary: usar card tipo "summary" ou derivar de video card
-    let summaryItems: string[] = [];
-    if (summaryCards.length > 0 && summaryCards[0].content_md) {
-      summaryItems = parseSummaryContent(summaryCards[0].content_md);
-    } else {
-      const firstVideoCard = videoCards[0];
-      if (firstVideoCard?.content_md && firstVideoCard.content_md.includes("•")) {
-        summaryItems = parseSummaryContent(firstVideoCard.content_md);
-      }
-    }
-    
-    const firstVideoCard = videoCards[0];
-    const firstMapCard = mapCards[0];
-    
-    // Separar card de oficina prática dos outros textos
-    const oficinaCard = textCards.find(c => 
-      c.title.toLowerCase().includes("oficina") || 
-      c.title.toLowerCase().includes("entendendo o caso")
-    );
-    
-    return {
-      video: firstVideoCard,
-      videoDescription: firstVideoCard?.content_md?.split("\n")[0] || null,
-      summary: summaryItems.length > 0 ? summaryItems : null,
-      tip: tipContent,
-      map: firstMapCard,
-      oficina: oficinaCard,
-      models: modelCards,
-      exercises: exerciseCards,
-      downloads: downloadCards,
-      otherText: textCards.filter(c => 
-        !c.title.toLowerCase().includes("pulo do gato") && 
-        !c.title.toLowerCase().includes("dica") &&
-        !c.title.toLowerCase().includes("oficina") &&
-        !c.title.toLowerCase().includes("entendendo o caso")
-      ),
-    };
-  }, [cards]);
-
   // Fetch user progress for this module
   const { data: progress } = useQuery({
     queryKey: ["progress", module?.id, user?.id],
@@ -273,6 +123,62 @@ export default function ModuleDetail() {
         .order("order_index");
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Organizar cards por tipo/seção
+  const organizedContent = useMemo(() => {
+    if (!cards) return null;
+    
+    const welcomeVideo = cards.find(c => c.type === "video");
+    const introCard = cards.find(c => c.type === "intro");
+    const readings = cards.filter(c => c.type === "reading");
+    const selahs = cards.filter(c => c.type === "selah");
+    const downloads = cards.filter(c => c.type === "download");
+    
+    return {
+      welcomeVideo,
+      intro: introCard,
+      readings,
+      selahs,
+      downloads,
+    };
+  }, [cards]);
+
+  // Mark card as complete
+  const completeCard = useMutation({
+    mutationFn: async (cardIndex: number) => {
+      if (!user?.id || !module?.id) return;
+      
+      const { data: existing } = await supabase
+        .from("progress")
+        .select("id, last_seen_card_index")
+        .eq("module_id", module.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        const newIndex = Math.max(existing.last_seen_card_index || 0, cardIndex);
+        await supabase
+          .from("progress")
+          .update({ 
+            last_seen_card_index: newIndex,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existing.id);
+      } else {
+        await supabase
+          .from("progress")
+          .insert({ 
+            module_id: module.id, 
+            user_id: user.id, 
+            last_seen_card_index: cardIndex
+          });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["progress"] });
+      toast({ title: "Progresso salvo!" });
     },
   });
 
@@ -313,17 +219,7 @@ export default function ModuleDetail() {
     },
   });
 
-  const handleSaveExercise = (cardId: string, cardTitle: string) => {
-    const text = exerciseTexts[cardId];
-    if (!text?.trim()) return;
-    
-    // TODO: Save to notebook_entries
-    toast({
-      title: "Exercício salvo!",
-      description: "Você pode revisar no seu Caderno.",
-    });
-  };
-
+  // Navegação
   const getNextModule = () => {
     if (!allModules || !module) return null;
     const currentIndex = allModules.findIndex(m => m.id === module.id);
@@ -334,6 +230,48 @@ export default function ModuleDetail() {
     if (!allModules || !module) return null;
     const currentIndex = allModules.findIndex(m => m.id === module.id);
     return allModules[currentIndex - 1] || null;
+  };
+
+  // Handlers de navegação
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const goToNotebook = (cardTitle?: string) => {
+    navigate("/membros/app/caderno", { 
+      state: { 
+        fromReading: true, 
+        readingTitle: cardTitle,
+        moduleSlug: slug 
+      } 
+    });
+  };
+
+  const goToActivity = () => {
+    navigate(`/membros/app/caderno/atividade/${slug}`);
+  };
+
+  const openReading = (cardId: string) => {
+    navigate(`/membros/app/modulos/${slug}/leitura/${cardId}`);
+  };
+
+  // Calcular status de cada card
+  const getCardStatus = (cardIndex: number): 'unread' | 'in_progress' | 'completed' => {
+    const lastSeen = progress?.last_seen_card_index || 0;
+    if (cardIndex < lastSeen) return 'completed';
+    if (cardIndex === lastSeen) return 'in_progress';
+    return 'unread';
+  };
+
+  const isCardCompleted = (cardIndex: number): boolean => {
+    return (progress?.last_seen_card_index || 0) >= cardIndex;
+  };
+
+  // Estimativa de tempo de leitura
+  const estimateReadingTime = (content: string | null): number => {
+    if (!content) return 3;
+    const words = content.split(/\s+/).length;
+    return Math.max(2, Math.ceil(words / 200));
   };
 
   const container = {
@@ -364,7 +302,7 @@ export default function ModuleDetail() {
       <AppLayout showNav={false}>
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
           <h2 className="text-xl font-serif font-semibold mb-2">Módulo não encontrado</h2>
-          <Button variant="muted" onClick={() => navigate("/membrosvmcm/app/modulos")}>
+          <Button variant="muted" onClick={() => navigate("/membros/app/modulos")}>
             Voltar aos módulos
           </Button>
         </div>
@@ -376,8 +314,16 @@ export default function ModuleDetail() {
   const nextModule = getNextModule();
   const prevModule = getPrevModule();
 
-  // Calculate progress percentage based on cards viewed
-  const progressPercent = isCompleted ? 100 : (cards?.length ? Math.round(((progress?.last_seen_card_index || 0) / cards.length) * 100) : 0);
+  // Calcular progresso baseado em readings + selahs
+  const totalItems = (organizedContent?.readings.length || 0) + (organizedContent?.selahs.length || 0);
+  const completedItems = progress?.last_seen_card_index || 0;
+  const progressPercent = isCompleted ? 100 : (totalItems > 0 ? Math.min(100, Math.round((completedItems / totalItems) * 100)) : 0);
+
+  // Dados da atividade
+  const activityConfig = MODULE_ACTIVITIES[slug || ""] || {
+    title: `Atividade do Módulo ${module.order_index}`,
+    description: "Complete a atividade deste módulo no seu Caderno."
+  };
 
   return (
     <AppLayout showNav={false}>
@@ -393,7 +339,7 @@ export default function ModuleDetail() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => navigate("/membrosvmcm/app/modulos")}
+                onClick={() => navigate("/membros/app/modulos")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -412,7 +358,12 @@ export default function ModuleDetail() {
                 </h1>
               </div>
             </div>
-            <Progress value={progressPercent} variant="gradient" className="h-1.5" />
+            <div className="flex items-center gap-2">
+              <Progress value={progressPercent} variant="gradient" className="h-1.5 flex-1" />
+              <span className="text-xs text-muted-foreground">
+                {completedItems}/{totalItems}
+              </span>
+            </div>
           </div>
         </motion.header>
 
@@ -421,184 +372,141 @@ export default function ModuleDetail() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="px-4 py-6 max-w-lg mx-auto space-y-6"
+          className="px-4 py-6 max-w-lg mx-auto space-y-8"
         >
-          {/* Descrição do módulo */}
-          {module.description && (
-            <motion.p variants={item} className="text-muted-foreground text-sm">
-              {module.description}
-            </motion.p>
-          )}
-
-          {/* 🎬 SEÇÃO: Aula (vídeo) */}
-          {organizedContent?.video && (
+          {/* 🎬 HERO: Vídeo de Boas-vindas */}
+          {organizedContent?.welcomeVideo && (
             <motion.div variants={item}>
-              <ContentCard
-                type="video"
-                title={organizedContent.video.title}
-                content={organizedContent.videoDescription || undefined}
-                videoUrl={organizedContent.video.video_url && organizedContent.video.video_url !== "[LINK]" 
-                  ? organizedContent.video.video_url 
-                  : undefined}
+              <ModuleVideoHero
+                title={`Boas-vindas — ${module.title}`}
+                description={module.description || "Um começo seguro para entender as raízes do que você sente."}
+                videoUrl={organizedContent.welcomeVideo.video_url}
               />
             </motion.div>
           )}
 
-          {/* ✅ SEÇÃO: Resumo do Módulo */}
-          {organizedContent?.summary && organizedContent.summary.length > 0 && (
-            <motion.div variants={item}>
-              <SummaryCards items={organizedContent.summary} />
-            </motion.div>
-          )}
+          {/* ⚡ Quick Actions */}
+          <motion.div variants={item}>
+            <QuickActionsModule
+              onStartHere={() => scrollToSection(introSectionRef)}
+              onMomentosSelah={() => scrollToSection(selahSectionRef)}
+              onAtividade={goToActivity}
+              onDownloads={() => scrollToSection(downloadsSectionRef)}
+            />
+          </motion.div>
 
-          {/* 📝 SEÇÃO: Pulo do Gato */}
-          {organizedContent?.tip && (
-            <motion.div variants={item}>
-              <TipCard tip={organizedContent.tip} />
-            </motion.div>
-          )}
-
-          {/* 📌 SEÇÃO: Mapa Visual da Anatomia */}
-          {organizedContent?.map && organizedContent.map.content_md && (
-            <motion.div variants={item} className="space-y-3">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <span>📌</span> {organizedContent.map.title}
-              </h2>
-              <Card variant="elevated" className="overflow-hidden">
-                <CardContent className="p-0">
-                  <ol className="divide-y divide-border">
-                    {parseMapContent(organizedContent.map.content_md).map((mapItem, idx) => (
-                      <li key={idx} className="flex items-start gap-3 p-3 hover:bg-muted/30 transition-colors">
-                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center">
-                          {mapItem.number || idx + 1}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <span className="font-semibold text-foreground">{mapItem.title}</span>
-                          {mapItem.description && (
-                            <span className="text-muted-foreground"> = {mapItem.description}</span>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* 📖 SEÇÃO: Oficina Prática */}
-          {organizedContent?.oficina && (
-            <motion.div variants={item}>
-              <ContentCard
-                type="text"
-                title={organizedContent.oficina.title}
-                content={organizedContent.oficina.content_md || undefined}
-                showSaveToNotebook
+          {/* ✨ SEÇÃO A: Começar por aqui */}
+          <motion.div variants={item} ref={introSectionRef}>
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+              <span>✨</span> Começar por aqui
+            </h2>
+            
+            {organizedContent?.intro ? (
+              <IntroCard
+                title={organizedContent.intro.title}
+                subtitle="Antes de avançar, faça esta pausa."
+                content={organizedContent.intro.content_md || undefined}
+                isCompleted={isCardCompleted(organizedContent.intro.order_index)}
+                onOpen={() => openReading(organizedContent.intro!.id)}
+                onSaveToNotebook={() => goToNotebook(organizedContent.intro?.title)}
+                onComplete={() => completeCard.mutate(organizedContent.intro!.order_index)}
               />
-            </motion.div>
-          )}
+            ) : (
+              <IntroCard
+                title="Começar por aqui"
+                subtitle="Antes de avançar, faça esta pausa."
+                content="Bem-vinda ao primeiro passo da sua jornada. Leia o conteúdo com calma, no seu tempo."
+                isCompleted={false}
+                onOpen={() => {}}
+                onSaveToNotebook={() => goToNotebook()}
+                onComplete={() => {}}
+              />
+            )}
+          </motion.div>
 
-          {/* ✨ SEÇÃO: Modelos Prontos */}
-          {organizedContent?.models && organizedContent.models.length > 0 && (
-            <motion.div variants={item} className="space-y-4">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <span>✨</span> Modelos Prontos
+          {/* 📖 SEÇÃO B: Leituras Principais */}
+          {organizedContent?.readings && organizedContent.readings.length > 0 && (
+            <motion.div variants={item}>
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+                <span>📖</span> Leituras Principais
               </h2>
-              {organizedContent.models.map((modelCard) => {
-                const parsed = parseModelContent(
-                  modelCard.content_md || "", 
-                  modelCard.title
-                );
-                return (
-                  <ModelCard
-                    key={modelCard.id}
-                    title={modelCard.title.replace(/^Modelo:\s*/i, '')}
-                    objective={parsed.objective}
-                    whenToUse={parsed.whenToUse}
-                    cards={parsed.cards}
+              <div className="space-y-3">
+                {organizedContent.readings.map((reading) => (
+                  <ReadingCard
+                    key={reading.id}
+                    id={reading.id}
+                    title={reading.title}
+                    estimatedMinutes={estimateReadingTime(reading.content_md)}
+                    status={getCardStatus(reading.order_index)}
+                    onClick={() => openReading(reading.id)}
                   />
-                );
-              })}
+                ))}
+              </div>
             </motion.div>
           )}
 
-          {/* 💪 SEÇÃO: Exercícios */}
-          {organizedContent?.exercises && organizedContent.exercises.length > 0 && (
-            <motion.div variants={item} className="space-y-4">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <span>💪</span> Exercício
+          {/* 🧘 SEÇÃO C: Momentos Selah */}
+          {organizedContent?.selahs && organizedContent.selahs.length > 0 && (
+            <motion.div variants={item} ref={selahSectionRef}>
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+                <span>🧘</span> Momentos Selah
               </h2>
-              {organizedContent.exercises.map((card) => (
-                <ContentCard key={card.id} type="exercise" title={card.title.replace(/^Exercício:\s*/i, '')}>
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {card.content_md}
-                    </p>
-                    <Textarea
-                      placeholder="Escreva sua resposta aqui..."
-                      value={exerciseTexts[card.id] || ""}
-                      onChange={(e) => setExerciseTexts(prev => ({ ...prev, [card.id]: e.target.value }))}
-                      className="min-h-32 resize-none"
-                    />
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleSaveExercise(card.id, card.title)}
-                      disabled={!exerciseTexts[card.id]?.trim()}
-                    >
-                      Salvar no Caderno
-                    </Button>
-                  </div>
-                </ContentCard>
-              ))}
+              <p className="text-sm text-muted-foreground mb-4">
+                Pausas intencionais para reflexão. Faça no seu tempo.
+              </p>
+              <div className="space-y-4">
+                {organizedContent.selahs.map((selah) => (
+                  <SelahCard
+                    key={selah.id}
+                    id={selah.id}
+                    title={selah.title}
+                    videoUrl={selah.video_url}
+                    reflection={selah.content_md || "Pause, respire e reflita sobre o que você está sentindo."}
+                    isCompleted={isCardCompleted(selah.order_index)}
+                    onComplete={() => completeCard.mutate(selah.order_index)}
+                    onSaveToNotebook={() => goToNotebook(selah.title)}
+                  />
+                ))}
+              </div>
             </motion.div>
           )}
 
-          {/* 📥 SEÇÃO: Templates */}
+          {/* 📝 SEÇÃO D: Atividade do Módulo */}
+          <motion.div variants={item}>
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+              <span>📝</span> Atividade do Módulo
+            </h2>
+            <ActivityCard
+              title={activityConfig.title}
+              description={activityConfig.description}
+              moduleSlug={slug || ""}
+              onClick={goToActivity}
+            />
+          </motion.div>
+
+          {/* 📥 SEÇÃO E: PDFs para baixar */}
           {organizedContent?.downloads && organizedContent.downloads.length > 0 && (
-            <motion.div variants={item} className="space-y-4">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <span>📥</span> Templates
+            <motion.div variants={item} ref={downloadsSectionRef}>
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+                <span>📥</span> PDFs para baixar
               </h2>
-              {organizedContent.downloads.map((card) => (
-                <ContentCard key={card.id} type="download" title={card.title}>
-                  <p className="text-sm text-muted-foreground mb-4 whitespace-pre-wrap">
-                    {card.content_md?.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\[LINK\]/g, 'Em breve')}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="gap-2"
-                      onClick={() => {
-                        if (card.cta_url && card.cta_url !== "[LINK]") {
-                          window.open(card.cta_url, "_blank");
-                        } else {
-                          toast({ title: "Link em breve!", description: "O template será disponibilizado em breve." });
-                        }
-                      }}
-                    >
-                      <Download className="h-4 w-4" />
-                      Abrir no Canva
-                    </Button>
-                  </div>
-                </ContentCard>
-              ))}
+              <div className="space-y-3">
+                {organizedContent.downloads.map((download) => (
+                  <DownloadCard
+                    key={download.id}
+                    title={download.title}
+                    description={download.content_md?.replace(/\[LINK\]/g, '') || undefined}
+                    fileUrl={download.cta_url}
+                    onDownload={() => {
+                      if (!download.cta_url || download.cta_url === "[LINK]") {
+                        toast({ title: "Link em breve!", description: "O arquivo será disponibilizado em breve." });
+                      }
+                    }}
+                    onPrint={() => {}}
+                  />
+                ))}
+              </div>
             </motion.div>
-          )}
-
-          {/* Outros cards de texto */}
-          {organizedContent?.otherText && organizedContent.otherText.length > 0 && (
-            organizedContent.otherText.map((card) => (
-              <motion.div key={card.id} variants={item}>
-                <ContentCard
-                  type="text"
-                  title={card.title}
-                  content={card.content_md || undefined}
-                  showSaveToNotebook
-                />
-              </motion.div>
-            ))
           )}
 
           {/* ✅ SEÇÃO: Progresso/Conclusão */}
@@ -621,7 +529,7 @@ export default function ModuleDetail() {
                       <Button
                         variant="gradient"
                         className="gap-2"
-                        onClick={() => navigate(`/membrosvmcm/app/modulos/${nextModule.slug}`)}
+                        onClick={() => navigate(`/membros/app/modulos/${nextModule.slug}`)}
                       >
                         Próximo Módulo
                         <ArrowRight className="h-4 w-4" />
@@ -631,10 +539,10 @@ export default function ModuleDetail() {
                 ) : (
                   <>
                     <h3 className="font-serif font-semibold text-lg mb-2">
-                      Pronta para avançar?
+                      Continue com calma
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Marque como concluído quando terminar todos os cards
+                      No seu tempo. Marque como concluído quando terminar todos os conteúdos.
                     </p>
                     <Button 
                       variant="gradient" 
@@ -659,7 +567,7 @@ export default function ModuleDetail() {
             <Button
               variant="muted"
               className="flex-1"
-              onClick={() => prevModule ? navigate(`/membrosvmcm/app/modulos/${prevModule.slug}`) : navigate("/membrosvmcm/app/modulos")}
+              onClick={() => prevModule ? navigate(`/membros/app/modulos/${prevModule.slug}`) : navigate("/membros/app/modulos")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               {prevModule ? "Anterior" : "Voltar"}
@@ -668,7 +576,7 @@ export default function ModuleDetail() {
               <Button
                 variant="default"
                 className="flex-1"
-                onClick={() => navigate(`/membrosvmcm/app/modulos/${nextModule.slug}`)}
+                onClick={() => navigate(`/membros/app/modulos/${nextModule.slug}`)}
               >
                 Próximo
                 <ArrowRight className="h-4 w-4 ml-2" />
