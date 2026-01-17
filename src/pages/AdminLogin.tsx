@@ -4,26 +4,37 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
-import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
+import { Shield } from "lucide-react";
 
 const emailSchema = z.string().email("Digite um e-mail válido");
 const passwordSchema = z.string().min(6, "A senha deve ter pelo menos 6 caracteres");
 
-export default function Login() {
+export default function AdminLogin() {
   const navigate = useNavigate();
-  const { user, signInWithPassword, loading } = useAuth();
+  const { user, signInWithPassword, loading: authLoading } = useAuth();
+  const { isAdmin, isLoading: roleLoading } = useAdminRole();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redireciona para área de membros se já estiver logado
+  // Redireciona para painel admin se já estiver logado como admin
   useEffect(() => {
-    if (user) {
-      navigate("/membros/app", { replace: true });
+    if (user && !roleLoading) {
+      if (isAdmin) {
+        navigate("/admin", { replace: true });
+      } else if (!authLoading) {
+        // Usuário logado mas não é admin
+        toast({
+          title: "Acesso restrito",
+          description: "Esta área é exclusiva para administradores.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, roleLoading, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,21 +74,22 @@ export default function Login() {
           variant: "destructive",
         });
       }
+      // O useEffect vai verificar se é admin e redirecionar
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (authLoading || (user && roleLoading)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F0E2D2] flex flex-col">
+    <div className="min-h-screen bg-slate-900 flex flex-col">
       
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
         <motion.div
@@ -86,11 +98,11 @@ export default function Login() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <img 
-            src={logoJornadaUnica} 
-            alt="Jornada Única" 
-            className="h-36 md:h-48 mx-auto mb-4"
-          />
+          <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="w-10 h-10 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold text-white">Painel Administrativo</h1>
+          <p className="text-slate-400 mt-2">Acesso restrito</p>
         </motion.div>
 
         <motion.div
@@ -99,26 +111,26 @@ export default function Login() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="w-full max-w-sm"
         >
-          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-card border border-border">
-            <h2 className="text-xl font-serif font-semibold text-center mb-6 text-[#253244]">
-              Acesse sua Jornada
+          <div className="bg-slate-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-slate-700">
+            <h2 className="text-xl font-semibold text-center mb-6 text-white">
+              Login de Administrador
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-[#253244] mb-2"
+                  className="block text-sm font-medium text-slate-300 mb-2"
                 >
                   E-mail
                 </label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="seu@email.com"
+                  placeholder="admin@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12"
+                  className="h-12 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                   required
                 />
               </div>
@@ -126,7 +138,7 @@ export default function Login() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-[#253244] mb-2"
+                  className="block text-sm font-medium text-slate-300 mb-2"
                 >
                   Senha
                 </label>
@@ -136,7 +148,7 @@ export default function Login() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-12"
+                  className="h-12 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                   required
                   minLength={6}
                 />
@@ -144,38 +156,20 @@ export default function Login() {
 
               <Button
                 type="submit"
-                variant="gradient"
                 size="lg"
-                className="w-full"
+                className="w-full bg-primary hover:bg-primary/90"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                    Aguarde...
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Verificando...
                   </span>
                 ) : (
-                  "Entrar"
+                  "Acessar Painel"
                 )}
               </Button>
             </form>
-
-            <div className="mt-4 text-center space-y-2">
-              <a
-                href="/membros/reset-password"
-                className="text-sm text-primary hover:underline block"
-              >
-                Esqueci minha senha
-              </a>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => navigate("/membros/signup")}
-              >
-                Criar conta
-              </Button>
-            </div>
           </div>
         </motion.div>
       </div>
@@ -186,8 +180,8 @@ export default function Login() {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="py-6 text-center"
       >
-        <p className="text-xs text-[#682A0C]">
-          © 2026 Jordana Cantarelli · Jornada Única
+        <p className="text-xs text-slate-500">
+          © 2026 Jornada Única · Área Administrativa
         </p>
       </motion.footer>
     </div>

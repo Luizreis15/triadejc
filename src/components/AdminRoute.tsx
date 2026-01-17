@@ -21,11 +21,11 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/membrosvmcm" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   if (!isAdmin) {
-    return <Navigate to="/membrosvmcm/app" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;

@@ -10,6 +10,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 // Public pages
 import SalesPage from "./pages/SalesPage";
 import Login from "./pages/Login";
+import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/membros/app/perfil" element={<ProtectedRoute><MemberProfile /></ProtectedRoute>} />
             
             {/* Admin routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/mockups" element={<AdminRoute><MockupGenerator /></AdminRoute>} />
             <Route path="/admin/perfil" element={<AdminRoute><AdminProfile /></AdminRoute>} />

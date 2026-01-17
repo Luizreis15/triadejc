@@ -21,7 +21,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/membrosvmcm" replace />;
+    return <Navigate to="/membros" replace />;
   }
 
   return <>{children}</>;
