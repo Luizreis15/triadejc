@@ -122,7 +122,7 @@ export default function Login() {
           <img 
             src={logoJornadaUnica} 
             alt="Jornada Única" 
-            className="h-24 md:h-32 mx-auto mb-4"
+            className="h-36 md:h-48 mx-auto mb-4"
           />
         </motion.div>
 
