@@ -296,7 +296,7 @@ export default function ResetPassword() {
         className="py-6 text-center"
       >
         <p className="text-xs text-[#682A0C]">
-          © 2025 Jordana Cantarelli · Jornada Única
+          © 2026 Jordana Cantarelli · Jornada Única
         </p>
       </motion.footer>
     </div>
