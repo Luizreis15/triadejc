@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Search, UserPlus, Shield, Users, UserCheck, UserX, Mail } from "lucide-react";
+import { Search, UserPlus, Shield, Users, UserCheck, UserX, Mail, Lock, ShieldCheck } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -43,6 +43,8 @@ export function UsersAdmin() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserName, setNewUserName] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [makeAdmin, setMakeAdmin] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: users, isLoading, refetch } = useQuery({
@@ -103,28 +105,32 @@ export function UsersAdmin() {
   });
 
   const createUser = useMutation({
-    mutationFn: async ({ email, name }: { email: string; name: string }) => {
-      // Send invite email via edge function
-      const { error } = await supabase.functions.invoke("send-auth-email", {
+    mutationFn: async ({ email, name, password, makeAdmin }: { email: string; name: string; password: string; makeAdmin: boolean }) => {
+      const { data, error } = await supabase.functions.invoke("create-admin-user", {
         body: { 
           email, 
           name,
-          type: "invite"
+          password,
+          makeAdmin,
         },
       });
       
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
     },
-    onSuccess: () => {
-      toast.success("Convite enviado com sucesso!");
+    onSuccess: (data) => {
+      toast.success(data.message || "Usuário criado com sucesso!");
       setIsCreateDialogOpen(false);
       setNewUserEmail("");
       setNewUserName("");
+      setNewUserPassword("");
+      setMakeAdmin(false);
       refetch();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error("Error creating user:", error);
-      toast.error("Erro ao enviar convite");
+      toast.error(error.message || "Erro ao criar usuário");
     },
   });
 
@@ -174,9 +180,9 @@ export function UsersAdmin() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Convidar Novo Usuário</DialogTitle>
+              <DialogTitle>Criar Novo Usuário</DialogTitle>
               <DialogDescription>
-                Envie um convite por email para o novo usuário.
+                Crie um novo usuário com acesso ao sistema.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -199,19 +205,51 @@ export function UsersAdmin() {
                   onChange={(e) => setNewUserEmail(e.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="makeAdmin"
+                  checked={makeAdmin}
+                  onCheckedChange={setMakeAdmin}
+                />
+                <Label htmlFor="makeAdmin" className="flex items-center gap-2 cursor-pointer">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  Criar como Administrador
+                </Label>
+              </div>
             </div>
             <DialogFooter>
               <Button
                 variant="outline"
-                onClick={() => setIsCreateDialogOpen(false)}
+                onClick={() => {
+                  setIsCreateDialogOpen(false);
+                  setNewUserEmail("");
+                  setNewUserName("");
+                  setNewUserPassword("");
+                  setMakeAdmin(false);
+                }}
               >
                 Cancelar
               </Button>
               <Button
-                onClick={() => createUser.mutate({ email: newUserEmail, name: newUserName })}
-                disabled={!newUserEmail || createUser.isPending}
+                onClick={() => createUser.mutate({ 
+                  email: newUserEmail, 
+                  name: newUserName,
+                  password: newUserPassword,
+                  makeAdmin 
+                })}
+                disabled={!newUserEmail || !newUserPassword || newUserPassword.length < 6 || createUser.isPending}
               >
-                {createUser.isPending ? "Enviando..." : "Enviar Convite"}
+                {createUser.isPending ? "Criando..." : "Criar Usuário"}
               </Button>
             </DialogFooter>
           </DialogContent>
