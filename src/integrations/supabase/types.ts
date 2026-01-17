@@ -94,6 +94,92 @@ export type Database = {
         }
         Relationships: []
       }
+      email_campaigns: {
+        Row: {
+          click_count: number | null
+          content_html: string
+          created_at: string | null
+          id: string
+          open_count: number | null
+          recipient_count: number | null
+          scheduled_at: string | null
+          segment: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          click_count?: number | null
+          content_html: string
+          created_at?: string | null
+          id?: string
+          open_count?: number | null
+          recipient_count?: number | null
+          scheduled_at?: string | null
+          segment?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          click_count?: number | null
+          content_html?: string
+          created_at?: string | null
+          id?: string
+          open_count?: number | null
+          recipient_count?: number | null
+          scheduled_at?: string | null
+          segment?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      email_logs: {
+        Row: {
+          campaign_id: string | null
+          clicked_at: string | null
+          email: string
+          id: string
+          opened_at: string | null
+          sent_at: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          clicked_at?: string | null
+          email: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          clicked_at?: string | null
+          email?: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -355,6 +441,8 @@ export type Database = {
           email: string | null
           goal: string | null
           id: string
+          is_active: boolean | null
+          last_access_at: string | null
           level: string | null
           name: string | null
           niche: string | null
@@ -366,6 +454,8 @@ export type Database = {
           email?: string | null
           goal?: string | null
           id: string
+          is_active?: boolean | null
+          last_access_at?: string | null
           level?: string | null
           name?: string | null
           niche?: string | null
@@ -377,6 +467,8 @@ export type Database = {
           email?: string | null
           goal?: string | null
           id?: string
+          is_active?: boolean | null
+          last_access_at?: string | null
           level?: string | null
           name?: string | null
           niche?: string | null
@@ -697,6 +789,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          external_id: string | null
+          id: string
+          payment_method: string | null
+          status: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          external_id?: string | null
+          id?: string
+          payment_method?: string | null
+          status?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          external_id?: string | null
+          id?: string
+          payment_method?: string | null
+          status?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

@@ -13,6 +13,9 @@ import { ScriptBlocksAdmin } from "@/components/admin/ScriptBlocksAdmin";
 import { ScriptMetricsAdmin } from "@/components/admin/ScriptMetricsAdmin";
 import { AdminSettingsContent } from "@/components/admin/AdminSettingsContent";
 import { TeleprompterAdmin } from "@/components/admin/TeleprompterAdmin";
+import { FinanceAdmin } from "@/components/admin/FinanceAdmin";
+import { EmailAdmin } from "@/components/admin/EmailAdmin";
+import { ModulePdfsAdmin } from "@/components/admin/ModulePdfsAdmin";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -32,11 +35,20 @@ export default function Admin() {
         <TabsContent value="leads" className="mt-0">
           <LeadsAdmin />
         </TabsContent>
+        <TabsContent value="finance" className="mt-0">
+          <FinanceAdmin />
+        </TabsContent>
+        <TabsContent value="email" className="mt-0">
+          <EmailAdmin />
+        </TabsContent>
         <TabsContent value="modules" className="mt-0">
           <ModulesAdmin />
         </TabsContent>
         <TabsContent value="cards" className="mt-0">
           <ModuleCardsAdmin />
+        </TabsContent>
+        <TabsContent value="pdfs" className="mt-0">
+          <ModulePdfsAdmin />
         </TabsContent>
         <TabsContent value="library" className="mt-0">
           <LibraryAdmin />

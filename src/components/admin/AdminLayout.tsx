@@ -17,6 +17,9 @@ import {
   Eye,
   Settings,
   Video,
+  DollarSign,
+  Mail,
+  FileDown,
 } from "lucide-react";
 import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
 
@@ -31,8 +34,11 @@ const navItems = [
   { value: "users", label: "Usuários", icon: Users },
   { value: "admins", label: "Admins", icon: Shield },
   { value: "leads", label: "Leads", icon: UserPlus },
+  { value: "finance", label: "Financeiro", icon: DollarSign },
+  { value: "email", label: "Email Mkt", icon: Mail },
   { value: "modules", label: "Módulos", icon: BookOpen },
   { value: "cards", label: "Cards", icon: Layers },
+  { value: "pdfs", label: "PDFs", icon: FileDown },
   { value: "library", label: "Biblioteca", icon: Library },
   { value: "script-products", label: "Produtos", icon: Wand2 },
   { value: "script-blocks", label: "Blocos", icon: Layers },
