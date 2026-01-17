@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -11,12 +11,9 @@ import {
   BookOpen,
   Layers,
   Library,
-  Wand2,
-  BarChart3,
   LogOut,
   Eye,
   Settings,
-  Video,
   DollarSign,
   Mail,
   FileDown,
@@ -40,10 +37,6 @@ const navItems = [
   { value: "cards", label: "Cards", icon: Layers },
   { value: "pdfs", label: "PDFs", icon: FileDown },
   { value: "library", label: "Biblioteca", icon: Library },
-  { value: "script-products", label: "Produtos", icon: Wand2 },
-  { value: "script-blocks", label: "Blocos", icon: Layers },
-  { value: "script-metrics", label: "Métricas", icon: BarChart3 },
-  { value: "teleprompter", label: "Teleprompter", icon: Video },
   { value: "settings", label: "Configurações", icon: Settings },
 ];
 
@@ -53,11 +46,11 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/membrosvmcm");
+    navigate("/membros");
   };
 
   const handleViewAsMember = () => {
-    navigate("/membrosvmcm/app");
+    navigate("/membros/app");
   };
 
   return (
