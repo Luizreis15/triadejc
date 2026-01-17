@@ -125,8 +125,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-warm flex flex-col">
-      <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-primary opacity-5" />
+    <div className="min-h-screen bg-[#F0E2D2] flex flex-col">
       
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
         <motion.div
@@ -149,7 +148,7 @@ export default function ResetPassword() {
           className="w-full max-w-sm"
         >
           <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-card border border-border">
-            <h2 className="text-xl font-serif font-semibold text-center mb-2">
+            <h2 className="text-xl font-serif font-semibold text-center mb-2 text-[#253244]">
               {isUpdateMode ? "Defina sua nova senha" : "Redefinir senha"}
             </h2>
             <p className="text-sm text-muted-foreground text-center mb-6">
@@ -185,7 +184,7 @@ export default function ResetPassword() {
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-sm font-medium text-foreground mb-2"
+                      className="block text-sm font-medium text-[#253244] mb-2"
                     >
                       E-mail
                     </label>
@@ -223,7 +222,7 @@ export default function ResetPassword() {
                 <div>
                   <label
                     htmlFor="newPassword"
-                    className="block text-sm font-medium text-foreground mb-2"
+                    className="block text-sm font-medium text-[#253244] mb-2"
                   >
                     Nova senha
                   </label>
@@ -242,7 +241,7 @@ export default function ResetPassword() {
                 <div>
                   <label
                     htmlFor="confirmPassword"
-                    className="block text-sm font-medium text-foreground mb-2"
+                    className="block text-sm font-medium text-[#253244] mb-2"
                   >
                     Confirmar nova senha
                   </label>
@@ -296,7 +295,7 @@ export default function ResetPassword() {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="py-6 text-center"
       >
-        <p className="text-xs text-white">
+        <p className="text-xs text-[#682A0C]">
           © 2025 Jordana Cantarelli · Jornada Única
         </p>
       </motion.footer>

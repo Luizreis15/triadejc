@@ -110,8 +110,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-warm flex flex-col">
-      <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-primary opacity-5" />
+    <div className="min-h-screen bg-[#F0E2D2] flex flex-col">
       
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
         <motion.div
@@ -134,15 +133,15 @@ export default function Login() {
           className="w-full max-w-sm"
         >
           <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-card border border-border">
-            <h2 className="text-xl font-serif font-semibold text-center mb-6">
-              Acesse seu Caderno
+            <h2 className="text-xl font-serif font-semibold text-center mb-6 text-[#253244]">
+              Acesse sua Jornada
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-foreground mb-2"
+                  className="block text-sm font-medium text-[#253244] mb-2"
                 >
                   E-mail
                 </label>
@@ -160,7 +159,7 @@ export default function Login() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-foreground mb-2"
+                  className="block text-sm font-medium text-[#253244] mb-2"
                 >
                   Senha
                 </label>
@@ -212,7 +211,7 @@ export default function Login() {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="py-6 text-center"
       >
-        <p className="text-xs text-white">
+        <p className="text-xs text-[#682A0C]">
           © 2025 Jordana Cantarelli · Jornada Única
         </p>
       </motion.footer>
