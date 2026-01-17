@@ -1,17 +1,16 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar } from "@/components/member";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useProgress } from "@/hooks/useProgress";
+import { toast } from "@/hooks/use-toast";
 
 export default function ModuleDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
 
   // Fetch module
   const { data: module, isLoading: moduleLoading } = useQuery({
@@ -21,7 +20,7 @@ export default function ModuleDetail() {
         .from("modules")
         .select("*")
         .eq("slug", slug)
-        .single();
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -60,26 +59,12 @@ export default function ModuleDetail() {
     enabled: !!module?.id,
   });
 
-  // Fetch user progress
-  const { data: progress } = useQuery({
-    queryKey: ["progress", user?.id, module?.id],
-    queryFn: async () => {
-      if (!user?.id || !module?.id) return null;
-      const { data, error } = await supabase
-        .from("progress")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("module_id", module.id)
-        .single();
-      if (error && error.code !== "PGRST116") throw error;
-      return data;
-    },
-    enabled: !!user?.id && !!module?.id,
-  });
+  // Use progress hook
+  const { isCardCompleted, markCardComplete } = useProgress(module?.id);
 
-  // Calculate progress
+  // Calculate progress based on actual completions
   const totalCards = cards.length;
-  const completedCards = progress?.last_seen_card_index || 0;
+  const completedCards = cards.filter(c => isCardCompleted(c.id)).length;
   const progressPercent = totalCards > 0 ? Math.round((completedCards / totalCards) * 100) : 0;
 
   // Group cards by type
@@ -87,6 +72,24 @@ export default function ModuleDetail() {
   const readingCards = cards.filter(c => c.type === "reading");
   const selahCards = cards.filter(c => c.type === "selah");
   const activityCards = cards.filter(c => c.type === "activity");
+
+  // Handle card completion
+  const handleCompleteCard = async (cardId: string) => {
+    if (!module?.id) return;
+    try {
+      await markCardComplete.mutateAsync({ cardId, moduleId: module.id });
+      toast({
+        title: "Etapa concluída! ✨",
+        description: "Seu progresso foi salvo.",
+      });
+    } catch {
+      toast({
+        title: "Erro ao salvar",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (moduleLoading) {
     return (
@@ -181,7 +184,13 @@ export default function ModuleDetail() {
       {introCards.length > 0 && (
         <ContentSection title="Começar por aqui">
           {introCards.map((card) => (
-            <ContentCard key={card.id} card={card} moduleSlug={slug!} />
+            <ContentCard 
+              key={card.id} 
+              card={card} 
+              moduleSlug={slug!}
+              isCompleted={isCardCompleted(card.id)}
+              onComplete={() => handleCompleteCard(card.id)}
+            />
           ))}
         </ContentSection>
       )}
@@ -190,7 +199,13 @@ export default function ModuleDetail() {
       {readingCards.length > 0 && (
         <ContentSection title="Leituras">
           {readingCards.map((card) => (
-            <ContentCard key={card.id} card={card} moduleSlug={slug!} />
+            <ContentCard 
+              key={card.id} 
+              card={card} 
+              moduleSlug={slug!}
+              isCompleted={isCardCompleted(card.id)}
+              onComplete={() => handleCompleteCard(card.id)}
+            />
           ))}
         </ContentSection>
       )}
@@ -199,7 +214,13 @@ export default function ModuleDetail() {
       {selahCards.length > 0 && (
         <ContentSection title="Momentos Selah">
           {selahCards.map((card) => (
-            <SelahCard key={card.id} card={card} moduleSlug={slug!} />
+            <SelahCard 
+              key={card.id} 
+              card={card} 
+              moduleSlug={slug!}
+              isCompleted={isCardCompleted(card.id)}
+              onComplete={() => handleCompleteCard(card.id)}
+            />
           ))}
         </ContentSection>
       )}
@@ -208,7 +229,13 @@ export default function ModuleDetail() {
       {activityCards.length > 0 && (
         <ContentSection title="Atividade do Módulo">
           {activityCards.map((card) => (
-            <ActivityCard key={card.id} card={card} moduleSlug={slug!} />
+            <ActivityCard 
+              key={card.id} 
+              card={card} 
+              moduleSlug={slug!}
+              isCompleted={isCardCompleted(card.id)}
+              onComplete={() => handleCompleteCard(card.id)}
+            />
           ))}
         </ContentSection>
       )}
@@ -292,33 +319,81 @@ function ContentSection({ title, children }: { title: string; children: React.Re
 }
 
 // Content Card Component
-function ContentCard({ card, moduleSlug }: { card: any; moduleSlug: string }) {
+function ContentCard({ 
+  card, 
+  moduleSlug, 
+  isCompleted,
+  onComplete 
+}: { 
+  card: any; 
+  moduleSlug: string;
+  isCompleted?: boolean;
+  onComplete?: () => void;
+}) {
   return (
-    <Link 
-      to={`/membros/app/modulos/${moduleSlug}/leitura/${card.id}`}
-      className="block p-4 bg-card rounded-xl border border-border/50 hover:border-primary/30 transition-colors"
-    >
+    <div className="p-4 bg-card rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-          <BookOpen className="w-5 h-5 text-primary" />
+        <div className={cn(
+          "w-10 h-10 rounded-lg flex items-center justify-center",
+          isCompleted ? "bg-green-100" : "bg-primary/10"
+        )}>
+          {isCompleted ? (
+            <CheckCircle2 className="w-5 h-5 text-green-600" />
+          ) : (
+            <BookOpen className="w-5 h-5 text-primary" />
+          )}
         </div>
         <div className="flex-1">
-          <h3 className="font-medium text-foreground">{card.title}</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">~5 min de leitura</p>
+          <h3 className={cn(
+            "font-medium",
+            isCompleted ? "text-muted-foreground" : "text-foreground"
+          )}>{card.title}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {isCompleted ? "Concluído" : "~5 min de leitura"}
+          </p>
         </div>
+        {!isCompleted && (
+          <Link 
+            to={`/membros/app/modulos/${moduleSlug}/leitura/${card.id}`}
+            className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+          >
+            Ler
+          </Link>
+        )}
       </div>
-    </Link>
+    </div>
   );
 }
 
 // Selah Card Component  
-function SelahCard({ card, moduleSlug }: { card: any; moduleSlug: string }) {
+function SelahCard({ 
+  card, 
+  moduleSlug,
+  isCompleted,
+  onComplete 
+}: { 
+  card: any; 
+  moduleSlug: string;
+  isCompleted?: boolean;
+  onComplete?: () => void;
+}) {
   return (
-    <div className="p-4 bg-card rounded-xl border border-border/50 space-y-3">
+    <div className={cn(
+      "p-4 rounded-xl border space-y-3",
+      isCompleted 
+        ? "bg-green-50/50 border-green-200" 
+        : "bg-card border-border/50"
+    )}>
       {card.video_url && (
         <VideoPlayer videoUrl={card.video_url} title={card.title} />
       )}
-      <h3 className="font-serif font-medium text-foreground">{card.title}</h3>
+      <div className="flex items-start gap-2">
+        {isCompleted && <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />}
+        <h3 className={cn(
+          "font-serif font-medium",
+          isCompleted ? "text-muted-foreground" : "text-foreground"
+        )}>{card.title}</h3>
+      </div>
       {card.content_md && (
         <p className="text-sm text-muted-foreground line-clamp-2">{card.content_md}</p>
       )}
@@ -329,29 +404,60 @@ function SelahCard({ card, moduleSlug }: { card: any; moduleSlug: string }) {
             Registrar
           </Button>
         </Link>
-        <Button size="sm" variant="ghost">
-          <CheckCircle2 className="w-4 h-4 mr-2" />
-          Concluir
-        </Button>
+        {!isCompleted && (
+          <Button size="sm" variant="ghost" onClick={onComplete}>
+            <Circle className="w-4 h-4 mr-2" />
+            Concluir
+          </Button>
+        )}
       </div>
     </div>
   );
 }
 
 // Activity Card Component
-function ActivityCard({ card, moduleSlug }: { card: any; moduleSlug: string }) {
+function ActivityCard({ 
+  card, 
+  moduleSlug,
+  isCompleted,
+  onComplete 
+}: { 
+  card: any; 
+  moduleSlug: string;
+  isCompleted?: boolean;
+  onComplete?: () => void;
+}) {
   return (
-    <div className="p-4 bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl border border-primary/20 space-y-3">
-      <h3 className="font-serif font-medium text-foreground">{card.title}</h3>
+    <div className={cn(
+      "p-4 rounded-xl border space-y-3",
+      isCompleted 
+        ? "bg-green-50/50 border-green-200" 
+        : "bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20"
+    )}>
+      <div className="flex items-start gap-2">
+        {isCompleted && <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />}
+        <h3 className={cn(
+          "font-serif font-medium",
+          isCompleted ? "text-muted-foreground" : "text-foreground"
+        )}>{card.title}</h3>
+      </div>
       {card.content_md && (
         <p className="text-sm text-muted-foreground">{card.content_md}</p>
       )}
-      <Link to={`/membros/app/caderno?module=${moduleSlug}&type=exercise`}>
-        <Button className="w-full">
-          <PenLine className="w-4 h-4 mr-2" />
-          Abrir no Caderno
-        </Button>
-      </Link>
+      <div className="flex gap-2">
+        <Link to={`/membros/app/caderno?module=${moduleSlug}&type=exercise`} className="flex-1">
+          <Button variant={isCompleted ? "outline" : "default"} className="w-full">
+            <PenLine className="w-4 h-4 mr-2" />
+            {isCompleted ? "Ver no Caderno" : "Abrir no Caderno"}
+          </Button>
+        </Link>
+        {!isCompleted && (
+          <Button variant="ghost" onClick={onComplete}>
+            <Circle className="w-4 h-4 mr-2" />
+            Concluir
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
