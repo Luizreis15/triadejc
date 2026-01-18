@@ -282,6 +282,7 @@ export type Database = {
       }
       module_pdfs: {
         Row: {
+          card_id: string | null
           created_at: string | null
           file_url: string
           id: string
@@ -290,6 +291,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          card_id?: string | null
           created_at?: string | null
           file_url: string
           id?: string
@@ -298,6 +300,7 @@ export type Database = {
           title: string
         }
         Update: {
+          card_id?: string | null
           created_at?: string | null
           file_url?: string
           id?: string
@@ -306,6 +309,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "module_pdfs_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "module_cards"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "module_pdfs_module_id_fkey"
             columns: ["module_id"]
