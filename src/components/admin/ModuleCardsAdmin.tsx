@@ -32,12 +32,18 @@ function convertToEmbedUrl(url: string): string | null {
   return url;
 }
 
+import { Pause } from "lucide-react";
+
 const cardTypeIcons: Record<string, React.ReactNode> = {
   video: <Video className="h-4 w-4" />,
   text: <FileText className="h-4 w-4" />,
+  reading: <FileText className="h-4 w-4" />,
   model: <Sparkles className="h-4 w-4" />,
   exercise: <Dumbbell className="h-4 w-4" />,
   download: <Download className="h-4 w-4" />,
+  selah: <Pause className="h-4 w-4" />,
+  closure: <Sparkles className="h-4 w-4" />,
+  activity: <Dumbbell className="h-4 w-4" />,
 };
 
 interface ModuleCard {
@@ -61,9 +67,13 @@ interface Module {
 const cardTypes = [
   { value: "video", label: "Vídeo" },
   { value: "text", label: "Texto" },
+  { value: "reading", label: "Leitura" },
   { value: "model", label: "Modelo" },
   { value: "exercise", label: "Exercício" },
   { value: "download", label: "Download" },
+  { value: "selah", label: "Selá (Pausa)" },
+  { value: "closure", label: "Fechamento" },
+  { value: "activity", label: "Atividade" },
 ];
 
 export function ModuleCardsAdmin() {
@@ -332,11 +342,13 @@ export function ModuleCardsAdmin() {
               />
             </div>
 
-            {formData.type === "video" && (
+            {(formData.type === "video" || formData.type === "selah") && (
               <div className="space-y-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
                 <div className="flex items-center gap-2 text-primary">
                   <Video className="h-5 w-5" />
-                  <Label className="text-base font-semibold">Configuração do Vídeo</Label>
+                  <Label className="text-base font-semibold">
+                    {formData.type === "selah" ? "Vídeo do Momento Selá (Opcional)" : "Configuração do Vídeo"}
+                  </Label>
                 </div>
                 <div className="space-y-2">
                   <Label>URL do Vídeo (YouTube ou Vimeo)</Label>
