@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, PenLine, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, PenLine, CheckCircle2, FileText, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +24,21 @@ export default function ReadingView() {
       return data;
     },
     enabled: !!cardId,
+  });
+
+  // Fetch PDFs for this module
+  const { data: modulePdfs } = useQuery({
+    queryKey: ["module-pdfs", card?.module_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("module_pdfs")
+        .select("*")
+        .eq("module_id", card?.module_id!)
+        .order("order_index");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!card?.module_id,
   });
 
   // Use progress hook
@@ -124,6 +139,41 @@ export default function ReadingView() {
           </div>
         </div>
       </article>
+
+      {/* Material de Apoio - PDF */}
+      {modulePdfs && modulePdfs.length > 0 && (
+        <section className="py-6 border-t border-border/50">
+          <h3 className="font-serif font-medium text-lg mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-primary" />
+            Material de Apoio
+          </h3>
+          <div className="space-y-3">
+            {modulePdfs.map((pdf) => (
+              <div 
+                key={pdf.id}
+                className="bg-muted/50 rounded-xl p-4 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-primary" />
+                  </div>
+                  <span className="font-medium text-sm">{pdf.title}</span>
+                </div>
+                <a 
+                  href={pdf.file_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" size="sm">
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar
+                  </Button>
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Fixed Footer */}
       <footer className="sticky bottom-20 bg-background/95 backdrop-blur-lg border-t border-border/50 -mx-4 px-4 py-4">
