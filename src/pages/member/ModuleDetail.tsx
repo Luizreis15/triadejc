@@ -4,6 +4,7 @@ import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2, Circle, Hea
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar } from "@/components/member";
+import { MarkdownPreview } from "@/components/member/MarkdownPreview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
@@ -507,7 +508,7 @@ function SelahCard({
         )}>{card.title}</h3>
       </div>
       {card.content_md && (
-        <p className="text-sm text-muted-foreground line-clamp-3">{card.content_md}</p>
+        <MarkdownPreview content={card.content_md} lineClamp={3} />
       )}
       <div className="flex gap-2">
         <Link to={`/membros/app/modulos/${moduleSlug}/leitura/${card.id}`} className="flex-1">
@@ -564,7 +565,7 @@ function ClosureCard({
       </div>
       
       {card.content_md && (
-        <p className="text-sm text-muted-foreground line-clamp-4 pl-7">{card.content_md}</p>
+        <MarkdownPreview content={card.content_md} lineClamp={4} className="pl-7" />
       )}
       
       <div className="flex gap-2 pl-7">
@@ -624,7 +625,7 @@ function ActivityCard({
       </div>
       
       {card.content_md && (
-        <p className="text-sm text-muted-foreground">{card.content_md}</p>
+        <MarkdownPreview content={card.content_md} lineClamp={5} />
       )}
       
       <div className="flex gap-2">
