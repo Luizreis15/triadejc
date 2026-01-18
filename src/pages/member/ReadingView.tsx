@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { useProgress } from "@/hooks/useProgress";
+import { VideoPlayer } from "@/components/member/VideoPlayer";
 
 export default function ReadingView() {
   const { slug, cardId } = useParams<{ slug: string; cardId: string }>();
@@ -114,6 +115,17 @@ export default function ReadingView() {
           </div>
         </div>
       </header>
+
+      {/* Video - if available */}
+      {card.video_url && (
+        <section className="py-6 -mx-4 px-4">
+          <VideoPlayer 
+            videoUrl={card.video_url} 
+            title={card.title}
+            className="shadow-lg"
+          />
+        </section>
+      )}
 
       {/* Reading Content */}
       <article className="flex-1 py-8">
