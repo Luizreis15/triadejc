@@ -26,19 +26,19 @@ export default function ReadingView() {
     enabled: !!cardId,
   });
 
-  // Fetch PDFs for this module
-  const { data: modulePdfs } = useQuery({
-    queryKey: ["module-pdfs", card?.module_id],
+  // Fetch PDFs for this specific card/chapter
+  const { data: cardPdfs } = useQuery({
+    queryKey: ["card-pdfs", cardId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("module_pdfs")
         .select("*")
-        .eq("module_id", card?.module_id!)
+        .eq("card_id", cardId!)
         .order("order_index");
       if (error) throw error;
       return data;
     },
-    enabled: !!card?.module_id,
+    enabled: !!cardId,
   });
 
   // Use progress hook
@@ -141,14 +141,14 @@ export default function ReadingView() {
       </article>
 
       {/* Material de Apoio - PDF */}
-      {modulePdfs && modulePdfs.length > 0 && (
+      {cardPdfs && cardPdfs.length > 0 && (
         <section className="py-6 border-t border-border/50">
           <h3 className="font-serif font-medium text-lg mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
             Material de Apoio
           </h3>
           <div className="space-y-3">
-            {modulePdfs.map((pdf) => (
+            {cardPdfs.map((pdf) => (
               <div 
                 key={pdf.id}
                 className="bg-muted/50 rounded-xl p-4 flex items-center justify-between"
