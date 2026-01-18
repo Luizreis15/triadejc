@@ -239,6 +239,7 @@ export type Database = {
           id: string
           module_id: string
           order_index: number
+          section: string | null
           title: string
           type: string
           video_url: string | null
@@ -251,6 +252,7 @@ export type Database = {
           id?: string
           module_id: string
           order_index: number
+          section?: string | null
           title: string
           type: string
           video_url?: string | null
@@ -263,6 +265,7 @@ export type Database = {
           id?: string
           module_id?: string
           order_index?: number
+          section?: string | null
           title?: string
           type?: string
           video_url?: string | null
