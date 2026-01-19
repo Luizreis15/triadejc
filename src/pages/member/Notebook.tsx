@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, FileDown, Clock, Smile, Meh, Frown, Heart, Sparkles } from "lucide-react";
+import { Save, FileDown, Clock, Smile, Meh, Frown, Heart, Sparkles, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useExercises, Exercise } from "@/hooks/useExercises";
@@ -16,6 +16,7 @@ import { ExerciseView } from "@/components/member/ExerciseView";
 import { DevotionalTimeline } from "@/components/member/DevotionalTimeline";
 import { DevotionalDayView } from "@/components/member/DevotionalDayView";
 import { ProgressDashboard } from "@/components/member/ProgressDashboard";
+import { exportNotebookToPdf } from "@/lib/exportNotebookPdf";
 
 const moodOptions = [
   { value: 1, icon: Frown, label: "Difícil", color: "text-red-500" },
@@ -37,6 +38,7 @@ export default function Notebook() {
   // Selected items for detail views
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [selectedDay, setSelectedDay] = useState<DevotionalDay | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Check-in form state
   const [mood, setMood] = useState<number | null>(null);
@@ -100,6 +102,39 @@ export default function Notebook() {
     },
     enabled: !!user?.id,
   });
+
+  // Fetch user profile for PDF
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("name, email")
+        .eq("id", user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Export PDF handler
+  const handleExportPdf = async () => {
+    if (entries.length === 0) {
+      toast({ title: "Nenhum registro", description: "Faça alguns registros antes de exportar.", variant: "destructive" });
+      return;
+    }
+    setIsExporting(true);
+    try {
+      exportNotebookToPdf(entries, profile || undefined);
+      toast({ title: "PDF exportado! 📄", description: "O arquivo foi baixado para seu dispositivo." });
+    } catch (error) {
+      toast({ title: "Erro ao exportar", description: "Tente novamente.", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Save check-in mutation
   const saveCheckin = useMutation({
@@ -298,7 +333,10 @@ export default function Notebook() {
           ) : (
             <>
               <div className="flex justify-end">
-                <Button variant="outline" size="sm"><FileDown className="w-4 h-4 mr-2" />Exportar PDF</Button>
+                <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={isExporting}>
+                  {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}
+                  {isExporting ? "Gerando..." : "Exportar PDF"}
+                </Button>
               </div>
               <div className="space-y-3">
                 {entries.map((entry) => <EntryCard key={entry.id} entry={entry} />)}
