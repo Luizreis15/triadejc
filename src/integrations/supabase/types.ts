@@ -43,6 +43,45 @@ export type Database = {
           },
         ]
       }
+      devotional_days: {
+        Row: {
+          created_at: string
+          day_number: number
+          heart_question: string
+          id: string
+          module_slug: string
+          prayer_md: string
+          reflection_md: string
+          scripture_reference: string
+          scripture_text: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          day_number: number
+          heart_question: string
+          id?: string
+          module_slug: string
+          prayer_md: string
+          reflection_md: string
+          scripture_reference: string
+          scripture_text: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          day_number?: number
+          heart_question?: string
+          id?: string
+          module_slug?: string
+          prayer_md?: string
+          reflection_md?: string
+          scripture_reference?: string
+          scripture_text?: string
+          title?: string
+        }
+        Relationships: []
+      }
       email_campaigns: {
         Row: {
           click_count: number | null
@@ -128,6 +167,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      exercises: {
+        Row: {
+          created_at: string
+          description: string
+          estimated_time: number | null
+          icon: string
+          id: string
+          module_slug: string
+          order_index: number
+          prompt_questions: Json
+          scripture_reference: string | null
+          scripture_text: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          estimated_time?: number | null
+          icon?: string
+          id?: string
+          module_slug: string
+          order_index: number
+          prompt_questions?: Json
+          scripture_reference?: string | null
+          scripture_text?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          estimated_time?: number | null
+          icon?: string
+          id?: string
+          module_slug?: string
+          order_index?: number
+          prompt_questions?: Json
+          scripture_reference?: string | null
+          scripture_text?: string | null
+          title?: string
+        }
+        Relationships: []
       }
       favorites: {
         Row: {
@@ -365,6 +446,8 @@ export type Database = {
         Row: {
           content_md: string | null
           created_at: string
+          devotional_day_id: string | null
+          exercise_id: string | null
           exercise_type: string | null
           id: string
           module_slug: string | null
@@ -376,6 +459,8 @@ export type Database = {
         Insert: {
           content_md?: string | null
           created_at?: string
+          devotional_day_id?: string | null
+          exercise_id?: string | null
           exercise_type?: string | null
           id?: string
           module_slug?: string | null
@@ -387,6 +472,8 @@ export type Database = {
         Update: {
           content_md?: string | null
           created_at?: string
+          devotional_day_id?: string | null
+          exercise_id?: string | null
           exercise_type?: string | null
           id?: string
           module_slug?: string | null
@@ -395,7 +482,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notebook_entries_devotional_day_id_fkey"
+            columns: ["devotional_day_id"]
+            isOneToOne: false
+            referencedRelation: "devotional_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notebook_entries_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
