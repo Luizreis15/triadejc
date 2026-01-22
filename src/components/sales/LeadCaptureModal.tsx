@@ -21,9 +21,10 @@ interface LeadCaptureModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   checkoutUrl: string;
+  price?: number;
 }
 
-export function LeadCaptureModal({ open, onOpenChange, checkoutUrl }: LeadCaptureModalProps) {
+export function LeadCaptureModal({ open, onOpenChange, checkoutUrl, price = 97 }: LeadCaptureModalProps) {
   const [formData, setFormData] = useState<LeadFormData>({
     name: "",
     email: "",
@@ -87,7 +88,7 @@ export function LeadCaptureModal({ open, onOpenChange, checkoutUrl }: LeadCaptur
         (window as any).fbq("track", "InitiateCheckout", {
           content_name: "Jornada Única - Jordana Cantarelli",
           currency: "BRL",
-          value: 97.0,
+          value: price,
         });
       }
 

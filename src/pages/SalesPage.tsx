@@ -6,7 +6,16 @@ import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
 import { ButtonGold, ButtonOrange, IconSquare, CardCream, SectionRed, FAQAccordion, ScrollReveal, LeadCaptureModal } from "@/components/sales";
 import { Shield, Heart, Brain, Sun, HelpCircle } from "lucide-react";
 
-const CHECKOUT_URL = "https://pay.kiwify.com.br/oHyxLi0";
+// Default values for the standard /jornada page
+const DEFAULT_CHECKOUT_URL = "https://pay.kiwify.com.br/oHyxLi0";
+const DEFAULT_PRICE = 97;
+const DEFAULT_ORIGINAL_PRICE = 197;
+
+export interface SalesPageProps {
+  price?: number;
+  originalPrice?: number;
+  checkoutUrl?: string;
+}
 
 const scrollToOffer = () => {
   document.getElementById("oferta")?.scrollIntoView({
@@ -246,7 +255,7 @@ function TestimonialsSection() {
 }
 
 // Seção 8: Card de Oferta
-function OfferSection({ onOpenLeadModal }: { onOpenLeadModal: () => void }) {
+function OfferSection({ onOpenLeadModal, price, originalPrice }: { onOpenLeadModal: () => void; price: number; originalPrice: number }) {
   const benefits = ["3 Sessões Completas de Jornada Guiada", "Ferramentas práticas de autoconhecimento", "Integração fé + clareza emocional", "Acesso imediato e vitalício"];
   return <SectionRed id="oferta" className="py-12">
       <div className="card-wine p-6 text-center">
@@ -279,8 +288,8 @@ function OfferSection({ onOpenLeadModal }: { onOpenLeadModal: () => void }) {
 
         {/* Preço */}
         <div className="mb-6">
-          <p className="text-sm line-through opacity-60 body-inter">de R$ 197,00</p>
-          <p className="heading-playfair text-3xl">por apenas R$ 97</p>
+          <p className="text-sm line-through opacity-60 body-inter">de R$ {originalPrice},00</p>
+          <p className="heading-playfair text-3xl">por apenas R$ {price}</p>
         </div>
 
         {/* CTA */}
@@ -372,7 +381,7 @@ function FAQSection() {
 }
 
 // Seção 11: CTA Final
-function FinalCTASection() {
+function FinalCTASection({ price }: { price: number }) {
   return <section className="px-6 py-8 text-center" style={{
     backgroundColor: 'hsl(30 25% 94%)'
   }}>
@@ -389,7 +398,7 @@ function FinalCTASection() {
       <div className="text-center">
         <ButtonGold onClick={scrollToOffer}>QUERO ACESSAR A JORNADA</ButtonGold>
         <p className="text-xs mt-3 opacity-60 body-inter">
-          R$ 97 • Acesso imediato • Garantia 7 dias
+          R$ {price} • Acesso imediato • Garantia 7 dias
         </p>
       </div>
     </section>;
@@ -414,7 +423,11 @@ function FooterSection() {
 }
 
 // Página Principal
-export default function SalesPage() {
+export default function SalesPage({ 
+  price = DEFAULT_PRICE, 
+  originalPrice = DEFAULT_ORIGINAL_PRICE, 
+  checkoutUrl = DEFAULT_CHECKOUT_URL 
+}: SalesPageProps) {
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
 
   return (
@@ -427,17 +440,22 @@ export default function SalesPage() {
         <TransitionTitle />
         <SessionsSection />
         <TestimonialsSection />
-        <OfferSection onOpenLeadModal={() => setIsLeadModalOpen(true)} />
+        <OfferSection 
+          onOpenLeadModal={() => setIsLeadModalOpen(true)} 
+          price={price}
+          originalPrice={originalPrice}
+        />
         <AboutSection />
         <FAQSection />
-        <FinalCTASection />
+        <FinalCTASection price={price} />
         <FooterSection />
       </div>
 
       <LeadCaptureModal
         open={isLeadModalOpen}
         onOpenChange={setIsLeadModalOpen}
-        checkoutUrl={CHECKOUT_URL}
+        checkoutUrl={checkoutUrl}
+        price={price}
       />
     </div>
   );
