@@ -34,6 +34,16 @@ export function VideoPlayer({
 
   // Check if it's a Bunny.net / MediaDelivery URL
   const isBunny = videoUrl?.includes("iframe.mediadelivery.net") || videoUrl?.includes("bunny.net");
+  
+  const getBunnyEmbedUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      urlObj.searchParams.set('responsive', 'true');
+      return urlObj.toString();
+    } catch {
+      return url;
+    }
+  };
 
   if (!videoUrl) {
     return (
@@ -83,7 +93,7 @@ export function VideoPlayer({
     return (
       <div className={cn("relative aspect-video rounded-2xl overflow-hidden", className)}>
         <iframe
-          src={videoUrl}
+          src={getBunnyEmbedUrl(videoUrl)}
           title={title || "Vídeo"}
           className="absolute inset-0 w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
