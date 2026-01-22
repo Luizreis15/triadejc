@@ -19,7 +19,7 @@ function HeroSection() {
   return <section className="px-6 py-8 text-center">
       {/* Logo/Título */}
       <div className="mb-4">
-        <img src={logoJornadaUnica} alt="Jornada Única" className="h-20 md:h-24 mx-auto mb-2" />
+        <img src={logoJornadaUnica} alt="Jornada Única" className="h-16 md:h-20 mx-auto mb-2" />
         <p className="text-xs mt-1 opacity-70 body-inter">Experiência Guiada • Digital</p>
       </div>
 

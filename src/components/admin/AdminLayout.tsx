@@ -64,7 +64,7 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
           <img 
             src={logoJornadaUnica} 
             alt="Jornada Única" 
-            className="h-12 mx-auto"
+            className="h-10 mx-auto"
           />
           <p className="text-xs text-muted-foreground text-center mt-2">Painel Admin</p>
         </div>
@@ -114,7 +114,7 @@ export function AdminLayout({ children, activeTab, onTabChange }: AdminLayoutPro
         <header className="md:hidden sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center justify-between px-4 h-14">
             <div className="flex items-center gap-2">
-              <img src={logoJornadaUnica} alt="Jornada Única" className="h-8" />
+              <img src={logoJornadaUnica} alt="Jornada Única" className="h-7" />
               <span className="text-sm font-medium text-muted-foreground">Admin</span>
             </div>
             <div className="flex items-center gap-1">
