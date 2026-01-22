@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.kiwify-webhook]
 verify_jwt = false
 
+[functions.send-abandoned-cart]
+verify_jwt = false
+
 [functions.send-auth-email]
 verify_jwt = false
 

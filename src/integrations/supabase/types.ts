@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      abandoned_cart_emails: {
+        Row: {
+          email_type: string
+          id: string
+          lead_id: string
+          sent_at: string | null
+        }
+        Insert: {
+          email_type: string
+          id?: string
+          lead_id: string
+          sent_at?: string | null
+        }
+        Update: {
+          email_type?: string
+          id?: string
+          lead_id?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abandoned_cart_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       card_completions: {
         Row: {
           card_id: string
