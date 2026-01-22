@@ -32,6 +32,9 @@ export function VideoPlayer({
     return `https://player.vimeo.com/video/${videoId}`;
   };
 
+  // Check if it's a Bunny.net / MediaDelivery URL
+  const isBunny = videoUrl?.includes("iframe.mediadelivery.net") || videoUrl?.includes("bunny.net");
+
   if (!videoUrl) {
     return (
       <div className={cn(
@@ -71,6 +74,22 @@ export function VideoPlayer({
           className="absolute inset-0 w-full h-full"
           allow="autoplay; fullscreen; picture-in-picture"
           allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  if (isBunny) {
+    return (
+      <div className={cn("relative aspect-video rounded-2xl overflow-hidden", className)}>
+        <iframe
+          src={videoUrl}
+          title={title || "Vídeo"}
+          className="absolute inset-0 w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allowFullScreen
+          loading="lazy"
+          style={{ border: "none" }}
         />
       </div>
     );
