@@ -120,6 +120,35 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Send welcome email with credentials
+    let emailSent = false;
+    try {
+      console.log(`Sending welcome email to ${email}`);
+      const welcomeResponse = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseServiceRoleKey}`,
+        },
+        body: JSON.stringify({
+          name: name || email.split("@")[0],
+          email,
+          password,
+          loginUrl: "https://traide.lovable.app/login",
+        }),
+      });
+
+      if (welcomeResponse.ok) {
+        emailSent = true;
+        console.log(`Welcome email sent successfully to ${email}`);
+      } else {
+        const errorData = await welcomeResponse.text();
+        console.error(`Failed to send welcome email: ${errorData}`);
+      }
+    } catch (emailError) {
+      console.error("Error sending welcome email:", emailError);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -128,9 +157,10 @@ Deno.serve(async (req) => {
           email: newUser.user.email,
           name,
         },
+        emailSent,
         message: makeAdmin 
-          ? `Usuário admin ${email} criado com sucesso!`
-          : `Usuário ${email} criado com sucesso!`
+          ? `Usuário admin ${email} criado com sucesso!${emailSent ? " Email de boas-vindas enviado." : ""}`
+          : `Usuário ${email} criado com sucesso!${emailSent ? " Email de boas-vindas enviado." : ""}`
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
