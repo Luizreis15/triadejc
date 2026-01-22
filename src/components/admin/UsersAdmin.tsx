@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Search, UserPlus, Shield, Users, UserCheck, UserX, Mail, Lock, ShieldCheck } from "lucide-react";
+import { Search, UserPlus, Shield, Users, UserCheck, UserX, Mail, ShieldCheck, Send } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -45,6 +45,9 @@ export function UsersAdmin() {
   const [newUserName, setNewUserName] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
   const [makeAdmin, setMakeAdmin] = useState(false);
+  const [isResendDialogOpen, setIsResendDialogOpen] = useState(false);
+  const [resendUser, setResendUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [resendPassword, setResendPassword] = useState("");
   const queryClient = useQueryClient();
 
   const { data: users, isLoading, refetch } = useQuery({
@@ -133,6 +136,43 @@ export function UsersAdmin() {
       toast.error(error.message || "Erro ao criar usuário");
     },
   });
+
+  const resendWelcomeEmail = useMutation({
+    mutationFn: async ({ name, email, password }: { name: string; email: string; password: string }) => {
+      const { data, error } = await supabase.functions.invoke("send-welcome-email", {
+        body: { 
+          name: name || email.split("@")[0],
+          email,
+          password,
+          loginUrl: "https://traide.lovable.app/login",
+        },
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Email de boas-vindas reenviado com sucesso!");
+      setIsResendDialogOpen(false);
+      setResendUser(null);
+      setResendPassword("");
+    },
+    onError: (error: Error) => {
+      console.error("Error resending welcome email:", error);
+      toast.error(error.message || "Erro ao reenviar email");
+    },
+  });
+
+  const handleOpenResendDialog = (user: { id: string; name: string | null; email: string | null }) => {
+    setResendUser({ 
+      id: user.id, 
+      name: user.name || "", 
+      email: user.email || "" 
+    });
+    setResendPassword("");
+    setIsResendDialogOpen(true);
+  };
 
   const handleMakeAdmin = async (userId: string, email: string) => {
     try {
@@ -393,6 +433,14 @@ export function UsersAdmin() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenResendDialog(user)}
+                            title="Reenviar email de boas-vindas"
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
                           {user.role !== "admin" && (
                             <Button
                               variant="ghost"
@@ -413,6 +461,68 @@ export function UsersAdmin() {
           )}
         </CardContent>
       </Card>
+
+      {/* Resend Welcome Email Dialog */}
+      <Dialog open={isResendDialogOpen} onOpenChange={setIsResendDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reenviar Email de Boas-Vindas</DialogTitle>
+            <DialogDescription>
+              Envie novamente o email de boas-vindas com as credenciais de acesso.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Usuário</Label>
+              <p className="text-sm font-medium">{resendUser?.name || "-"}</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <p className="text-sm text-muted-foreground">{resendUser?.email}</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="resendPassword">Senha para enviar no email</Label>
+              <Input
+                id="resendPassword"
+                type="password"
+                placeholder="Digite a senha do usuário"
+                value={resendPassword}
+                onChange={(e) => setResendPassword(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Informe a senha que será enviada no email. Se não souber a senha atual, 
+                você pode definir uma nova senha temporária e orientar o usuário a alterá-la.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsResendDialogOpen(false);
+                setResendUser(null);
+                setResendPassword("");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                if (resendUser) {
+                  resendWelcomeEmail.mutate({
+                    name: resendUser.name,
+                    email: resendUser.email,
+                    password: resendPassword,
+                  });
+                }
+              }}
+              disabled={!resendPassword || resendPassword.length < 6 || resendWelcomeEmail.isPending}
+            >
+              {resendWelcomeEmail.isPending ? "Enviando..." : "Enviar Email"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
