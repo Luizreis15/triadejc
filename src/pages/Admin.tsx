@@ -12,6 +12,7 @@ import { AdminSettingsContent } from "@/components/admin/AdminSettingsContent";
 import { FinanceAdmin } from "@/components/admin/FinanceAdmin";
 import { EmailAdmin } from "@/components/admin/EmailAdmin";
 import { ModulePdfsAdmin } from "@/components/admin/ModulePdfsAdmin";
+import { AbandonedCartDashboard } from "@/components/admin/AbandonedCartDashboard";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -36,6 +37,9 @@ export default function Admin() {
         </TabsContent>
         <TabsContent value="email" className="mt-0">
           <EmailAdmin />
+        </TabsContent>
+        <TabsContent value="abandoned-cart" className="mt-0">
+          <AbandonedCartDashboard />
         </TabsContent>
         <TabsContent value="modules" className="mt-0">
           <ModulesAdmin />

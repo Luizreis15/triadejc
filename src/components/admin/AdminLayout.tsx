@@ -17,6 +17,7 @@ import {
   DollarSign,
   Mail,
   FileDown,
+  ShoppingCart,
 } from "lucide-react";
 import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
 
@@ -33,6 +34,7 @@ const navItems = [
   { value: "leads", label: "Leads", icon: UserPlus },
   { value: "finance", label: "Financeiro", icon: DollarSign },
   { value: "email", label: "Email Mkt", icon: Mail },
+  { value: "abandoned-cart", label: "Carrinho", icon: ShoppingCart },
   { value: "modules", label: "Módulos", icon: BookOpen },
   { value: "cards", label: "Cards", icon: Layers },
   { value: "pdfs", label: "PDFs", icon: FileDown },
