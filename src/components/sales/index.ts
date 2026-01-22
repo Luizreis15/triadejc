@@ -7,4 +7,5 @@ export { PlaceholderImage } from "./PlaceholderImage";
 export { TestimonialCard } from "./TestimonialCard";
 export { FAQAccordion } from "./FAQAccordion";
 export { ScrollReveal } from "./ScrollReveal";
+export { LeadCaptureModal } from "./LeadCaptureModal";
 // MockupLibrary, MockupModules, MockupNotebook are now lazy loaded directly in SalesPage
