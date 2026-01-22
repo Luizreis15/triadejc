@@ -91,15 +91,24 @@ export function VideoPlayer({
 
   if (isBunny) {
     return (
-      <div className={cn("relative aspect-video rounded-2xl overflow-hidden", className)}>
+      <div 
+        className={cn("relative rounded-2xl overflow-hidden", className)}
+        style={{ paddingTop: "56.25%" }}
+      >
         <iframe
           src={getBunnyEmbedUrl(videoUrl)}
           title={title || "Vídeo"}
-          className="absolute inset-0 w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-          allowFullScreen
           loading="lazy"
-          style={{ border: "none" }}
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          style={{ 
+            border: "none", 
+            position: "absolute", 
+            top: 0, 
+            left: 0,
+            height: "100%", 
+            width: "100%" 
+          }}
         />
       </div>
     );
