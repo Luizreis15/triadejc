@@ -334,7 +334,7 @@ function OfferSection() {
 
         {/* CTA - TODO: atualizar link de pagamento */}
         <a 
-          href="https://pay.hub.la/LINK_JORDANA"
+          href="https://pay.kiwify.com.br/oHyxLi0"
           target="_blank" 
           rel="noopener noreferrer"
           className="block w-full"
