@@ -37,7 +37,10 @@ export function VideoPlayer({
   
   const getBunnyEmbedUrl = (url: string) => {
     try {
-      const urlObj = new URL(url);
+      // Converter /play/ para /embed/ para compatibilidade com iframe responsivo
+      let embedUrl = url.replace('/play/', '/embed/');
+      
+      const urlObj = new URL(embedUrl);
       urlObj.searchParams.set('responsive', 'true');
       return urlObj.toString();
     } catch {
