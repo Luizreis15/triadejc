@@ -120,7 +120,7 @@ export function LeadCaptureModal({ open, onOpenChange, checkoutUrl }: LeadCaptur
           <img
             src={logoJornadaUnica}
             alt="Jornada Única"
-            className="h-14 mx-auto mb-4"
+            className="h-12 mx-auto mb-4"
           />
           <h2
             className="heading-playfair text-xl mb-2"
