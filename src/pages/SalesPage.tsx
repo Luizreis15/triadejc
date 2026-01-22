@@ -1,9 +1,13 @@
 import "@/styles/sales-page.css";
+import { useState } from "react";
 import jordanaHero from "@/assets/jordana-hero.jpg";
 import jordanaAbout from "@/assets/jordana-about.jpg";
 import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
-import { ButtonGold, ButtonOrange, IconSquare, CardCream, SectionRed, FAQAccordion, ScrollReveal } from "@/components/sales";
+import { ButtonGold, ButtonOrange, IconSquare, CardCream, SectionRed, FAQAccordion, ScrollReveal, LeadCaptureModal } from "@/components/sales";
 import { Shield, Heart, Brain, Sun, HelpCircle } from "lucide-react";
+
+const CHECKOUT_URL = "https://pay.kiwify.com.br/oHyxLi0";
+
 const scrollToOffer = () => {
   document.getElementById("oferta")?.scrollIntoView({
     behavior: "smooth"
@@ -242,7 +246,7 @@ function TestimonialsSection() {
 }
 
 // Seção 8: Card de Oferta
-function OfferSection() {
+function OfferSection({ onOpenLeadModal }: { onOpenLeadModal: () => void }) {
   const benefits = ["3 Sessões Completas de Jornada Guiada", "Ferramentas práticas de autoconhecimento", "Integração fé + clareza emocional", "Acesso imediato e vitalício"];
   return <SectionRed id="oferta" className="py-12">
       <div className="card-wine p-6 text-center">
@@ -279,20 +283,10 @@ function OfferSection() {
           <p className="heading-playfair text-3xl">por apenas R$ 97</p>
         </div>
 
-        {/* CTA - TODO: atualizar link de pagamento */}
-        <a href="https://pay.kiwify.com.br/oHyxLi0" target="_blank" rel="noopener noreferrer" className="block w-full" onClick={() => {
-        if (typeof window !== 'undefined' && (window as any).fbq) {
-          (window as any).fbq('track', 'InitiateCheckout', {
-            content_name: 'Jornada Única - Jordana Cantarelli',
-            currency: 'BRL',
-            value: 97.00
-          });
-        }
-      }}>
-          <ButtonOrange size="large" className="w-full pointer-events-auto">
-            QUERO ACESSAR A JORNADA
-          </ButtonOrange>
-        </a>
+        {/* CTA */}
+        <ButtonOrange size="large" className="w-full" onClick={onOpenLeadModal}>
+          QUERO ACESSAR A JORNADA
+        </ButtonOrange>
         <p className="text-xs mt-3 opacity-70 body-inter">
           Acesso imediato após confirmação do pagamento.
         </p>
@@ -421,7 +415,10 @@ function FooterSection() {
 
 // Página Principal
 export default function SalesPage() {
-  return <div className="sales-page">
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+
+  return (
+    <div className="sales-page">
       <div className="sales-container">
         <HeroSection />
         <IdentificationSection />
@@ -430,11 +427,18 @@ export default function SalesPage() {
         <TransitionTitle />
         <SessionsSection />
         <TestimonialsSection />
-        <OfferSection />
+        <OfferSection onOpenLeadModal={() => setIsLeadModalOpen(true)} />
         <AboutSection />
         <FAQSection />
         <FinalCTASection />
         <FooterSection />
       </div>
-    </div>;
+
+      <LeadCaptureModal
+        open={isLeadModalOpen}
+        onOpenChange={setIsLeadModalOpen}
+        checkoutUrl={CHECKOUT_URL}
+      />
+    </div>
+  );
 }
