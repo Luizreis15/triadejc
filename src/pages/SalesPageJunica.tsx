@@ -1,7 +1,6 @@
 import SalesPage from "./SalesPage";
 
-// TODO: Substituir pela URL real do Kiwify quando criar o produto de R$ 47
-const CHECKOUT_URL_JUNICA = "https://pay.kiwify.com.br/SEU_LINK_47";
+const CHECKOUT_URL_JUNICA = "https://pay.kiwify.com.br/Kp2712c";
 
 export default function SalesPageJunica() {
   return (
