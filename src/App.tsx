@@ -22,7 +22,7 @@ import AdminProfile from "./pages/AdminProfile";
 
 // Member pages
 import { AppLayout } from "@/components/member/AppLayout";
-import { Home, Modules, ModuleDetail, ReadingView, Notebook, Library, Profile } from "./pages/member";
+import { Home, Modules, ModuleDetail, DayView, ReadingView, Notebook, Library, Profile } from "./pages/member";
 
 const queryClient = new QueryClient();
 
