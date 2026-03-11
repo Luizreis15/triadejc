@@ -38,7 +38,7 @@ export function useModuleDays(moduleId?: string) {
     enabled: !!moduleId,
   });
 
-  // Completions are now fetched globally below (allCompletedDayIds)
+  const isDayCompleted = (dayId: string) => allCompletedDayIds.includes(dayId);
 
   // Fetch ALL completions globally (not just this module)
   const { data: allCompletedDayIds = [] } = useQuery({
