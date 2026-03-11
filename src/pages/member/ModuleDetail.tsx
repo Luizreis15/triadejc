@@ -257,18 +257,21 @@ export default function ModuleDetail() {
                       const completed = isDayCompleted(day.id);
                       const globalIndex = moduleDays.findIndex(d => d.id === day.id);
                       const unlocked = isDayUnlocked(globalIndex);
+                      const isSelahDay = day.day_number === 16;
                       return (
                         <div key={day.id} className="flex items-center gap-3">
                           <div className="flex flex-col items-center">
                             <div className={cn(
                               "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold",
-                              completed
-                                ? "bg-green-100 text-green-700"
-                                : unlocked
-                                  ? "bg-primary/10 text-primary"
-                                  : "bg-muted text-muted-foreground"
+                              isSelahDay && !completed
+                                ? "bg-purple-100 text-purple-700"
+                                : completed
+                                  ? "bg-green-100 text-green-700"
+                                  : unlocked
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-muted text-muted-foreground"
                             )}>
-                              {completed ? <CheckCircle2 className="w-4 h-4" /> : day.day_in_module}
+                              {completed ? <CheckCircle2 className="w-4 h-4" /> : isSelahDay ? "✦" : day.day_in_module}
                             </div>
                             {group.days.indexOf(day) < group.days.length - 1 && (
                               <div className={cn(
@@ -282,17 +285,26 @@ export default function ModuleDetail() {
                               to={`/membros/app/modulos/${slug}/dia/${day.id}`}
                               className={cn(
                                 "flex-1 p-3 rounded-xl border transition-colors",
-                                completed
-                                  ? "bg-green-50/50 border-green-200 hover:border-green-300"
-                                  : "bg-card border-border/50 hover:border-primary/30"
+                                isSelahDay && !completed
+                                  ? "bg-purple-50/50 border-purple-200 hover:border-purple-300"
+                                  : completed
+                                    ? "bg-green-50/50 border-green-200 hover:border-green-300"
+                                    : "bg-card border-border/50 hover:border-primary/30"
                               )}
                             >
-                              <h3 className={cn(
-                                "font-medium text-sm",
-                                completed ? "text-muted-foreground" : "text-foreground"
-                              )}>
-                                {day.title}
-                              </h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className={cn(
+                                  "font-medium text-sm",
+                                  isSelahDay && !completed ? "text-purple-800" : completed ? "text-muted-foreground" : "text-foreground"
+                                )}>
+                                  {day.title}
+                                </h3>
+                                {isSelahDay && !completed && (
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded">
+                                    Checkpoint
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-xs text-muted-foreground mt-0.5">
                                 Dia {day.day_number} · {completed ? "Concluído" : "Disponível"}
                               </p>

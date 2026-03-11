@@ -43,23 +43,36 @@ export default function DayView() {
   // Exercise state
   const [q1, setQ1] = useState("");
   const [q2, setQ2] = useState("");
+  const [q3, setQ3] = useState("");
   const [saving, setSaving] = useState(false);
+  const isSelah = day?.day_number === 16;
 
   // Load saved exercises
   const { data: savedExercises } = useDayExercises(dayId);
 
   useEffect(() => {
     if (savedExercises) {
-      // Parse saved content
-      const parts = savedExercises.split("\n\n**Exercício 2:**\n");
-      if (parts.length === 2) {
-        const q1Part = parts[0].replace("**Exercício 1:**\n", "");
-        setQ1(q1Part);
-        setQ2(parts[1]);
+      // Try new format with q3
+      const parts3 = savedExercises.split("\n\n**Exercício 3:**\n");
+      if (parts3.length === 2) {
+        const firstTwo = parts3[0].split("\n\n**Exercício 2:**\n");
+        if (firstTwo.length === 2) {
+          setQ1(firstTwo[0].replace("**Exercício 1:**\n", ""));
+          setQ2(firstTwo[1]);
+          setQ3(parts3[1]);
+        }
+      } else {
+        const parts = savedExercises.split("\n\n**Exercício 2:**\n");
+        if (parts.length === 2) {
+          setQ1(parts[0].replace("**Exercício 1:**\n", ""));
+          setQ2(parts[1]);
+        }
+        setQ3("");
       }
     } else {
       setQ1("");
       setQ2("");
+      setQ3("");
     }
   }, [savedExercises]);
 
@@ -72,6 +85,7 @@ export default function DayView() {
         moduleSlug: slug,
         q1Answer: q1,
         q2Answer: q2,
+        q3Answer: q3 || undefined,
       });
       toast({ title: "Respostas salvas! 💾" });
     } catch {
@@ -83,12 +97,13 @@ export default function DayView() {
   const handleComplete = async () => {
     if (!day || !slug) return;
     // Save exercises first
-    if (q1 || q2) {
+    if (q1 || q2 || q3) {
       await saveExercises.mutateAsync({
         dayId: day.id,
         moduleSlug: slug,
         q1Answer: q1,
         q2Answer: q2,
+        q3Answer: q3 || undefined,
       });
     }
     try {
@@ -127,6 +142,18 @@ export default function DayView() {
         <ArrowLeft className="w-4 h-4" />
         <span className="text-sm">Voltar ao módulo</span>
       </Link>
+
+      {/* Selá Checkpoint Banner */}
+      {isSelah && (
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-4 text-center space-y-1">
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
+            ✦ Checkpoint
+          </span>
+          <p className="text-sm text-purple-800 font-medium">
+            Pausa do meio da jornada — revise e consolide antes de avançar.
+          </p>
+        </div>
+      )}
 
       {/* Video */}
       {day.top_video_url && (
@@ -183,7 +210,7 @@ export default function DayView() {
       )}
 
       {/* Exercises */}
-      {(day.exercise_q1 || day.exercise_q2) && (
+      {(day.exercise_q1 || day.exercise_q2 || (day as any).exercise_q3) && (
         <section className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
           <div className="flex items-center gap-2">
             <PenLine className="w-5 h-5 text-green-600" />
@@ -213,6 +240,18 @@ export default function DayView() {
               />
             </div>
           )}
+
+          {(day as any).exercise_q3 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">{(day as any).exercise_q3}</p>
+              <Textarea
+                value={q3}
+                onChange={(e) => setQ3(e.target.value)}
+                placeholder="Escreva sua resposta aqui..."
+                className="min-h-[100px] bg-background border-border/50 focus:border-primary/30 resize-none"
+              />
+            </div>
+          )}
         </section>
       )}
 
@@ -233,7 +272,7 @@ export default function DayView() {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3 pt-2">
-        {(q1 || q2) && (
+        {(q1 || q2 || q3) && (
           <Button
             variant="outline"
             onClick={handleSave}
@@ -251,7 +290,7 @@ export default function DayView() {
             className="w-full bg-primary hover:bg-primary/90"
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
-            Concluir dia
+            {isSelah ? "Concluir Selá e avançar" : "Concluir dia"}
           </Button>
         )}
 

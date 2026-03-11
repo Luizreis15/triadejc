@@ -398,6 +398,7 @@ export type Database = {
           day_number: number
           exercise_q1: string | null
           exercise_q2: string | null
+          exercise_q3: string | null
           id: string
           message_text: string
           module_id: string
@@ -413,6 +414,7 @@ export type Database = {
           day_number: number
           exercise_q1?: string | null
           exercise_q2?: string | null
+          exercise_q3?: string | null
           id?: string
           message_text: string
           module_id: string
@@ -428,6 +430,7 @@ export type Database = {
           day_number?: number
           exercise_q1?: string | null
           exercise_q2?: string | null
+          exercise_q3?: string | null
           id?: string
           message_text?: string
           module_id?: string
