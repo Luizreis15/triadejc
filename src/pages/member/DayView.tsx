@@ -97,12 +97,13 @@ export default function DayView() {
   const handleComplete = async () => {
     if (!day || !slug) return;
     // Save exercises first
-    if (q1 || q2) {
+    if (q1 || q2 || q3) {
       await saveExercises.mutateAsync({
         dayId: day.id,
         moduleSlug: slug,
         q1Answer: q1,
         q2Answer: q2,
+        q3Answer: q3 || undefined,
       });
     }
     try {
