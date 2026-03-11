@@ -210,7 +210,7 @@ export default function DayView() {
       )}
 
       {/* Exercises */}
-      {(day.exercise_q1 || day.exercise_q2) && (
+      {(day.exercise_q1 || day.exercise_q2 || (day as any).exercise_q3) && (
         <section className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
           <div className="flex items-center gap-2">
             <PenLine className="w-5 h-5 text-green-600" />
@@ -235,6 +235,18 @@ export default function DayView() {
               <Textarea
                 value={q2}
                 onChange={(e) => setQ2(e.target.value)}
+                placeholder="Escreva sua resposta aqui..."
+                className="min-h-[100px] bg-background border-border/50 focus:border-primary/30 resize-none"
+              />
+            </div>
+          )}
+
+          {(day as any).exercise_q3 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">{(day as any).exercise_q3}</p>
+              <Textarea
+                value={q3}
+                onChange={(e) => setQ3(e.target.value)}
                 placeholder="Escreva sua resposta aqui..."
                 className="min-h-[100px] bg-background border-border/50 focus:border-primary/30 resize-none"
               />
