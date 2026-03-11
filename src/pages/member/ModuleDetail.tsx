@@ -223,108 +223,166 @@ export default function ModuleDetail() {
 
       {/* JORNADA DIÁRIA — Sub-módulos colapsáveis */}
       {moduleDays.length > 0 && (() => {
-        // Group days into sub-modules by ranges of 5
+        // Group days into sub-modules by ranges
         const subModules = [
-          { title: "Presença, Entrega e Direção", subtitle: "Dias 1–5", days: moduleDays.filter(d => d.day_number >= 1 && d.day_number <= 5) },
-          { title: "Presença que Ilumina", subtitle: "Dias 6–10 · Luz & Influência", days: moduleDays.filter(d => d.day_number >= 6 && d.day_number <= 10) },
-          { title: "Vitória & Propósito", subtitle: "Dias 11–15 · Coragem para Continuar", days: moduleDays.filter(d => d.day_number >= 11 && d.day_number <= 15) },
-          { title: "Direção & Renovo", subtitle: "Dias 16–20 · Nova Fase", days: moduleDays.filter(d => d.day_number >= 16 && d.day_number <= 20) },
+          { title: "Presença, Entrega e Direção", subtitle: "Dias 1–5", days: moduleDays.filter(d => d.day_number >= 1 && d.day_number <= 5), isSelah: false },
+          { title: "Presença que Ilumina", subtitle: "Dias 6–10 · Luz & Influência", days: moduleDays.filter(d => d.day_number >= 6 && d.day_number <= 10), isSelah: false },
+          { title: "Vitória & Propósito", subtitle: "Dias 11–15 · Coragem para Continuar", days: moduleDays.filter(d => d.day_number >= 11 && d.day_number <= 15), isSelah: false },
+          { title: "Momento Selá", subtitle: "Checkpoint · Pausa e Revisão", days: moduleDays.filter(d => d.day_number === 16), isSelah: true },
+          { title: "Direção & Renovo", subtitle: "Dias 17–20 · Nova Fase", days: moduleDays.filter(d => d.day_number >= 17 && d.day_number <= 20), isSelah: false },
         ].filter(g => g.days.length > 0);
 
         return (
           <div className="space-y-3">
-            {subModules.map((group) => (
-              <Collapsible key={group.title}>
-                <CollapsibleTrigger className="w-full">
-                  <div className="flex items-center justify-between p-4 bg-card rounded-2xl border border-border/50 hover:border-primary/20 transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                        <Calendar className="w-6 h-6" />
+            {subModules.map((group) => {
+              // Selá: render as a single clickable card (no collapsible)
+              if (group.isSelah && group.days.length === 1) {
+                const selahDay = group.days[0];
+                const completed = isDayCompleted(selahDay.id);
+                const globalIndex = moduleDays.findIndex(d => d.id === selahDay.id);
+                const unlocked = isDayUnlocked(globalIndex);
+
+                if (unlocked) {
+                  return (
+                    <Link
+                      key={group.title}
+                      to={`/membros/app/modulos/${slug}/dia/${selahDay.id}`}
+                      className={cn(
+                        "flex items-center justify-between p-4 rounded-2xl border transition-colors",
+                        completed
+                          ? "bg-green-50/50 border-green-200 hover:border-green-300"
+                          : "bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 hover:border-purple-300"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-12 h-12 rounded-xl flex items-center justify-center text-lg",
+                          completed ? "bg-green-100 text-green-700" : "bg-purple-100 text-purple-700"
+                        )}>
+                          {completed ? <CheckCircle2 className="w-6 h-6" /> : "✦"}
+                        </div>
+                        <div className="text-left">
+                          <div className="flex items-center gap-2">
+                            <h2 className={cn("font-serif text-lg font-semibold", completed ? "text-muted-foreground" : "text-purple-800")}>
+                              {group.title}
+                            </h2>
+                            {!completed && (
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded">
+                                Checkpoint
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {completed ? "Concluído" : "Pausa e Revisão · Dia 16"}
+                          </p>
+                        </div>
                       </div>
+                      <ChevronDown className="w-5 h-5 text-muted-foreground -rotate-90" />
+                    </Link>
+                  );
+                }
+
+                return (
+                  <div
+                    key={group.title}
+                    className="flex items-center justify-between p-4 rounded-2xl border bg-muted/30 border-border/30 opacity-60"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-lg text-muted-foreground">✦</div>
                       <div className="text-left">
-                        <h2 className="font-serif text-lg font-semibold text-foreground">{group.title}</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {group.days.filter(d => isDayCompleted(d.id)).length} de {group.days.length} dias concluídos
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <h2 className="font-serif text-lg font-semibold text-muted-foreground">{group.title}</h2>
+                          <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">Conclua o dia anterior para avançar</p>
                       </div>
                     </div>
-                    <ChevronDown className="w-5 h-5 text-muted-foreground group-data-[state=open]:rotate-180 transition-transform" />
                   </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="space-y-2 mt-3 pl-2">
-                    {group.days.map((day) => {
-                      const completed = isDayCompleted(day.id);
-                      const globalIndex = moduleDays.findIndex(d => d.id === day.id);
-                      const unlocked = isDayUnlocked(globalIndex);
-                      const isSelahDay = day.day_number === 16;
-                      return (
-                        <div key={day.id} className="flex items-center gap-3">
-                          <div className="flex flex-col items-center">
-                            <div className={cn(
-                              "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold",
-                              isSelahDay && !completed
-                                ? "bg-purple-100 text-purple-700"
-                                : completed
+                );
+              }
+
+              // Normal collapsible group
+              return (
+                <Collapsible key={group.title}>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between p-4 bg-card rounded-2xl border border-border/50 hover:border-primary/20 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                          <Calendar className="w-6 h-6" />
+                        </div>
+                        <div className="text-left">
+                          <h2 className="font-serif text-lg font-semibold text-foreground">{group.title}</h2>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {group.days.filter(d => isDayCompleted(d.id)).length} de {group.days.length} dias concluídos
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronDown className="w-5 h-5 text-muted-foreground group-data-[state=open]:rotate-180 transition-transform" />
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="space-y-2 mt-3 pl-2">
+                      {group.days.map((day) => {
+                        const completed = isDayCompleted(day.id);
+                        const globalIndex = moduleDays.findIndex(d => d.id === day.id);
+                        const unlocked = isDayUnlocked(globalIndex);
+                        return (
+                          <div key={day.id} className="flex items-center gap-3">
+                            <div className="flex flex-col items-center">
+                              <div className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold",
+                                completed
                                   ? "bg-green-100 text-green-700"
                                   : unlocked
                                     ? "bg-primary/10 text-primary"
                                     : "bg-muted text-muted-foreground"
-                            )}>
-                              {completed ? <CheckCircle2 className="w-4 h-4" /> : isSelahDay ? "✦" : day.day_in_module}
+                              )}>
+                                {completed ? <CheckCircle2 className="w-4 h-4" /> : day.day_in_module}
+                              </div>
+                              {group.days.indexOf(day) < group.days.length - 1 && (
+                                <div className={cn(
+                                  "w-0.5 h-4",
+                                  completed ? "bg-green-200" : "bg-border"
+                                )} />
+                              )}
                             </div>
-                            {group.days.indexOf(day) < group.days.length - 1 && (
-                              <div className={cn(
-                                "w-0.5 h-4",
-                                completed ? "bg-green-200" : "bg-border"
-                              )} />
-                            )}
-                          </div>
-                          {unlocked ? (
-                            <Link
-                              to={`/membros/app/modulos/${slug}/dia/${day.id}`}
-                              className={cn(
-                                "flex-1 p-3 rounded-xl border transition-colors",
-                                isSelahDay && !completed
-                                  ? "bg-purple-50/50 border-purple-200 hover:border-purple-300"
-                                  : completed
+                            {unlocked ? (
+                              <Link
+                                to={`/membros/app/modulos/${slug}/dia/${day.id}`}
+                                className={cn(
+                                  "flex-1 p-3 rounded-xl border transition-colors",
+                                  completed
                                     ? "bg-green-50/50 border-green-200 hover:border-green-300"
                                     : "bg-card border-border/50 hover:border-primary/30"
-                              )}
-                            >
-                              <div className="flex items-center gap-2">
+                                )}
+                              >
                                 <h3 className={cn(
                                   "font-medium text-sm",
-                                  isSelahDay && !completed ? "text-purple-800" : completed ? "text-muted-foreground" : "text-foreground"
+                                  completed ? "text-muted-foreground" : "text-foreground"
                                 )}>
                                   {day.title}
                                 </h3>
-                                {isSelahDay && !completed && (
-                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded">
-                                    Checkpoint
-                                  </span>
-                                )}
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Dia {day.day_number} · {completed ? "Concluído" : "Disponível"}
+                                </p>
+                              </Link>
+                            ) : (
+                              <div className="flex-1 p-3 rounded-xl border bg-muted/30 border-border/30 opacity-60">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-medium text-sm text-muted-foreground">{day.title}</h3>
+                                  <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-0.5">Conclua o dia anterior para avançar</p>
                               </div>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                Dia {day.day_number} · {completed ? "Concluído" : "Disponível"}
-                              </p>
-                            </Link>
-                          ) : (
-                            <div className="flex-1 p-3 rounded-xl border bg-muted/30 border-border/30 opacity-60">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium text-sm text-muted-foreground">{day.title}</h3>
-                                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-0.5">Conclua o dia anterior para avançar</p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            ))}
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
           </div>
         );
       })()}
