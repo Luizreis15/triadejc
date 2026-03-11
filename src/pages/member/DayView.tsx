@@ -143,6 +143,18 @@ export default function DayView() {
         <span className="text-sm">Voltar ao módulo</span>
       </Link>
 
+      {/* Selá Checkpoint Banner */}
+      {isSelah && (
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-4 text-center space-y-1">
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
+            ✦ Checkpoint
+          </span>
+          <p className="text-sm text-purple-800 font-medium">
+            Pausa do meio da jornada — revise e consolide antes de avançar.
+          </p>
+        </div>
+      )}
+
       {/* Video */}
       {day.top_video_url && (
         <VideoPlayer videoUrl={day.top_video_url} title={day.title} className="shadow-lg" />
