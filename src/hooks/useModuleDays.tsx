@@ -13,6 +13,7 @@ export interface ModuleDay {
   confession_text: string | null;
   exercise_q1: string | null;
   exercise_q2: string | null;
+  exercise_q3: string | null;
   top_video_url: string | null;
   pdf_url: string | null;
   created_at: string;
