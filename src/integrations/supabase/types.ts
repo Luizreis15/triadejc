@@ -712,6 +712,62 @@ export type Database = {
         }
         Relationships: []
       }
+      user_favorite_confessions: {
+        Row: {
+          created_at: string
+          day_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorite_confessions_day_id_fkey"
+            columns: ["day_id"]
+            isOneToOne: false
+            referencedRelation: "module_days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_maintenance_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          maintenance_day: number
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          maintenance_day: number
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          maintenance_day?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
