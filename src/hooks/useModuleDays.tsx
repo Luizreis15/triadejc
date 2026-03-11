@@ -58,10 +58,42 @@ export function useModuleDays(moduleId?: string) {
 
   const isDayCompleted = (dayId: string) => completedDayIds.includes(dayId);
 
+  // Fetch ALL completions globally (not just this module)
+  const { data: allCompletedDayIds = [] } = useQuery({
+    queryKey: ["all-day-completions", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("notebook_entries")
+        .select("title")
+        .eq("user_id", user.id)
+        .eq("section", "day_complete");
+      if (error) throw error;
+      return (data || []).map(e => e.title).filter(Boolean) as string[];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch ALL days globally to check cross-module unlock
+  const { data: allDays = [] } = useQuery({
+    queryKey: ["all-module-days"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("module_days")
+        .select("id, day_number")
+        .order("day_number");
+      if (error) throw error;
+      return data as { id: string; day_number: number }[];
+    },
+  });
+
   const isDayUnlocked = (dayIndex: number) => {
-    if (dayIndex === 0) return true;
-    const prevDay = days[dayIndex - 1];
-    return prevDay ? isDayCompleted(prevDay.id) : false;
+    const day = days[dayIndex];
+    if (!day) return false;
+    if (day.day_number === 1) return true;
+    // Find the global previous day (day_number - 1)
+    const prevGlobalDay = allDays.find(d => d.day_number === day.day_number - 1);
+    return prevGlobalDay ? allCompletedDayIds.includes(prevGlobalDay.id) : false;
   };
 
   // Save exercise answers
