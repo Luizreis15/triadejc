@@ -174,7 +174,7 @@ export function useModuleDays(moduleId?: string) {
 
   return {
     days,
-    isLoading: daysLoading || completionsLoading,
+    isLoading: daysLoading,
     isDayCompleted,
     isDayUnlocked,
     saveExercises,
