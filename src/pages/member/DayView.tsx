@@ -43,7 +43,9 @@ export default function DayView() {
   // Exercise state
   const [q1, setQ1] = useState("");
   const [q2, setQ2] = useState("");
+  const [q3, setQ3] = useState("");
   const [saving, setSaving] = useState(false);
+  const isSelah = day?.day_number === 16;
 
   // Load saved exercises
   const { data: savedExercises } = useDayExercises(dayId);
