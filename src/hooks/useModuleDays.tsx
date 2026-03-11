@@ -81,15 +81,19 @@ export function useModuleDays(moduleId?: string) {
 
   // Save exercise answers
   const saveExercises = useMutation({
-    mutationFn: async ({ dayId, moduleSlug, q1Answer, q2Answer }: {
+    mutationFn: async ({ dayId, moduleSlug, q1Answer, q2Answer, q3Answer }: {
       dayId: string;
       moduleSlug: string;
       q1Answer: string;
       q2Answer: string;
+      q3Answer?: string;
     }) => {
       if (!user?.id) throw new Error("Not authenticated");
       
-      const content = `**Exercício 1:**\n${q1Answer}\n\n**Exercício 2:**\n${q2Answer}`;
+      let content = `**Exercício 1:**\n${q1Answer}\n\n**Exercício 2:**\n${q2Answer}`;
+      if (q3Answer) {
+        content += `\n\n**Exercício 3:**\n${q3Answer}`;
+      }
       
       // Upsert: check if entry exists
       const { data: existing } = await supabase
