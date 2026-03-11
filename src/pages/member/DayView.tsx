@@ -136,7 +136,7 @@ export default function DayView() {
       {/* Day Header */}
       <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Dia {day.day_in_module} de {totalDays}
+          Dia {day.day_number}
         </p>
         <h1 className="font-serif text-2xl font-semibold text-foreground">{day.title}</h1>
         {isCompleted && (
