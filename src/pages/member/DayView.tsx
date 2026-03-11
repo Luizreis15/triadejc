@@ -272,7 +272,7 @@ export default function DayView() {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3 pt-2">
-        {(q1 || q2) && (
+        {(q1 || q2 || q3) && (
           <Button
             variant="outline"
             onClick={handleSave}
@@ -290,7 +290,7 @@ export default function DayView() {
             className="w-full bg-primary hover:bg-primary/90"
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
-            Concluir dia
+            {isSelah ? "Concluir Selá e avançar" : "Concluir dia"}
           </Button>
         )}
 
