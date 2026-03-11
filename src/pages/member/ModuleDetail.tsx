@@ -230,6 +230,7 @@ export default function ModuleDetail() {
           { title: "Vitória & Propósito", subtitle: "Dias 11–15 · Coragem para Continuar", days: moduleDays.filter(d => d.day_number >= 11 && d.day_number <= 15), isSelah: false },
           { title: "Momento Selá", subtitle: "Checkpoint · Pausa e Revisão", days: moduleDays.filter(d => d.day_number === 16), isSelah: true },
           { title: "Direção & Renovo", subtitle: "Dias 17–20 · Nova Fase", days: moduleDays.filter(d => d.day_number >= 17 && d.day_number <= 20), isSelah: false },
+          { title: "Paz que Transborda", subtitle: "Dias 21–25 · Coração & Relacionamentos", days: moduleDays.filter(d => d.day_number >= 21 && d.day_number <= 25), isSelah: false },
         ].filter(g => g.days.length > 0);
 
         return (
