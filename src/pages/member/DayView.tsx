@@ -46,6 +46,39 @@ export default function DayView() {
   const [q3, setQ3] = useState("");
   const [saving, setSaving] = useState(false);
   const isSelah = day?.day_number === 16;
+  const queryClient = useQueryClient();
+
+  // Favorite confession
+  const { data: isFavorited = false } = useQuery({
+    queryKey: ["fav-confession", user?.id, dayId],
+    queryFn: async () => {
+      if (!user?.id || !dayId) return false;
+      const { data } = await supabase
+        .from("user_favorite_confessions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("day_id", dayId)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id && !!dayId,
+  });
+
+  const toggleFavorite = useMutation({
+    mutationFn: async () => {
+      if (!user?.id || !dayId) throw new Error("Missing data");
+      if (isFavorited) {
+        await supabase.from("user_favorite_confessions").delete().eq("user_id", user.id).eq("day_id", dayId);
+      } else {
+        await supabase.from("user_favorite_confessions").insert({ user_id: user.id, day_id: dayId });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fav-confession", user?.id, dayId] });
+      queryClient.invalidateQueries({ queryKey: ["favorite-confessions"] });
+      toast({ title: isFavorited ? "Removido dos favoritos" : "Adicionado aos favoritos ❤️" });
+    },
+  });
 
   // Load saved exercises
   const { data: savedExercises } = useDayExercises(dayId);
