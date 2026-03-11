@@ -85,6 +85,7 @@ export default function DayView() {
         moduleSlug: slug,
         q1Answer: q1,
         q2Answer: q2,
+        q3Answer: q3 || undefined,
       });
       toast({ title: "Respostas salvas! 💾" });
     } catch {
