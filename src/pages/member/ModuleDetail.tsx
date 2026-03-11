@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar } from "@/components/member";
 import { MarkdownPreview } from "@/components/member/MarkdownPreview";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
 import { useModuleDays } from "@/hooks/useModuleDays";
