@@ -88,6 +88,9 @@ export default function ModuleDetail() {
 
   // Use progress hook
   const { isCardCompleted, markCardComplete } = useProgress(module?.id);
+  
+  // Use module days hook
+  const { days: moduleDays, isDayCompleted, isDayUnlocked } = useModuleDays(module?.id);
 
   // Calculate progress based on actual completions
   const totalCards = cards.length;
