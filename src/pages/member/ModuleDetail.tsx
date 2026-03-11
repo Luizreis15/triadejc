@@ -227,6 +227,7 @@ export default function ModuleDetail() {
         const subModules = [
           { title: "Presença, Entrega e Direção", subtitle: "Dias 1–5", days: moduleDays.filter(d => d.day_number >= 1 && d.day_number <= 5) },
           { title: "Presença que Ilumina", subtitle: "Dias 6–10 · Luz & Influência", days: moduleDays.filter(d => d.day_number >= 6 && d.day_number <= 10) },
+          { title: "Vitória & Propósito", subtitle: "Dias 11–15 · Coragem para Continuar", days: moduleDays.filter(d => d.day_number >= 11 && d.day_number <= 15) },
         ].filter(g => g.days.length > 0);
 
         return (
