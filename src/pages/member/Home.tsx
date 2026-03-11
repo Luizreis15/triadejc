@@ -96,32 +96,10 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Overall Progress */}
-      <section className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-foreground">Sua jornada</span>
-          <span className="text-2xl font-serif font-semibold text-primary">{overallProgress}%</span>
-        </div>
-        <ProgressBar value={overallProgress} size="lg" />
-        <p className="text-xs text-muted-foreground mt-2">
-          {completedModules} de {totalModules} módulos concluídos
-        </p>
-      </section>
-
-      {/* Continue Button */}
-      {currentModule && (
-        <Link to={`/membros/app/modulos/${currentModule.slug}`}>
-          <Button className="w-full h-14 rounded-xl text-base font-medium gap-2">
-            Continuar de onde parei
-            <ArrowRight className="w-5 h-5" />
-          </Button>
-        </Link>
-      )}
-
-      {/* Modules Preview */}
+      {/* Modules Preview - Jornada Diária */}
       <section className="space-y-4">
         <h2 className="font-serif text-lg font-semibold text-foreground">
-          Trilha da Jornada
+          Jornada Diária
         </h2>
         <div className="space-y-3">
           {modules.slice(0, 3).map((module) => {
@@ -148,6 +126,28 @@ export default function Home() {
           </Link>
         )}
       </section>
+
+      {/* Overall Progress */}
+      <section className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-foreground">Sua jornada</span>
+          <span className="text-2xl font-serif font-semibold text-primary">{overallProgress}%</span>
+        </div>
+        <ProgressBar value={overallProgress} size="lg" />
+        <p className="text-xs text-muted-foreground mt-2">
+          {completedModules} de {totalModules} módulos concluídos
+        </p>
+      </section>
+
+      {/* Continue Button */}
+      {currentModule && (
+        <Link to={`/membros/app/modulos/${currentModule.slug}`}>
+          <Button className="w-full h-14 rounded-xl text-base font-medium gap-2">
+            Continuar de onde parei
+            <ArrowRight className="w-5 h-5" />
+          </Button>
+        </Link>
+      )}
 
       {/* Calm Button - Floating */}
       <button
