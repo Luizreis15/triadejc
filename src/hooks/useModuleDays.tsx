@@ -38,25 +38,7 @@ export function useModuleDays(moduleId?: string) {
     enabled: !!moduleId,
   });
 
-  // Fetch day completions (using notebook_entries with section='day_exercise')
-  const { data: completedDayIds = [], isLoading: completionsLoading } = useQuery({
-    queryKey: ["day-completions", user?.id, moduleId],
-    queryFn: async () => {
-      if (!user?.id || !moduleId) return [];
-      // A day is "completed" if there's a notebook_entry with section='day_complete' for that day
-      const { data, error } = await supabase
-        .from("notebook_entries")
-        .select("title")
-        .eq("user_id", user.id)
-        .eq("section", "day_complete");
-      if (error) throw error;
-      // title stores the day id
-      return (data || []).map(e => e.title).filter(Boolean) as string[];
-    },
-    enabled: !!user?.id && !!moduleId,
-  });
-
-  const isDayCompleted = (dayId: string) => completedDayIds.includes(dayId);
+  // Completions are now fetched globally below (allCompletedDayIds)
 
   // Fetch ALL completions globally (not just this module)
   const { data: allCompletedDayIds = [] } = useQuery({
