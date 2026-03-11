@@ -139,9 +139,13 @@ export default function DayView() {
         q3Answer: q3 || undefined,
       });
     }
-    try {
+     try {
       await markDayComplete.mutateAsync({ dayId: day.id, moduleSlug: slug });
       toast({ title: "Dia concluído! ✨", description: "Parabéns por mais um dia de jornada." });
+      // If Day 30, redirect to completion page
+      if (day.day_number === 30) {
+        setTimeout(() => navigate("/membros/app/conclusao"), 1500);
+      }
     } catch {
       toast({ title: "Erro ao concluir", variant: "destructive" });
     }
