@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2, Circle, Heart, Sparkles, Lock, Calendar } from "lucide-react";
+import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2, Circle, Heart, Sparkles, Lock, Calendar, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar } from "@/components/member";
