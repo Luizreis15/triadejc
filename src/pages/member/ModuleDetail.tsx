@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2, Circle, Heart, Sparkles } from "lucide-react";
+import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2, Circle, Heart, Sparkles, Lock, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar } from "@/components/member";
@@ -8,6 +8,7 @@ import { MarkdownPreview } from "@/components/member/MarkdownPreview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
+import { useModuleDays } from "@/hooks/useModuleDays";
 import { toast } from "@/hooks/use-toast";
 import { useRef } from "react";
 
