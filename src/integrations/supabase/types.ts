@@ -390,6 +390,62 @@ export type Database = {
           },
         ]
       }
+      module_days: {
+        Row: {
+          confession_text: string | null
+          created_at: string | null
+          day_in_module: number
+          day_number: number
+          exercise_q1: string | null
+          exercise_q2: string | null
+          id: string
+          message_text: string
+          module_id: string
+          pdf_url: string | null
+          title: string
+          top_video_url: string | null
+          verse_reference: string | null
+        }
+        Insert: {
+          confession_text?: string | null
+          created_at?: string | null
+          day_in_module: number
+          day_number: number
+          exercise_q1?: string | null
+          exercise_q2?: string | null
+          id?: string
+          message_text: string
+          module_id: string
+          pdf_url?: string | null
+          title: string
+          top_video_url?: string | null
+          verse_reference?: string | null
+        }
+        Update: {
+          confession_text?: string | null
+          created_at?: string | null
+          day_in_module?: number
+          day_number?: number
+          exercise_q1?: string | null
+          exercise_q2?: string | null
+          id?: string
+          message_text?: string
+          module_id?: string
+          pdf_url?: string | null
+          title?: string
+          top_video_url?: string | null
+          verse_reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_days_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_pdfs: {
         Row: {
           card_id: string | null
