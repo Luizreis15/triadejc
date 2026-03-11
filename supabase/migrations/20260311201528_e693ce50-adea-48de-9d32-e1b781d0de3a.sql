@@ -1,0 +1,1 @@
+ALTER TABLE public.module_days ADD COLUMN exercise_q3 text DEFAULT NULL;
