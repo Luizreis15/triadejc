@@ -52,16 +52,27 @@ export default function DayView() {
 
   useEffect(() => {
     if (savedExercises) {
-      // Parse saved content
-      const parts = savedExercises.split("\n\n**Exercício 2:**\n");
-      if (parts.length === 2) {
-        const q1Part = parts[0].replace("**Exercício 1:**\n", "");
-        setQ1(q1Part);
-        setQ2(parts[1]);
+      // Try new format with q3
+      const parts3 = savedExercises.split("\n\n**Exercício 3:**\n");
+      if (parts3.length === 2) {
+        const firstTwo = parts3[0].split("\n\n**Exercício 2:**\n");
+        if (firstTwo.length === 2) {
+          setQ1(firstTwo[0].replace("**Exercício 1:**\n", ""));
+          setQ2(firstTwo[1]);
+          setQ3(parts3[1]);
+        }
+      } else {
+        const parts = savedExercises.split("\n\n**Exercício 2:**\n");
+        if (parts.length === 2) {
+          setQ1(parts[0].replace("**Exercício 1:**\n", ""));
+          setQ2(parts[1]);
+        }
+        setQ3("");
       }
     } else {
       setQ1("");
       setQ2("");
+      setQ3("");
     }
   }, [savedExercises]);
 
