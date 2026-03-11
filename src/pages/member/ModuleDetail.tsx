@@ -220,6 +220,75 @@ export default function ModuleDetail() {
         />
       </section>
 
+      {/* JORNADA DIÁRIA — Timeline de Dias */}
+      {moduleDays.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            <h2 className="font-serif text-lg font-semibold text-foreground">Jornada Diária</h2>
+          </div>
+          <div className="space-y-2">
+            {moduleDays.map((day, index) => {
+              const completed = isDayCompleted(day.id);
+              const unlocked = isDayUnlocked(index);
+              return (
+                <div key={day.id} className="flex items-center gap-3">
+                  {/* Timeline dot */}
+                  <div className="flex flex-col items-center">
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold",
+                      completed
+                        ? "bg-green-100 text-green-700"
+                        : unlocked
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground"
+                    )}>
+                      {completed ? <CheckCircle2 className="w-4 h-4" /> : day.day_in_module}
+                    </div>
+                    {index < moduleDays.length - 1 && (
+                      <div className={cn(
+                        "w-0.5 h-4",
+                        completed ? "bg-green-200" : "bg-border"
+                      )} />
+                    )}
+                  </div>
+                  {/* Card */}
+                  {unlocked ? (
+                    <Link
+                      to={`/membros/app/modulos/${slug}/dia/${day.id}`}
+                      className={cn(
+                        "flex-1 p-3 rounded-xl border transition-colors",
+                        completed
+                          ? "bg-green-50/50 border-green-200 hover:border-green-300"
+                          : "bg-card border-border/50 hover:border-primary/30"
+                      )}
+                    >
+                      <h3 className={cn(
+                        "font-medium text-sm",
+                        completed ? "text-muted-foreground" : "text-foreground"
+                      )}>
+                        {day.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {completed ? "Concluído" : "Disponível"}
+                      </p>
+                    </Link>
+                  ) : (
+                    <div className="flex-1 p-3 rounded-xl border bg-muted/30 border-border/30 opacity-60">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-sm text-muted-foreground">{day.title}</h3>
+                        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">Conclua o dia anterior</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* SEÇÃO 1 — Começar por aqui (intro) */}
       {introCards.length > 0 && (
         <div ref={introRef}>
