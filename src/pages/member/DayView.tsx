@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BookOpen, Sparkles, PenLine, Save, CheckCircle2, ChevronRight, FileDown } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, BookOpen, Sparkles, PenLine, Save, CheckCircle2, ChevronRight, FileDown, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,6 +46,39 @@ export default function DayView() {
   const [q3, setQ3] = useState("");
   const [saving, setSaving] = useState(false);
   const isSelah = day?.day_number === 16;
+  const queryClient = useQueryClient();
+
+  // Favorite confession
+  const { data: isFavorited = false } = useQuery({
+    queryKey: ["fav-confession", user?.id, dayId],
+    queryFn: async () => {
+      if (!user?.id || !dayId) return false;
+      const { data } = await supabase
+        .from("user_favorite_confessions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("day_id", dayId)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id && !!dayId,
+  });
+
+  const toggleFavorite = useMutation({
+    mutationFn: async () => {
+      if (!user?.id || !dayId) throw new Error("Missing data");
+      if (isFavorited) {
+        await supabase.from("user_favorite_confessions").delete().eq("user_id", user.id).eq("day_id", dayId);
+      } else {
+        await supabase.from("user_favorite_confessions").insert({ user_id: user.id, day_id: dayId });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fav-confession", user?.id, dayId] });
+      queryClient.invalidateQueries({ queryKey: ["favorite-confessions"] });
+      toast({ title: isFavorited ? "Removido dos favoritos" : "Adicionado aos favoritos ❤️" });
+    },
+  });
 
   // Load saved exercises
   const { data: savedExercises } = useDayExercises(dayId);
@@ -106,9 +139,13 @@ export default function DayView() {
         q3Answer: q3 || undefined,
       });
     }
-    try {
+     try {
       await markDayComplete.mutateAsync({ dayId: day.id, moduleSlug: slug });
       toast({ title: "Dia concluído! ✨", description: "Parabéns por mais um dia de jornada." });
+      // If Day 30, redirect to completion page
+      if (day.day_number === 30) {
+        setTimeout(() => navigate("/membros/app/conclusao"), 1500);
+      }
     } catch {
       toast({ title: "Erro ao concluir", variant: "destructive" });
     }
@@ -199,9 +236,18 @@ export default function DayView() {
       {/* Confession */}
       {day.confession_text && (
         <section className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-600" />
-            <h2 className="font-serif font-semibold text-amber-900">Confissão de Fé</h2>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber-600" />
+              <h2 className="font-serif font-semibold text-amber-900">Confissão de Fé</h2>
+            </div>
+            <button
+              onClick={() => toggleFavorite.mutate()}
+              className="p-1.5 rounded-full hover:bg-amber-100 transition-colors"
+              aria-label={isFavorited ? "Remover dos favoritos" : "Favoritar confissão"}
+            >
+              <Heart className={cn("w-5 h-5 transition-colors", isFavorited ? "fill-red-500 text-red-500" : "text-amber-400")} />
+            </button>
           </div>
           <p className="text-amber-800 italic leading-relaxed font-serif">
             "{day.confession_text}"

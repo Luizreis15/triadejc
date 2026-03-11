@@ -6,3 +6,4 @@ export { default as ReadingView } from "./ReadingView";
 export { default as Notebook } from "./Notebook";
 export { default as Library } from "./Library";
 export { default as Profile } from "./Profile";
+export { default as JourneyCompletion } from "./JourneyCompletion";
