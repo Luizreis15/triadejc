@@ -236,9 +236,18 @@ export default function DayView() {
       {/* Confession */}
       {day.confession_text && (
         <section className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-600" />
-            <h2 className="font-serif font-semibold text-amber-900">Confissão de Fé</h2>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber-600" />
+              <h2 className="font-serif font-semibold text-amber-900">Confissão de Fé</h2>
+            </div>
+            <button
+              onClick={() => toggleFavorite.mutate()}
+              className="p-1.5 rounded-full hover:bg-amber-100 transition-colors"
+              aria-label={isFavorited ? "Remover dos favoritos" : "Favoritar confissão"}
+            >
+              <Heart className={cn("w-5 h-5 transition-colors", isFavorited ? "fill-red-500 text-red-500" : "text-amber-400")} />
+            </button>
           </div>
           <p className="text-amber-800 italic leading-relaxed font-serif">
             "{day.confession_text}"
