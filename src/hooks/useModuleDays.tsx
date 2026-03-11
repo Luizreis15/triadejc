@@ -148,7 +148,7 @@ export function useModuleDays(moduleId?: string) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["day-completions"] });
+      queryClient.invalidateQueries({ queryKey: ["all-day-completions"] });
     },
   });
 
