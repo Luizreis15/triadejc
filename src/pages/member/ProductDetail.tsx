@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileDown, Save, CheckCircle2, ChevronDown, Wind } from "lucide-react";
+import { ArrowLeft, FileDown, Save, CheckCircle2, Wind, Play, BookOpen, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ProgressBar, VideoPlayer } from "@/components/member";
+import { VideoPlayer, ProgressBar } from "@/components/member";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -21,10 +21,14 @@ interface ProductDetailProps {
     slug: string;
     title: string;
     description: string | null;
+    welcome_video_url: string | null;
   };
 }
 
 export default function ProductDetail({ module }: ProductDetailProps) {
+  const chaptersRef = useRef<HTMLDivElement>(null);
+  const pdfsRef = useRef<HTMLDivElement>(null);
+
   const {
     chapters,
     chaptersLoading,
@@ -37,10 +41,10 @@ export default function ProductDetail({ module }: ProductDetailProps) {
 
   if (chaptersLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
+        <Skeleton className="aspect-video w-full rounded-2xl" />
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-20 w-full rounded-2xl" />
         <Skeleton className="h-20 w-full rounded-2xl" />
       </div>
     );
@@ -49,8 +53,14 @@ export default function ProductDetail({ module }: ProductDetailProps) {
   const progressPercent =
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  const chaptersWithPdf = chapters.filter((c) => c.pdf_url);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Back */}
       <Link
         to="/membros/app/modulos"
@@ -60,28 +70,30 @@ export default function ProductDetail({ module }: ProductDetailProps) {
         <span className="text-sm">Voltar</span>
       </Link>
 
+      {/* Welcome Video */}
+      <VideoPlayer
+        videoUrl={module.welcome_video_url || undefined}
+        title={`Boas-vindas: ${module.title}`}
+        className="shadow-lg"
+      />
+
       {/* Header */}
       <section className="space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Wind className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="font-serif text-2xl font-semibold text-foreground">
-              {module.title}
-            </h1>
-            {module.description && (
-              <p className="text-sm text-muted-foreground">{module.description}</p>
-            )}
-          </div>
-        </div>
+        <h1 className="font-serif text-2xl font-semibold text-foreground">
+          {module.title}
+        </h1>
+        {module.description && (
+          <p className="text-muted-foreground leading-relaxed">
+            {module.description}
+          </p>
+        )}
 
         {/* Progress */}
         <div className="bg-card rounded-xl p-4 border border-border/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-muted-foreground">Progresso</span>
             <span className="text-lg font-serif font-semibold text-primary">
-              {completedCount} de {totalCount}
+              {progressPercent}%
             </span>
           </div>
           <ProgressBar value={progressPercent} size="md" />
@@ -91,22 +103,84 @@ export default function ProductDetail({ module }: ProductDetailProps) {
         </div>
       </section>
 
+      {/* Quick Actions */}
+      <section className="grid grid-cols-2 gap-3">
+        <button
+          onClick={() => scrollToSection(chaptersRef)}
+          className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-primary/10 text-primary hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          <Play className="w-5 h-5" />
+          <span className="text-xs font-medium">Começar</span>
+        </button>
+        <button
+          onClick={() => scrollToSection(pdfsRef)}
+          disabled={chaptersWithPdf.length === 0}
+          className={cn(
+            "flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all",
+            chaptersWithPdf.length === 0
+              ? "opacity-50 cursor-not-allowed bg-orange-100 text-orange-700"
+              : "bg-orange-100 text-orange-700 hover:scale-[1.02] active:scale-[0.98]"
+          )}
+        >
+          <FileDown className="w-5 h-5" />
+          <span className="text-xs font-medium">PDFs</span>
+          {chaptersWithPdf.length > 0 && (
+            <span className="text-[10px] opacity-70">{chaptersWithPdf.length} arquivos</span>
+          )}
+        </button>
+      </section>
+
       {/* Accordion Chapters */}
-      <Accordion type="single" collapsible className="space-y-3">
-        {chapters.map((chapter) => (
-          <ChapterAccordionItem
-            key={chapter.id}
-            chapter={chapter}
-            answer={getAnswer(chapter.id)}
-            onSave={(data) =>
-              saveAnswers.mutateAsync({ chapterId: chapter.id, answerData: data })
-            }
-            onComplete={(data) =>
-              markComplete.mutateAsync({ chapterId: chapter.id, answerData: data })
-            }
-          />
-        ))}
-      </Accordion>
+      <div ref={chaptersRef}>
+        <div className="flex items-center gap-2 mb-3">
+          <BookOpen className="w-5 h-5 text-primary" />
+          <h2 className="font-serif text-lg font-semibold text-foreground">Capítulos</h2>
+        </div>
+        <Accordion type="single" collapsible className="space-y-3">
+          {chapters.map((chapter) => (
+            <ChapterAccordionItem
+              key={chapter.id}
+              chapter={chapter}
+              answer={getAnswer(chapter.id)}
+              onSave={(data) =>
+                saveAnswers.mutateAsync({ chapterId: chapter.id, answerData: data })
+              }
+              onComplete={(data) =>
+                markComplete.mutateAsync({ chapterId: chapter.id, answerData: data })
+              }
+            />
+          ))}
+        </Accordion>
+      </div>
+
+      {/* PDFs Section */}
+      {chaptersWithPdf.length > 0 && (
+        <div ref={pdfsRef}>
+          <div className="flex items-center gap-2 mb-3">
+            <FileDown className="w-5 h-5 text-orange-600" />
+            <h2 className="font-serif text-lg font-semibold text-foreground">Materiais para Download</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-3">
+            PDFs são materiais de apoio. Use após as leituras.
+          </p>
+          <div className="space-y-2">
+            {chaptersWithPdf.map((chapter) => (
+              <a
+                key={chapter.id}
+                href={chapter.pdf_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50 hover:border-orange-300 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                  <FileDown className="w-5 h-5 text-red-600" />
+                </div>
+                <span className="flex-1 text-sm font-medium">{chapter.title}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
