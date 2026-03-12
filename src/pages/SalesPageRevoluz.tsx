@@ -189,7 +189,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── O QUE ESTÁ INCLUÍDO ─── */}
-        <SectionRed className="py-10">
+        <SectionRed className="py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O que está incluído</TextReveal>
 
           <StaggerContainer className="space-y-4 mb-8" staggerDelay={0.08}>
