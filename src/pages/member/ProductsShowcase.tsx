@@ -121,7 +121,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* QUEM TE ACOMPANHA */}
         <ScrollReveal>
-          <section className="section-red px-6 py-10">
+          <section className="section-red px-6 py-8">
             <h2 className="heading-playfair text-xl md:text-2xl mb-4 text-center">Quem te acompanha</h2>
             <div className="rounded-2xl overflow-hidden mb-5">
               <img src={jordanaAbout} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
