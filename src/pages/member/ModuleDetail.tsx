@@ -12,6 +12,8 @@ import { useProgress } from "@/hooks/useProgress";
 import { useModuleDays } from "@/hooks/useModuleDays";
 import { toast } from "@/hooks/use-toast";
 import { useRef } from "react";
+import { useQuery as useRQQuery } from "@tanstack/react-query";
+import ProductDetail from "./ProductDetail";
 
 // Define the card type with section
 interface ModuleCard {
@@ -53,6 +55,20 @@ export default function ModuleDetail() {
       return data;
     },
     enabled: !!slug,
+  });
+
+  // Check if this module has product_chapters (chapter-based product like Respira Alma)
+  const { data: hasChapters } = useRQQuery({
+    queryKey: ["has-product-chapters", module?.id],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("product_chapters")
+        .select("id", { count: "exact", head: true })
+        .eq("module_id", module!.id);
+      if (error) throw error;
+      return (count ?? 0) > 0;
+    },
+    enabled: !!module?.id,
   });
 
   // Fetch module cards
@@ -147,6 +163,11 @@ export default function ModuleDetail() {
         </Link>
       </div>
     );
+  }
+
+  // If chapter-based product, delegate to ProductDetail
+  if (hasChapters) {
+    return <ProductDetail module={module} />;
   }
 
   return (
