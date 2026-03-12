@@ -142,7 +142,6 @@ export default function Home() {
           </div>
         </div>
       </Link>
-      </section>
 
       {/* Overall Progress */}
       <section className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
