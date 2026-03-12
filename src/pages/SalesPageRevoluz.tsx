@@ -132,7 +132,7 @@ export default function SalesPageRevoluz() {
           <ScrollReveal delay={0.35}>
             <div className="flex flex-col gap-3">
               <ButtonOrange onClick={handlePurchase} size="large" className="w-full justify-center">
-                Comece Sua Transformação Hoje
+                Quero Começar Agora
               </ButtonOrange>
               <button
                 onClick={() => scrollTo("conteudo")}
