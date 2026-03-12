@@ -35,6 +35,11 @@
   min-height: 100vh;
 }
 
+/* Institutional pages use full-width */
+.sales-page > main {
+  max-width: 100%;
+}
+
 /* Typography Classes */
 .heading-playfair {
   font-family: var(--font-playfair);
