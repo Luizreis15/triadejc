@@ -108,8 +108,8 @@ export default function SalesPageRevoluz() {
           </TextReveal>
 
           <ScrollReveal delay={0.15}>
-            <p className="body-inter text-sm leading-relaxed mb-4" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
-              Fé + inteligência emocional + reprogramação mental (passo a passo).
+            <p className="body-inter text-sm leading-relaxed mb-4 mx-auto" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
+              Fé + inteligência emocional + reprogramação mental<br />(passo a passo).
             </p>
           </ScrollReveal>
 
