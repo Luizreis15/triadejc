@@ -72,6 +72,47 @@ export type Database = {
           },
         ]
       }
+      chapter_answers: {
+        Row: {
+          answers: Json | null
+          chapter_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          chapter_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          chapter_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_answers_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "product_chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       devotional_days: {
         Row: {
           created_at: string
@@ -583,6 +624,59 @@ export type Database = {
             columns: ["exercise_id"]
             isOneToOne: false
             referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_chapters: {
+        Row: {
+          created_at: string
+          exercise_q1: string | null
+          exercise_q2: string | null
+          exercise_q3: string | null
+          exercise_q4: string | null
+          id: string
+          long_description: string
+          module_id: string
+          order_index: number
+          pdf_url: string | null
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          exercise_q1?: string | null
+          exercise_q2?: string | null
+          exercise_q3?: string | null
+          exercise_q4?: string | null
+          id?: string
+          long_description: string
+          module_id: string
+          order_index: number
+          pdf_url?: string | null
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          exercise_q1?: string | null
+          exercise_q2?: string | null
+          exercise_q3?: string | null
+          exercise_q4?: string | null
+          id?: string
+          long_description?: string
+          module_id?: string
+          order_index?: number
+          pdf_url?: string | null
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_chapters_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
             referencedColumns: ["id"]
           },
         ]
