@@ -12,6 +12,8 @@ import { useProgress } from "@/hooks/useProgress";
 import { useModuleDays } from "@/hooks/useModuleDays";
 import { toast } from "@/hooks/use-toast";
 import { useRef } from "react";
+import { useQuery as useRQQuery } from "@tanstack/react-query";
+import ProductDetail from "./ProductDetail";
 
 // Define the card type with section
 interface ModuleCard {
