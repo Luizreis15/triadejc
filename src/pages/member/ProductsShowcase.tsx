@@ -12,52 +12,52 @@ import jordanaAbout from "@/assets/jordana-about.jpg";
 const REVOLUZ_URL = "https://pay.kiwify.com.br/IFBt2d0";
 
 const revoluzModules = [
-  {
-    title: "Módulo 1 — Espiritualidade",
-    lessons: [
-      "Poder das Disciplinas Espirituais",
-      "Orações que Acessam o Coração de Deus",
-      "Meditação Cristã na Prática da Vida",
-      "Como Colocar Deus em Sua Rotina?",
-    ],
-  },
-  {
-    title: "Módulo 2 — Autoconhecimento",
-    lessons: [
-      "Identifique Bloqueios, Traumas e Feridas Emocionais",
-      "Consequências desses Bloqueios",
-      "O Que Está te Impedindo de Viver sua Melhor Versão?",
-      "Autoanálise",
-      "Identidade — Quem Você Realmente Nasceu para Ser?",
-    ],
-  },
-  {
-    title: "Módulo 3 — Inteligência Emocional",
-    lessons: [
-      "O que é Inteligência Emocional?",
-      "Inteligência Emocional sob o Olhar Bíblico",
-      "Como Superar Traumas e Feridas Emocionais?",
-      "Como Lidar com o Caminho até a Superação?",
-      "Como Não Repetir os Padrões Negativos Hereditários?",
-    ],
-  },
-  {
-    title: "Módulo 4 — Reprogramação Mental",
-    lessons: [
-      "Técnica M.C.P.®",
-      "Exercícios Terapêuticos de Fé",
-      "A Importância do Ecossistema",
-      "Constância, o Caminho do Sucesso",
-      "O Passaporte para a Sua Melhor Versão!",
-    ],
-  },
-];
+{
+  title: "Módulo 1 — Espiritualidade",
+  lessons: [
+  "Poder das Disciplinas Espirituais",
+  "Orações que Acessam o Coração de Deus",
+  "Meditação Cristã na Prática da Vida",
+  "Como Colocar Deus em Sua Rotina?"]
+
+},
+{
+  title: "Módulo 2 — Autoconhecimento",
+  lessons: [
+  "Identifique Bloqueios, Traumas e Feridas Emocionais",
+  "Consequências desses Bloqueios",
+  "O Que Está te Impedindo de Viver sua Melhor Versão?",
+  "Autoanálise",
+  "Identidade — Quem Você Realmente Nasceu para Ser?"]
+
+},
+{
+  title: "Módulo 3 — Inteligência Emocional",
+  lessons: [
+  "O que é Inteligência Emocional?",
+  "Inteligência Emocional sob o Olhar Bíblico",
+  "Como Superar Traumas e Feridas Emocionais?",
+  "Como Lidar com o Caminho até a Superação?",
+  "Como Não Repetir os Padrões Negativos Hereditários?"]
+
+},
+{
+  title: "Módulo 4 — Reprogramação Mental",
+  lessons: [
+  "Técnica M.C.P.®",
+  "Exercícios Terapêuticos de Fé",
+  "A Importância do Ecossistema",
+  "Constância, o Caminho do Sucesso",
+  "O Passaporte para a Sua Melhor Versão!"]
+
+}];
+
 
 const testimonials = [
-  "Pela primeira vez entendi o que sinto por dentro, sem culpa e com direção.",
-  "Não é promessa, é clareza. Me ajudou a acalmar a mente e viver com mais serenidade.",
-  "A forma como a Jordana aplica fé + clareza emocional fez sentido pra mim.",
-];
+"Pela primeira vez entendi o que sinto por dentro, sem culpa e com direção.",
+"Não é promessa, é clareza. Me ajudou a acalmar a mente e viver com mais serenidade.",
+"A forma como a Jordana aplica fé + clareza emocional fez sentido pra mim."];
+
 
 export default function ProductsShowcase() {
   const navigate = useNavigate();
@@ -87,7 +87,8 @@ export default function ProductsShowcase() {
         {/* HERO */}
         <section className="px-6 py-10 text-center">
           <h1 className="heading-playfair text-2xl md:text-3xl mb-4 px-2">
-            Conheça todos os meus produtos — e escolha o próximo passo da sua transformação.
+            Conheça todos os meus produtos 
+e escolha o próximo passo da sua transformação.
           </h1>
           <p className="body-inter text-base mb-6 opacity-80 px-2">
             Fé com presença. Clareza emocional com responsabilidade. Um caminho prático para restaurar identidade e propósito.
@@ -102,16 +103,15 @@ export default function ProductsShowcase() {
           <section className="px-6 py-10">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">Você sente isso?</h2>
             <div className="space-y-3">
-              {[
-                "Você ama a Deus, mas sente que por dentro está tudo desorganizado?",
-                "Você já tentou mudar hábitos, pensamentos e reações… mas volta para os mesmos ciclos?",
-                "Você sente que precisa de direção — espiritual e emocional — para não viver no modo sobrevivência?",
-                "Você sabe que existe uma 'melhor versão', mas falta um caminho prático para sustentar isso?",
-              ].map((q, i) => (
-                <div key={i} className="card-cream p-4">
+              {["Você ama a Deus, mas sente que por dentro está tudo desorganizado?",
+              "Você já tentou mudar hábitos, pensamentos e reações… mas volta para os mesmos ciclos?",
+              "Você sente que precisa de direção — espiritual e emocional — para não viver no modo sobrevivência?",
+              "Você sabe que existe uma 'melhor versão', mas falta um caminho prático para sustentar isso?"].
+              map((q, i) =>
+              <div key={i} className="card-cream p-4">
                   <p className="body-inter text-sm">{q}</p>
                 </div>
-              ))}
+              )}
             </div>
             <p className="body-inter text-center text-sm mt-6 opacity-70 italic">
               Não é sobre perfeição. É sobre clareza + constância.
@@ -152,17 +152,17 @@ export default function ProductsShowcase() {
                   </p>
                   <ul className="space-y-2 mb-4">
                     {[
-                      "Transformação espiritual e emocional (sem religiosidade vazia)",
-                      "Autoconhecimento profundo para identificar bloqueios, traumas e padrões",
-                      "Inteligência emocional sob um olhar bíblico + ferramentas práticas",
-                      "Reprogramação mental com técnica e constância",
-                      "Acesso por 365 dias",
-                    ].map((b, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm body-inter">
+                    "Transformação espiritual e emocional (sem religiosidade vazia)",
+                    "Autoconhecimento profundo para identificar bloqueios, traumas e padrões",
+                    "Inteligência emocional sob um olhar bíblico + ferramentas práticas",
+                    "Reprogramação mental com técnica e constância",
+                    "Acesso por 365 dias"].
+                    map((b, i) =>
+                    <li key={i} className="flex items-start gap-2 text-sm body-inter">
                         <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
                         <span>{b}</span>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
                 <div className="px-5 pb-5">
@@ -175,25 +175,25 @@ export default function ProductsShowcase() {
                   {/* Collapsible curriculum */}
                   <button
                     onClick={() => setShowCurriculum(!showCurriculum)}
-                    className="flex items-center justify-center gap-1 w-full mt-4 text-sm font-medium text-primary"
-                  >
+                    className="flex items-center justify-center gap-1 w-full mt-4 text-sm font-medium text-primary">
+                    
                     O que você vai aprender
                     {showCurriculum ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
-                  {showCurriculum && (
-                    <div className="mt-3 space-y-4">
-                      {revoluzModules.map((mod, i) => (
-                        <div key={i}>
+                  {showCurriculum &&
+                  <div className="mt-3 space-y-4">
+                      {revoluzModules.map((mod, i) =>
+                    <div key={i}>
                           <h4 className="text-sm font-semibold text-foreground mb-1">{mod.title}</h4>
                           <ul className="space-y-1 pl-4">
-                            {mod.lessons.map((l, j) => (
-                              <li key={j} className="text-xs text-muted-foreground list-disc">{l}</li>
-                            ))}
+                            {mod.lessons.map((l, j) =>
+                        <li key={j} className="text-xs text-muted-foreground list-disc">{l}</li>
+                        )}
                           </ul>
                         </div>
-                      ))}
+                    )}
                     </div>
-                  )}
+                  }
                 </div>
               </div>
 
@@ -209,15 +209,15 @@ export default function ProductsShowcase() {
                   </p>
                   <ul className="space-y-2 mb-4">
                     {[
-                      "Direcionamento para decisões e posicionamento",
-                      "Ambiente de constância: você não caminha sozinha",
-                      "Clareza para identificar bloqueios e alinhar fé + vida emocional",
-                    ].map((b, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm body-inter">
+                    "Direcionamento para decisões e posicionamento",
+                    "Ambiente de constância: você não caminha sozinha",
+                    "Clareza para identificar bloqueios e alinhar fé + vida emocional"].
+                    map((b, i) =>
+                    <li key={i} className="flex items-start gap-2 text-sm body-inter">
                         <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
                         <span>{b}</span>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
                 <div className="px-5 pb-5">
@@ -240,15 +240,15 @@ export default function ProductsShowcase() {
                   </p>
                   <ul className="space-y-2 mb-4">
                     {[
-                      "Um dia para destravar, reorganizar e tomar decisões práticas",
-                      "Experiência de presença: fé aplicada com intencionalidade",
-                      "Vivência concentrada para sair do modo 'só conteúdo' e ir para 'ação'",
-                    ].map((b, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm body-inter">
+                    "Um dia para destravar, reorganizar e tomar decisões práticas",
+                    "Experiência de presença: fé aplicada com intencionalidade",
+                    "Vivência concentrada para sair do modo 'só conteúdo' e ir para 'ação'"].
+                    map((b, i) =>
+                    <li key={i} className="flex items-start gap-2 text-sm body-inter">
                         <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
                         <span>{b}</span>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
                 <div className="px-5 pb-5">
@@ -267,16 +267,16 @@ export default function ProductsShowcase() {
           <section className="px-6 py-10 bg-muted/30">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">O que elas dizem</h2>
             <div className="space-y-4">
-              {testimonials.map((t, i) => (
-                <div key={i} className="card-cream p-5 text-center">
+              {testimonials.map((t, i) =>
+              <div key={i} className="card-cream p-5 text-center">
                   <div className="flex justify-center gap-1 mb-2">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-secondary text-secondary" />
-                    ))}
+                    {[...Array(5)].map((_, j) =>
+                  <Star key={j} className="w-4 h-4 fill-secondary text-secondary" />
+                  )}
                   </div>
                   <p className="body-inter text-sm italic">"{t}"</p>
                 </div>
-              ))}
+              )}
             </div>
           </section>
         </ScrollReveal>
@@ -349,6 +349,6 @@ export default function ProductsShowcase() {
       </div>
 
       <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} product={waitlistProduct} />
-    </div>
-  );
+    </div>);
+
 }
