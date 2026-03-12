@@ -290,7 +290,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── QUEM TE ACOMPANHA ─── */}
-        <section className="px-6 py-10">
+        <section className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Quem te acompanha nessa jornada</TextReveal>
 
           <ScrollReveal>
