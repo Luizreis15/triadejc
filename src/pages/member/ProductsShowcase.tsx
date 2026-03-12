@@ -85,7 +85,7 @@ export default function ProductsShowcase() {
         </div>
 
         {/* HERO */}
-        <section className="px-6 py-10 text-center">
+        <section className="px-6 py-6 text-center">
           <h1 className="heading-playfair text-2xl md:text-3xl mb-4 px-2">
             Conheça todos os meus produtos 
 e escolha o próximo passo da sua transformação.
@@ -100,7 +100,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* VOCÊ SENTE ISSO? */}
         <ScrollReveal>
-          <section className="px-6 py-10">
+          <section className="px-6 py-8">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">Você sente isso?</h2>
             <div className="space-y-3">
               {["Você ama a Deus, mas sente que por dentro está tudo desorganizado?",
@@ -121,7 +121,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* QUEM TE ACOMPANHA */}
         <ScrollReveal>
-          <section className="section-red px-6 py-10">
+          <section className="section-red px-6 py-8">
             <h2 className="heading-playfair text-xl md:text-2xl mb-4 text-center">Quem te acompanha</h2>
             <div className="rounded-2xl overflow-hidden mb-5">
               <img src={jordanaAbout} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
@@ -137,7 +137,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* ESCOLHA SEU PRÓXIMO PASSO */}
         <ScrollReveal>
-          <section className="px-6 py-10">
+          <section className="px-6 py-8">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">Escolha o seu próximo passo</h2>
             <div className="space-y-6">
               {/* CARD 1 — REVOLUZ */}
@@ -264,7 +264,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* PROVA SOCIAL */}
         <ScrollReveal>
-          <section className="px-6 py-10 bg-muted/30">
+          <section className="px-6 py-8 bg-muted/30">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">O que elas dizem</h2>
             <div className="space-y-4">
               {testimonials.map((t, i) =>
@@ -284,7 +284,7 @@ e escolha o próximo passo da sua transformação.
         {/* LISTA DE ESPERA SECTION */}
         <ScrollReveal>
           <div ref={waitlistRef}>
-            <section className="px-6 py-10">
+            <section className="px-6 py-6">
               <h2 className="heading-playfair text-xl md:text-2xl mb-3 text-center">Lista de espera</h2>
               <p className="body-inter text-sm text-center opacity-80 mb-6">
                 Se você quer ser avisada quando abrirem novas turmas/edições, cadastre seu contato. Eu vou te chamar assim que houver abertura.
@@ -313,7 +313,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* CTA FINAL */}
         <ScrollReveal>
-          <section className="section-red px-6 py-10 text-center">
+          <section className="section-red px-6 py-8 text-center">
             <h2 className="heading-playfair text-xl md:text-2xl mb-4">Comece sua transformação hoje</h2>
             <p className="body-inter text-sm mb-6 opacity-90">
               A transformação começa com uma decisão. Se você sente que esse é o seu tempo, comece pelo Método REVOLUZ — acesso imediato, e você tem 7 dias para testar sem risco.
