@@ -41,6 +41,7 @@ export default function ModuleDetail() {
   const closureRef = useRef<HTMLDivElement>(null);
   const activityRef = useRef<HTMLDivElement>(null);
   const pdfsRef = useRef<HTMLDivElement>(null);
+  const journeyRef = useRef<HTMLDivElement>(null);
 
   // Fetch module
   const { data: module, isLoading: moduleLoading } = useQuery({
@@ -209,37 +210,48 @@ export default function ModuleDetail() {
         </div>
       </section>
 
-      {/* Quick Actions */}
+      {/* Quick Actions — adapt based on available content */}
       <section className="grid grid-cols-2 gap-3">
-        <QuickActionButton
-          icon={Play}
-          label="Começar"
-          color="bg-primary/10 text-primary"
-          onClick={() => scrollToSection(introRef)}
-          disabled={introCards.length === 0}
-        />
-        <QuickActionButton
-          icon={Heart}
-          label="Momentos Selah"
-          color="bg-purple-100 text-purple-700"
-          onClick={() => scrollToSection(selahRef)}
-          disabled={selahCards.length === 0}
-        />
-        <QuickActionButton
-          icon={PenLine}
-          label="Atividade"
-          color="bg-green-100 text-green-700"
-          onClick={() => scrollToSection(activityRef)}
-          disabled={activityCards.length === 0}
-        />
-        <QuickActionButton
-          icon={FileDown}
-          label="PDFs"
-          color="bg-orange-100 text-orange-700"
-          count={pdfs.length}
-          onClick={() => scrollToSection(pdfsRef)}
-          disabled={pdfs.length === 0}
-        />
+        {introCards.length > 0 ? (
+          <QuickActionButton
+            icon={Play}
+            label="Começar"
+            color="bg-primary/10 text-primary"
+            onClick={() => scrollToSection(introRef)}
+          />
+        ) : moduleDays.length > 0 ? (
+          <QuickActionButton
+            icon={Play}
+            label="Começar"
+            color="bg-primary/10 text-primary"
+            onClick={() => scrollToSection(journeyRef)}
+          />
+        ) : null}
+        {selahCards.length > 0 && (
+          <QuickActionButton
+            icon={Heart}
+            label="Momentos Selah"
+            color="bg-purple-100 text-purple-700"
+            onClick={() => scrollToSection(selahRef)}
+          />
+        )}
+        {activityCards.length > 0 && (
+          <QuickActionButton
+            icon={PenLine}
+            label="Atividade"
+            color="bg-green-100 text-green-700"
+            onClick={() => scrollToSection(activityRef)}
+          />
+        )}
+        {pdfs.length > 0 && (
+          <QuickActionButton
+            icon={FileDown}
+            label="PDFs"
+            color="bg-orange-100 text-orange-700"
+            count={pdfs.length}
+            onClick={() => scrollToSection(pdfsRef)}
+          />
+        )}
       </section>
 
       {/* JORNADA DIÁRIA — Sub-módulos colapsáveis */}
@@ -256,7 +268,7 @@ export default function ModuleDetail() {
         ].filter(g => g.days.length > 0);
 
         return (
-          <div className="space-y-3">
+          <div ref={journeyRef} className="space-y-3">
             {subModules.map((group) => {
               // Selá: render as a single clickable card (no collapsible)
               if (group.isSelah && group.days.length === 1) {
@@ -535,7 +547,7 @@ export default function ModuleDetail() {
       )}
 
       {/* Empty State */}
-      {cards.length === 0 && pdfs.length === 0 && (
+      {cards.length === 0 && pdfs.length === 0 && moduleDays.length === 0 && (
         <div className="text-center py-8 bg-muted/30 rounded-2xl">
           <p className="text-muted-foreground">
             O conteúdo deste módulo está sendo preparado com carinho.
@@ -556,24 +568,18 @@ function QuickActionButton({
   color, 
   count,
   onClick,
-  disabled
 }: { 
   icon: React.ElementType;
   label: string; 
   color: string;
   count?: number;
   onClick: () => void;
-  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
       className={cn(
-        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all",
-        disabled 
-          ? "opacity-50 cursor-not-allowed" 
-          : "hover:scale-[1.02] active:scale-[0.98]",
+        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]",
         color
       )}
     >
