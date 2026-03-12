@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-import logoImg from "@/assets/logo-jornada-unica.png";
+
 import heroImg from "@/assets/jordana-hero.jpg";
 import aboutImg from "@/assets/jordana-about.jpg";
 
