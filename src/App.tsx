@@ -10,6 +10,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 // Public pages
 import SalesPage from "./pages/SalesPage";
 import SalesPageJunica from "./pages/SalesPageJunica";
+import SalesPageRevoluz from "./pages/SalesPageRevoluz";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
