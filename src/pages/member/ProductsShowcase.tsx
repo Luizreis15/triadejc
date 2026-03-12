@@ -264,7 +264,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* PROVA SOCIAL */}
         <ScrollReveal>
-          <section className="px-6 py-10 bg-muted/30">
+          <section className="px-6 py-8 bg-muted/30">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">O que elas dizem</h2>
             <div className="space-y-4">
               {testimonials.map((t, i) =>
