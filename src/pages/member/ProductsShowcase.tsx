@@ -124,7 +124,7 @@ export default function ProductsShowcase() {
           <section className="section-red px-6 py-10">
             <h2 className="heading-playfair text-xl md:text-2xl mb-4 text-center">Quem te acompanha</h2>
             <div className="rounded-2xl overflow-hidden mb-5">
-              <img src={jordanaAbout} alt="Jordana Cantarelli" className="w-full object-cover max-h-72" />
+              <img src={jordanaAbout} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
             </div>
             <p className="body-inter text-sm leading-relaxed opacity-90">
               Eu sou Jordana Cantarelli — pastora e psicanalista clínica, com mais de 10 anos de atuação acompanhando mulheres em processos de restauração emocional e espiritual. Meu trabalho une fé, sensibilidade humana e ferramentas práticas para ajudar você a organizar o que está por dentro, recuperar clareza e caminhar com propósito.
