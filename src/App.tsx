@@ -10,6 +10,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 // Public pages
 import SalesPage from "./pages/SalesPage";
 import SalesPageJunica from "./pages/SalesPageJunica";
+import SalesPageRevoluz from "./pages/SalesPageRevoluz";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
@@ -40,6 +41,8 @@ const App = () => (
             {/* Public routes */}
             <Route path="/jornada" element={<SalesPage />} />
             <Route path="/junica" element={<SalesPageJunica />} />
+            <Route path="/revoluz" element={<SalesPageRevoluz />} />
+            <Route path="/metodo-revoluz" element={<SalesPageRevoluz />} />
             
             {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
