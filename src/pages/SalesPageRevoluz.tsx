@@ -2,7 +2,7 @@ import "@/styles/sales-page.css";
 import { ButtonGold, ButtonOrange, IconSquare, CardCream, SectionRed, FAQAccordion, ScrollReveal } from "@/components/sales";
 import { StaggerContainer, StaggerItem } from "@/components/sales/StaggerContainer";
 import { TextReveal } from "@/components/sales/TextReveal";
-import { Check, X, BookOpen, Brain, Heart, Sparkles, Clock, Shield } from "lucide-react";
+import { Check, BookOpen, Brain, Heart, Sparkles, Clock, Shield } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-import logoImg from "@/assets/logo-jornada-unica.png";
+
 import heroImg from "@/assets/jordana-hero.jpg";
 import aboutImg from "@/assets/jordana-about.jpg";
 
@@ -80,20 +80,6 @@ export default function SalesPageRevoluz() {
   return (
     <div className="sales-page">
       <div className="sales-container relative">
-        {/* ─── HEADER ─── */}
-        <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-[hsl(var(--sp-paper)/0.95)] backdrop-blur-md border-b border-[hsl(var(--sp-cream))]">
-          <a href="/">
-            <img src={logoImg} alt="Jornada Única" className="h-8" />
-          </a>
-          <nav className="hidden md:flex items-center gap-4 text-xs body-inter">
-            <button onClick={() => scrollTo("conteudo")} className="hover:opacity-70 transition-opacity">Conteúdo</button>
-            <button onClick={() => scrollTo("para-quem")} className="hover:opacity-70 transition-opacity">Para quem</button>
-            <button onClick={() => scrollTo("faq")} className="hover:opacity-70 transition-opacity">FAQ</button>
-          </nav>
-          <button onClick={handlePurchase} className="btn-gold py-2 px-4 text-xs">
-            Entrar no REVOLUZ
-          </button>
-        </header>
 
         {/* ─── HERO ─── */}
         <section className="px-6 pt-8 pb-6 text-center">
@@ -149,7 +135,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── VOCÊ SENTE ISSO? ─── */}
-        <section id="voce-sente" className="px-6 py-10">
+        <section id="voce-sente" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Você sente isso?</TextReveal>
 
           <StaggerContainer className="space-y-3 mb-6" staggerDelay={0.1}>
@@ -182,7 +168,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── POR QUE EXISTE ─── */}
-        <section className="px-6 py-10">
+        <section className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Por que esse método existe</TextReveal>
 
           <ScrollReveal>
@@ -203,7 +189,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── O QUE ESTÁ INCLUÍDO ─── */}
-        <SectionRed className="py-10">
+        <SectionRed className="py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O que está incluído</TextReveal>
 
           <StaggerContainer className="space-y-4 mb-8" staggerDelay={0.08}>
@@ -231,7 +217,7 @@ export default function SalesPageRevoluz() {
         </SectionRed>
 
         {/* ─── CONTEÚDO / ACCORDION ─── */}
-        <section id="conteudo" className="px-6 py-10">
+        <section id="conteudo" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O que você vai receber dentro</TextReveal>
 
           <ScrollReveal>
@@ -271,7 +257,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── PARA QUEM É ─── */}
-        <section id="para-quem" className="px-6 py-10">
+        <section id="para-quem" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O REVOLUZ é para você que…</TextReveal>
 
           <div className="grid grid-cols-1 gap-4 mb-6">
@@ -294,22 +280,6 @@ export default function SalesPageRevoluz() {
               </CardCream>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.1}>
-              <CardCream className="space-y-3">
-                <h3 className="heading-playfair text-base mb-2" style={{ color: "hsl(var(--sp-petrol-primary))" }}>
-                  Não é sobre:
-                </h3>
-                {[
-                  "Ser perfeita",
-                  "Fazer tudo de uma vez",
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-2 body-inter text-sm">
-                    <X className="w-4 h-4 mt-0.5 shrink-0 opacity-50" />
-                    {item}
-                  </div>
-                ))}
-              </CardCream>
-            </ScrollReveal>
           </div>
 
           <ScrollReveal>
@@ -320,7 +290,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── QUEM TE ACOMPANHA ─── */}
-        <section className="px-6 py-10">
+        <section className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Quem te acompanha nessa jornada</TextReveal>
 
           <ScrollReveal>
@@ -338,7 +308,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── GARANTIA ─── */}
-        <section className="px-6 py-10">
+        <section className="px-6 py-6">
           <ScrollReveal>
             <div className="card-cream p-6 border-2" style={{ borderColor: "hsl(var(--sp-rose)/0.4)" }}>
               <div className="flex items-center gap-3 mb-4">
@@ -362,7 +332,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── FAQ ─── */}
-        <section id="faq" className="px-6 py-10">
+        <section id="faq" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Dúvidas Frequentes</TextReveal>
           <ScrollReveal>
             <FAQAccordion items={faqItems} />
