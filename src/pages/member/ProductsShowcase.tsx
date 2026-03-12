@@ -313,7 +313,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* CTA FINAL */}
         <ScrollReveal>
-          <section className="section-red px-6 py-10 text-center">
+          <section className="section-red px-6 py-8 text-center">
             <h2 className="heading-playfair text-xl md:text-2xl mb-4">Comece sua transformação hoje</h2>
             <p className="body-inter text-sm mb-6 opacity-90">
               A transformação começa com uma decisão. Se você sente que esse é o seu tempo, comece pelo Método REVOLUZ — acesso imediato, e você tem 7 dias para testar sem risco.
