@@ -10,14 +10,14 @@ interface StaggerContainerProps {
 export function StaggerContainer({ 
   children, 
   className = "",
-  staggerDelay = 0.1 
+  staggerDelay = 0.08 
 }: StaggerContainerProps) {
   return (
     <motion.div
       className={className}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.15 }}
       variants={{
         hidden: {},
         visible: { 
@@ -42,13 +42,14 @@ export function StaggerItem({ children, className = "" }: StaggerItemProps) {
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, x: -20 },
+        hidden: { opacity: 0, y: 30, filter: "blur(6px)" },
         visible: { 
           opacity: 1, 
-          x: 0,
+          y: 0,
+          filter: "blur(0px)",
           transition: {
-            duration: 0.5,
-            ease: [0.25, 0.4, 0.25, 1]
+            duration: 0.6,
+            ease: [0.22, 1, 0.36, 1]
           }
         }
       }}
