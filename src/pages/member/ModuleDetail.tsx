@@ -57,6 +57,20 @@ export default function ModuleDetail() {
     enabled: !!slug,
   });
 
+  // Check if this module has product_chapters (chapter-based product like Respira Alma)
+  const { data: hasChapters } = useRQQuery({
+    queryKey: ["has-product-chapters", module?.id],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("product_chapters")
+        .select("id", { count: "exact", head: true })
+        .eq("module_id", module!.id);
+      if (error) throw error;
+      return (count ?? 0) > 0;
+    },
+    enabled: !!module?.id,
+  });
+
   // Fetch module cards
   const { data: cards = [] } = useQuery({
     queryKey: ["module-cards", module?.id],
