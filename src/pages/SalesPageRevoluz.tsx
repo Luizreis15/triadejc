@@ -2,7 +2,7 @@ import "@/styles/sales-page.css";
 import { ButtonGold, ButtonOrange, IconSquare, CardCream, SectionRed, FAQAccordion, ScrollReveal } from "@/components/sales";
 import { StaggerContainer, StaggerItem } from "@/components/sales/StaggerContainer";
 import { TextReveal } from "@/components/sales/TextReveal";
-import { Check, X, BookOpen, Brain, Heart, Sparkles, Clock, Shield } from "lucide-react";
+import { Check, BookOpen, Brain, Heart, Sparkles, Clock, Shield } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
