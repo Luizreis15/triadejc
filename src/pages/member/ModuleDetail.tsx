@@ -568,24 +568,18 @@ function QuickActionButton({
   color, 
   count,
   onClick,
-  disabled
 }: { 
   icon: React.ElementType;
   label: string; 
   color: string;
   count?: number;
   onClick: () => void;
-  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
       className={cn(
-        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all",
-        disabled 
-          ? "opacity-50 cursor-not-allowed" 
-          : "hover:scale-[1.02] active:scale-[0.98]",
+        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]",
         color
       )}
     >
