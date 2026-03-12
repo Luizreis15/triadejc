@@ -80,20 +80,6 @@ export default function SalesPageRevoluz() {
   return (
     <div className="sales-page">
       <div className="sales-container relative">
-        {/* ─── HEADER ─── */}
-        <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-[hsl(var(--sp-paper)/0.95)] backdrop-blur-md border-b border-[hsl(var(--sp-cream))]">
-          <a href="/">
-            <img src={logoImg} alt="Jornada Única" className="h-8" />
-          </a>
-          <nav className="hidden md:flex items-center gap-4 text-xs body-inter">
-            <button onClick={() => scrollTo("conteudo")} className="hover:opacity-70 transition-opacity">Conteúdo</button>
-            <button onClick={() => scrollTo("para-quem")} className="hover:opacity-70 transition-opacity">Para quem</button>
-            <button onClick={() => scrollTo("faq")} className="hover:opacity-70 transition-opacity">FAQ</button>
-          </nav>
-          <button onClick={handlePurchase} className="btn-gold py-2 px-4 text-xs">
-            Entrar no REVOLUZ
-          </button>
-        </header>
 
         {/* ─── HERO ─── */}
         <section className="px-6 pt-8 pb-6 text-center">
