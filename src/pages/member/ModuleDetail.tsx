@@ -268,7 +268,7 @@ export default function ModuleDetail() {
         ].filter(g => g.days.length > 0);
 
         return (
-          <div className="space-y-3">
+          <div ref={journeyRef} className="space-y-3">
             {subModules.map((group) => {
               // Selá: render as a single clickable card (no collapsible)
               if (group.isSelah && group.days.length === 1) {
