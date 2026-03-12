@@ -345,6 +345,57 @@ export type Database = {
         }
         Relationships: []
       }
+      leads_contato: {
+        Row: {
+          cidade: string | null
+          created_at: string
+          data_evento: string | null
+          email: string
+          estado: string | null
+          id: string
+          igreja_organizacao: string | null
+          mensagem: string | null
+          nome: string
+          produto_interesse: string | null
+          tema: string | null
+          tipo: string
+          tipo_evento: string | null
+          whatsapp: string
+        }
+        Insert: {
+          cidade?: string | null
+          created_at?: string
+          data_evento?: string | null
+          email: string
+          estado?: string | null
+          id?: string
+          igreja_organizacao?: string | null
+          mensagem?: string | null
+          nome: string
+          produto_interesse?: string | null
+          tema?: string | null
+          tipo: string
+          tipo_evento?: string | null
+          whatsapp: string
+        }
+        Update: {
+          cidade?: string | null
+          created_at?: string
+          data_evento?: string | null
+          email?: string
+          estado?: string | null
+          id?: string
+          igreja_organizacao?: string | null
+          mensagem?: string | null
+          nome?: string
+          produto_interesse?: string | null
+          tema?: string | null
+          tipo?: string
+          tipo_evento?: string | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       library_items: {
         Row: {
           content_md: string

@@ -11,6 +11,9 @@ import { AdminRoute } from "@/components/AdminRoute";
 import SalesPage from "./pages/SalesPage";
 import SalesPageJunica from "./pages/SalesPageJunica";
 import SalesPageRevoluz from "./pages/SalesPageRevoluz";
+import HomePage from "./pages/HomePage";
+import JornadasPage from "./pages/JornadasPage";
+import ContatoPage from "./pages/ContatoPage";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
@@ -35,14 +38,16 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Redirect root to sales page */}
-            <Route path="/" element={<Navigate to="/jornada" replace />} />
+{/* Institutional home */}
+            <Route path="/" element={<HomePage />} />
             
             {/* Public routes */}
             <Route path="/jornada" element={<SalesPage />} />
             <Route path="/junica" element={<SalesPageJunica />} />
             <Route path="/revoluz" element={<SalesPageRevoluz />} />
             <Route path="/metodo-revoluz" element={<SalesPageRevoluz />} />
+            <Route path="/jornadas" element={<JornadasPage />} />
+            <Route path="/contato" element={<ContatoPage />} />
             
             {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
