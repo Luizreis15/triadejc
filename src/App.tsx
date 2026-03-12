@@ -41,6 +41,8 @@ const App = () => (
             {/* Public routes */}
             <Route path="/jornada" element={<SalesPage />} />
             <Route path="/junica" element={<SalesPageJunica />} />
+            <Route path="/revoluz" element={<SalesPageRevoluz />} />
+            <Route path="/metodo-revoluz" element={<SalesPageRevoluz />} />
             
             {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
