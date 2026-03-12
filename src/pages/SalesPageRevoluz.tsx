@@ -96,7 +96,7 @@ export default function SalesPageRevoluz() {
         </header>
 
         {/* ─── HERO ─── */}
-        <section className="px-6 pt-8 pb-6">
+        <section className="px-6 pt-8 pb-6 text-center">
           <ScrollReveal>
             <span className="inline-block text-xs body-inter tracking-widest uppercase mb-4" style={{ color: "hsl(var(--sp-rose))" }}>
               Programa de Transformação • Digital
@@ -114,7 +114,7 @@ export default function SalesPageRevoluz() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.25}>
-            <div className="flex flex-wrap gap-3 text-xs body-inter mb-6" style={{ color: "hsl(var(--sp-text-dark)/0.6)" }}>
+            <div className="flex flex-wrap justify-center gap-3 text-xs body-inter mb-6" style={{ color: "hsl(var(--sp-text-dark)/0.6)" }}>
               <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Acesso online</span>
               <span>•</span>
               <span>365 dias de acesso</span>
@@ -124,7 +124,13 @@ export default function SalesPageRevoluz() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.3}>
-            <div className="flex flex-col gap-3 mb-6">
+            <div className="rounded-2xl overflow-hidden mb-6">
+              <img src={heroImg} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.35}>
+            <div className="flex flex-col gap-3">
               <ButtonOrange onClick={handlePurchase} size="large" className="w-full justify-center">
                 Comece Sua Transformação Hoje
               </ButtonOrange>
@@ -138,12 +144,6 @@ export default function SalesPageRevoluz() {
               >
                 Ver o que tem dentro
               </button>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.35}>
-            <div className="rounded-2xl overflow-hidden">
-              <img src={heroImg} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
             </div>
           </ScrollReveal>
         </section>
