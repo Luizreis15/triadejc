@@ -41,6 +41,7 @@ export default function ModuleDetail() {
   const closureRef = useRef<HTMLDivElement>(null);
   const activityRef = useRef<HTMLDivElement>(null);
   const pdfsRef = useRef<HTMLDivElement>(null);
+  const journeyRef = useRef<HTMLDivElement>(null);
 
   // Fetch module
   const { data: module, isLoading: moduleLoading } = useQuery({
