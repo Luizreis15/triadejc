@@ -81,7 +81,7 @@ export default function ProductsShowcase() {
       <div className="sales-container !max-w-2xl">
         {/* Back button */}
         <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md px-4 py-3 border-b border-border/30">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <button onClick={() => navigate("/membros/app")} className="flex items-center gap-2 text-sm font-medium text-foreground">
             <ArrowLeft className="w-4 h-4" />
             Voltar
           </button>
