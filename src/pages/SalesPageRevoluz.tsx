@@ -308,7 +308,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── GARANTIA ─── */}
-        <section className="px-6 py-10">
+        <section className="px-6 py-6">
           <ScrollReveal>
             <div className="card-cream p-6 border-2" style={{ borderColor: "hsl(var(--sp-rose)/0.4)" }}>
               <div className="flex items-center gap-3 mb-4">
