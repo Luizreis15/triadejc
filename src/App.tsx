@@ -38,14 +38,16 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Redirect root to sales page */}
-            <Route path="/" element={<Navigate to="/jornada" replace />} />
+{/* Institutional home */}
+            <Route path="/" element={<HomePage />} />
             
             {/* Public routes */}
             <Route path="/jornada" element={<SalesPage />} />
             <Route path="/junica" element={<SalesPageJunica />} />
             <Route path="/revoluz" element={<SalesPageRevoluz />} />
             <Route path="/metodo-revoluz" element={<SalesPageRevoluz />} />
+            <Route path="/jornadas" element={<JornadasPage />} />
+            <Route path="/contato" element={<ContatoPage />} />
             
             {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
