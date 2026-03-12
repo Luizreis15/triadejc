@@ -302,7 +302,7 @@ export default function SalesPageRevoluz() {
           <ScrollReveal delay={0.1}>
             <h3 className="heading-playfair text-lg mb-2">Jordana Cantarelli</h3>
             <p className="body-inter text-sm leading-relaxed" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
-              Pastora, psicanalista clínica e terapeuta cristã, com mais de 10 anos de experiência. Ela une fé, sensibilidade humana e ciência emocional para guiar mulheres que desejam viver sua fé com calma interior e organização emocional prática.
+              Pastora da Lagoinha Morumbi, psicanalista clínica e terapeuta cristã, com mais de 10 anos de experiência. Ela une fé, sensibilidade humana e ciência emocional para guiar mulheres que desejam viver sua fé com calma interior e organização emocional prática.
             </p>
           </ScrollReveal>
         </section>
