@@ -127,7 +127,7 @@ export default function ProductsShowcase() {
               <img src={jordanaAbout} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
             </div>
             <p className="body-inter text-sm leading-relaxed opacity-90">
-              Eu sou Jordana Cantarelli — pastora e psicanalista clínica, com mais de 10 anos de atuação acompanhando mulheres em processos de restauração emocional e espiritual. Meu trabalho une fé, sensibilidade humana e ferramentas práticas para ajudar você a organizar o que está por dentro, recuperar clareza e caminhar com propósito.
+              Eu sou Jordana Cantarelli — pastora da Lagoinha Morumbi e psicanalista clínica, com mais de 10 anos de atuação acompanhando mulheres em processos de restauração emocional e espiritual. Meu trabalho une fé, sensibilidade humana e ferramentas práticas para ajudar você a organizar o que está por dentro, recuperar clareza e caminhar com propósito.
             </p>
             <p className="body-inter text-center text-sm mt-5 italic opacity-80">
               "Aqui não existe atalho. Existe caminho."
