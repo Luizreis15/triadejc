@@ -284,7 +284,7 @@ e escolha o próximo passo da sua transformação.
         {/* LISTA DE ESPERA SECTION */}
         <ScrollReveal>
           <div ref={waitlistRef}>
-            <section className="px-6 py-10">
+            <section className="px-6 py-6">
               <h2 className="heading-playfair text-xl md:text-2xl mb-3 text-center">Lista de espera</h2>
               <p className="body-inter text-sm text-center opacity-80 mb-6">
                 Se você quer ser avisada quando abrirem novas turmas/edições, cadastre seu contato. Eu vou te chamar assim que houver abertura.
