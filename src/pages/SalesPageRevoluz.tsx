@@ -168,7 +168,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── POR QUE EXISTE ─── */}
-        <section className="px-6 py-10">
+        <section className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Por que esse método existe</TextReveal>
 
           <ScrollReveal>
