@@ -257,7 +257,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── PARA QUEM É ─── */}
-        <section id="para-quem" className="px-6 py-10">
+        <section id="para-quem" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O REVOLUZ é para você que…</TextReveal>
 
           <div className="grid grid-cols-1 gap-4 mb-6">
