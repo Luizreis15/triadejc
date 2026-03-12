@@ -547,7 +547,7 @@ export default function ModuleDetail() {
       )}
 
       {/* Empty State */}
-      {cards.length === 0 && pdfs.length === 0 && (
+      {cards.length === 0 && pdfs.length === 0 && moduleDays.length === 0 && (
         <div className="text-center py-8 bg-muted/30 rounded-2xl">
           <p className="text-muted-foreground">
             O conteúdo deste módulo está sendo preparado com carinho.
