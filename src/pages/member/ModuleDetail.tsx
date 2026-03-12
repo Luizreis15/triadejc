@@ -255,6 +255,24 @@ export default function ModuleDetail() {
         )}
       </section>
 
+      {/* SEÇÃO 1 — Começar por aqui (intro) — logo após os botões */}
+      {introCards.length > 0 && (
+        <div ref={introRef}>
+          <ContentSection title="Começar por aqui" icon={<Sparkles className="w-5 h-5 text-primary" />}>
+            {introCards.map((card) => (
+              <ContentCard 
+                key={card.id} 
+                card={card} 
+                moduleSlug={slug!}
+                isCompleted={isCardCompleted(card.id)}
+                onComplete={() => handleCompleteCard(card.id)}
+                isIntro
+              />
+            ))}
+          </ContentSection>
+        </div>
+      )}
+
       {/* JORNADA DIÁRIA — Sub-módulos colapsáveis */}
       {moduleDays.length > 0 && (() => {
         // Group days into sub-modules by ranges
@@ -422,24 +440,6 @@ export default function ModuleDetail() {
           </div>
         );
       })()}
-
-      {/* SEÇÃO 1 — Começar por aqui (intro) */}
-      {introCards.length > 0 && (
-        <div ref={introRef}>
-          <ContentSection title="Começar por aqui" icon={<Sparkles className="w-5 h-5 text-primary" />}>
-            {introCards.map((card) => (
-              <ContentCard 
-                key={card.id} 
-                card={card} 
-                moduleSlug={slug!}
-                isCompleted={isCardCompleted(card.id)}
-                onComplete={() => handleCompleteCard(card.id)}
-                isIntro
-              />
-            ))}
-          </ContentSection>
-        </div>
-      )}
 
       {/* SEÇÃO 2 — Leituras Principais (reading) */}
       {readingCards.length > 0 && (
