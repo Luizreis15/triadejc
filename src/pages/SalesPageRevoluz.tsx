@@ -217,7 +217,7 @@ export default function SalesPageRevoluz() {
         </SectionRed>
 
         {/* ─── CONTEÚDO / ACCORDION ─── */}
-        <section id="conteudo" className="px-6 py-10">
+        <section id="conteudo" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O que você vai receber dentro</TextReveal>
 
           <ScrollReveal>
