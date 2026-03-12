@@ -92,22 +92,8 @@ export default function ProductsShowcase() {
           <p className="body-inter text-base mb-6 opacity-80 px-2">
             Fé com presença. Clareza emocional com responsabilidade. Um caminho prático para restaurar identidade e propósito.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto">
-            <a href={REVOLUZ_URL} target="_blank" rel="noopener noreferrer" className="btn-orange w-full text-center text-sm py-4 px-6">
-              QUERO ENTRAR NO MÉTODO REVOLUZ
-              <ArrowRight className="w-4 h-4 inline ml-1" />
-            </a>
-            <button onClick={scrollToWaitlist} className="btn-gold w-full text-sm py-4 px-6">
-              LISTA DE ESPERA
-              <ArrowRight className="w-4 h-4 inline ml-1" />
-            </button>
-          </div>
-          <p className="text-xs mt-3 opacity-60 body-inter">
-            Acesso online • Garantia de 7 dias (Método REVOLUZ) • Caminhos diferentes para necessidades diferentes
-          </p>
-
           <div className="mt-8 rounded-2xl overflow-hidden shadow-lg">
-            <img src={jordanaHero} alt="Jordana Cantarelli" className="w-full object-cover max-h-80" />
+            <img src={jordanaHero} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
           </div>
         </section>
 
