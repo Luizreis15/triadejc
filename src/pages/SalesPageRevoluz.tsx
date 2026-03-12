@@ -87,7 +87,7 @@ export default function SalesPageRevoluz() {
         <section className="px-6 pt-8 pb-6 text-center">
           <ScrollReveal blur scale>
             <span className="inline-block text-xs body-inter tracking-widest uppercase mb-4" style={{ color: "hsl(var(--sp-rose))" }}>
-              Programa de Transformação • Digital
+              Método REVOLUZ • Online
             </span>
           </ScrollReveal>
 
