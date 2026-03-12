@@ -135,7 +135,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── VOCÊ SENTE ISSO? ─── */}
-        <section id="voce-sente" className="px-6 py-10">
+        <section id="voce-sente" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Você sente isso?</TextReveal>
 
           <StaggerContainer className="space-y-3 mb-6" staggerDelay={0.1}>
