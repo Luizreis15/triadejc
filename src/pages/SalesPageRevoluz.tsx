@@ -104,12 +104,12 @@ export default function SalesPageRevoluz() {
           </ScrollReveal>
 
           <TextReveal as="h1" className="heading-playfair text-2xl md:text-3xl mb-4">
-            Reprograme sua mente com fé, clareza e método — e volte a viver com identidade e propósito.
+            Organize o que está por dentro — e viva com propósito.
           </TextReveal>
 
           <ScrollReveal delay={0.15}>
             <p className="body-inter text-sm leading-relaxed mb-4" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
-              O Método REVOLUZ combina princípios cristãos com desenvolvimento pessoal, inteligência emocional e ferramentas práticas de reprogramação mental — para você organizar o que está por dentro e sustentar uma vida emocional mais firme.
+              Fé + inteligência emocional + reprogramação mental (passo a passo).
             </p>
           </ScrollReveal>
 
