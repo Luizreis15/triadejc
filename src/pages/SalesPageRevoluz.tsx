@@ -280,22 +280,6 @@ export default function SalesPageRevoluz() {
               </CardCream>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.1}>
-              <CardCream className="space-y-3">
-                <h3 className="heading-playfair text-base mb-2" style={{ color: "hsl(var(--sp-petrol-primary))" }}>
-                  Não é sobre:
-                </h3>
-                {[
-                  "Ser perfeita",
-                  "Fazer tudo de uma vez",
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-2 body-inter text-sm">
-                    <X className="w-4 h-4 mt-0.5 shrink-0 opacity-50" />
-                    {item}
-                  </div>
-                ))}
-              </CardCream>
-            </ScrollReveal>
           </div>
 
           <ScrollReveal>
