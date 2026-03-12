@@ -85,7 +85,7 @@ export default function ProductsShowcase() {
         </div>
 
         {/* HERO */}
-        <section className="px-6 py-10 text-center">
+        <section className="px-6 py-6 text-center">
           <h1 className="heading-playfair text-2xl md:text-3xl mb-4 px-2">
             Conheça todos os meus produtos 
 e escolha o próximo passo da sua transformação.
