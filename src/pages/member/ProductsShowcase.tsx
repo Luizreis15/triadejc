@@ -137,7 +137,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* ESCOLHA SEU PRÓXIMO PASSO */}
         <ScrollReveal>
-          <section className="px-6 py-10">
+          <section className="px-6 py-8">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">Escolha o seu próximo passo</h2>
             <div className="space-y-6">
               {/* CARD 1 — REVOLUZ */}
