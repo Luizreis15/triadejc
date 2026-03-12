@@ -3,13 +3,13 @@ import { ButtonGold, ButtonOrange, IconSquare, CardCream, SectionRed, FAQAccordi
 import { StaggerContainer, StaggerItem } from "@/components/sales/StaggerContainer";
 import { TextReveal } from "@/components/sales/TextReveal";
 import { Check, BookOpen, Brain, Heart, Sparkles, Clock, Shield } from "lucide-react";
+import { motion } from "framer-motion";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
 
 import heroImg from "@/assets/jordana-hero.jpg";
 import aboutImg from "@/assets/jordana-about.jpg";
@@ -76,6 +76,8 @@ const modules = [
   },
 ];
 
+const ease21st = [0.22, 1, 0.36, 1] as const;
+
 export default function SalesPageRevoluz() {
   return (
     <div className="sales-page">
@@ -83,7 +85,7 @@ export default function SalesPageRevoluz() {
 
         {/* ─── HERO ─── */}
         <section className="px-6 pt-8 pb-6 text-center">
-          <ScrollReveal>
+          <ScrollReveal blur scale>
             <span className="inline-block text-xs body-inter tracking-widest uppercase mb-4" style={{ color: "hsl(var(--sp-rose))" }}>
               Programa de Transformação • Digital
             </span>
@@ -93,13 +95,13 @@ export default function SalesPageRevoluz() {
             Organize o que está por dentro — e viva com propósito.
           </TextReveal>
 
-          <ScrollReveal delay={0.15}>
+          <ScrollReveal delay={0.15} blur>
             <p className="body-inter text-sm leading-relaxed mb-4 mx-auto" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
               Fé + inteligência emocional + reprogramação mental<br />(passo a passo).
             </p>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.25}>
+          <ScrollReveal delay={0.25} blur>
             <div className="flex flex-wrap justify-center gap-3 text-xs body-inter mb-6" style={{ color: "hsl(var(--sp-text-dark)/0.6)" }}>
               <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Acesso online</span>
               <span>•</span>
@@ -109,27 +111,44 @@ export default function SalesPageRevoluz() {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.3}>
-            <div className="rounded-2xl overflow-hidden mb-6">
-              <img src={heroImg} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
-            </div>
+          <ScrollReveal delay={0.3} scale blur>
+            <motion.div
+              className="rounded-2xl overflow-hidden mb-6"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.5, ease: ease21st }}
+            >
+              <motion.img
+                src={heroImg}
+                alt="Jordana Cantarelli"
+                className="w-full aspect-[4/5] object-cover object-top"
+                initial={{ scale: 1.1 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, ease: ease21st }}
+              />
+            </motion.div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.35}>
+          <ScrollReveal delay={0.4} blur>
             <div className="flex flex-col gap-3">
-              <ButtonOrange onClick={handlePurchase} size="large" className="w-full justify-center">
-                Quero Começar Agora
-              </ButtonOrange>
-              <button
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.2 }}>
+                <ButtonOrange onClick={handlePurchase} size="large" className="w-full justify-center">
+                  Quero Começar Agora
+                </ButtonOrange>
+              </motion.div>
+              <motion.button
                 onClick={() => scrollTo("conteudo")}
                 className="body-inter text-sm font-medium py-3 px-6 rounded-xl border-2 transition-colors text-center"
                 style={{
                   borderColor: "hsl(var(--sp-petrol-primary))",
                   color: "hsl(var(--sp-petrol-primary))",
                 }}
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2 }}
               >
                 Ver o que tem dentro
-              </button>
+              </motion.button>
             </div>
           </ScrollReveal>
         </section>
@@ -138,7 +157,7 @@ export default function SalesPageRevoluz() {
         <section id="voce-sente" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Você sente isso?</TextReveal>
 
-          <StaggerContainer className="space-y-3 mb-6" staggerDelay={0.1}>
+          <StaggerContainer className="space-y-3 mb-6" staggerDelay={0.12}>
             {[
               "Você ama a Deus, mas por dentro está tudo confuso?",
               "Você já tentou mudar hábitos, pensamentos e reações… e voltou para os mesmos ciclos?",
@@ -146,24 +165,28 @@ export default function SalesPageRevoluz() {
               "Você precisa de um caminho prático e didático, sem peso e sem conteúdo cansativo?",
             ].map((q, i) => (
               <StaggerItem key={i}>
-                <CardCream className="flex items-start gap-3">
-                  <Heart className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "hsl(var(--sp-rose))" }} />
-                  <p className="body-inter text-sm">{q}</p>
-                </CardCream>
+                <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.25, ease: ease21st }}>
+                  <CardCream className="flex items-start gap-3">
+                    <Heart className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "hsl(var(--sp-rose))" }} />
+                    <p className="body-inter text-sm">{q}</p>
+                  </CardCream>
+                </motion.div>
               </StaggerItem>
             ))}
           </StaggerContainer>
 
-          <ScrollReveal>
+          <ScrollReveal scale blur>
             <p className="heading-playfair text-lg text-center mb-6" style={{ color: "hsl(var(--sp-petrol-primary))" }}>
               Não é falta de fé.<br />É falta de clareza interna.
             </p>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.1}>
-            <ButtonGold onClick={handlePurchase} className="w-full justify-center">
-              Quero entrar no REVOLUZ
-            </ButtonGold>
+          <ScrollReveal delay={0.1} blur>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.2 }}>
+              <ButtonGold onClick={handlePurchase} className="w-full justify-center">
+                Quero entrar no REVOLUZ
+              </ButtonGold>
+            </motion.div>
           </ScrollReveal>
         </section>
 
@@ -171,7 +194,7 @@ export default function SalesPageRevoluz() {
         <section className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Por que esse método existe</TextReveal>
 
-          <ScrollReveal>
+          <ScrollReveal direction="left" blur>
             <CardCream className="mb-4">
               <p className="body-inter text-sm leading-relaxed">
                 Muitas pessoas amam a Deus com sinceridade, mas vivem sem direção interna para organizar o que sentem por dentro. E isso vira culpa, cansaço e repetição de padrões.
@@ -179,7 +202,7 @@ export default function SalesPageRevoluz() {
             </CardCream>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.1}>
+          <ScrollReveal delay={0.1} direction="right" blur>
             <CardCream>
               <p className="body-inter text-sm leading-relaxed">
                 Aqui não se promete cura milagrosa. Aqui se oferece um espaço para entender, acolher e organizar sua vida emocional e espiritual com responsabilidade e carinho — com um passo a passo claro.
@@ -192,7 +215,7 @@ export default function SalesPageRevoluz() {
         <SectionRed className="py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O que está incluído</TextReveal>
 
-          <StaggerContainer className="space-y-4 mb-8" staggerDelay={0.08}>
+          <StaggerContainer className="space-y-4 mb-8" staggerDelay={0.1}>
             {[
               { icon: Sparkles, text: "Transformação espiritual e emocional" },
               { icon: Brain, text: "Autoconhecimento profundo (bloqueios, traumas e feridas emocionais)" },
@@ -201,18 +224,24 @@ export default function SalesPageRevoluz() {
               { icon: Clock, text: "Apoio/estrutura para você caminhar no seu tempo (acesso por 365 dias)" },
             ].map((item, i) => (
               <StaggerItem key={i}>
-                <div className="flex items-start gap-3">
+                <motion.div
+                  className="flex items-start gap-3"
+                  whileHover={{ x: 6 }}
+                  transition={{ duration: 0.25, ease: ease21st }}
+                >
                   <IconSquare icon={item.icon} />
                   <p className="body-inter text-sm">{item.text}</p>
-                </div>
+                </motion.div>
               </StaggerItem>
             ))}
           </StaggerContainer>
 
-          <ScrollReveal>
-            <ButtonOrange onClick={handlePurchase} className="w-full justify-center">
-              Garanta sua vaga
-            </ButtonOrange>
+          <ScrollReveal blur>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.2 }}>
+              <ButtonOrange onClick={handlePurchase} className="w-full justify-center">
+                Garanta sua vaga
+              </ButtonOrange>
+            </motion.div>
           </ScrollReveal>
         </SectionRed>
 
@@ -220,39 +249,48 @@ export default function SalesPageRevoluz() {
         <section id="conteudo" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O que você vai receber dentro</TextReveal>
 
-          <ScrollReveal>
-            <Accordion type="single" collapsible className="mb-8">
+          <StaggerContainer className="mb-8" staggerDelay={0.1}>
+            <Accordion type="single" collapsible>
               {modules.map((mod, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`mod-${i}`}
-                  className="border-b border-[hsl(var(--sp-rose)/0.3)]"
-                >
-                  <AccordionTrigger
-                    className="text-left py-4 hover:no-underline"
-                    style={{ fontFamily: "var(--font-playfair)", fontWeight: 500 }}
+                <StaggerItem key={i}>
+                  <AccordionItem
+                    value={`mod-${i}`}
+                    className="border-b border-[hsl(var(--sp-rose)/0.3)]"
                   >
-                    {mod.title}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 pb-2">
-                      {mod.lessons.map((lesson, j) => (
-                        <li key={j} className="flex items-start gap-2 body-inter text-sm">
-                          <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "hsl(var(--sp-rose))" }} />
-                          {lesson}
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
+                    <AccordionTrigger
+                      className="text-left py-4 hover:no-underline"
+                      style={{ fontFamily: "var(--font-playfair)", fontWeight: 500 }}
+                    >
+                      {mod.title}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="space-y-2 pb-2">
+                        {mod.lessons.map((lesson, j) => (
+                          <motion.li
+                            key={j}
+                            className="flex items-start gap-2 body-inter text-sm"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: j * 0.06, duration: 0.4, ease: ease21st }}
+                          >
+                            <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "hsl(var(--sp-rose))" }} />
+                            {lesson}
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                </StaggerItem>
               ))}
             </Accordion>
-          </ScrollReveal>
+          </StaggerContainer>
 
-          <ScrollReveal delay={0.1}>
-            <ButtonOrange onClick={handlePurchase} className="w-full justify-center">
-              Comece agora (acesso imediato)
-            </ButtonOrange>
+          <ScrollReveal delay={0.1} blur>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.2 }}>
+              <ButtonOrange onClick={handlePurchase} className="w-full justify-center">
+                Comece agora (acesso imediato)
+              </ButtonOrange>
+            </motion.div>
           </ScrollReveal>
         </section>
 
@@ -260,29 +298,30 @@ export default function SalesPageRevoluz() {
         <section id="para-quem" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">O REVOLUZ é para você que…</TextReveal>
 
-          <div className="grid grid-cols-1 gap-4 mb-6">
-            <ScrollReveal>
-              <CardCream className="space-y-3">
-                <h3 className="heading-playfair text-base mb-2" style={{ color: "hsl(var(--sp-petrol-primary))" }}>
-                  É para você se:
-                </h3>
+          <ScrollReveal blur scale>
+            <CardCream className="space-y-3 mb-6">
+              <h3 className="heading-playfair text-base mb-2" style={{ color: "hsl(var(--sp-petrol-primary))" }}>
+                É para você se:
+              </h3>
+              <StaggerContainer staggerDelay={0.1}>
                 {[
                   "Tem pouco tempo e quer praticidade",
                   "Detesta conteúdos cansativos e aulas que dão sono",
                   "Quer estudar fazendo o seu próprio horário",
                   "Precisa de um passo a passo simples que funcione",
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-2 body-inter text-sm">
-                    <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "hsl(var(--sp-rose))" }} />
-                    {item}
-                  </div>
+                  <StaggerItem key={i}>
+                    <div className="flex items-start gap-2 body-inter text-sm">
+                      <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "hsl(var(--sp-rose))" }} />
+                      {item}
+                    </div>
+                  </StaggerItem>
                 ))}
-              </CardCream>
-            </ScrollReveal>
+              </StaggerContainer>
+            </CardCream>
+          </ScrollReveal>
 
-          </div>
-
-          <ScrollReveal>
+          <ScrollReveal delay={0.15} scale blur>
             <p className="heading-playfair text-lg text-center" style={{ color: "hsl(var(--sp-petrol-primary))" }}>
               Não é sobre ser perfeita —<br />é sobre viver com presença.
             </p>
@@ -293,13 +332,25 @@ export default function SalesPageRevoluz() {
         <section className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Quem te acompanha nessa jornada</TextReveal>
 
-          <ScrollReveal>
-            <div className="rounded-2xl overflow-hidden mb-4">
-              <img src={aboutImg} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
-            </div>
+          <ScrollReveal scale blur>
+            <motion.div
+              className="rounded-2xl overflow-hidden mb-4"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.5, ease: ease21st }}
+            >
+              <motion.img
+                src={aboutImg}
+                alt="Jordana Cantarelli"
+                className="w-full aspect-[4/5] object-cover object-top"
+                initial={{ scale: 1.1 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, ease: ease21st }}
+              />
+            </motion.div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.1}>
+          <ScrollReveal delay={0.15} direction="left" blur>
             <h3 className="heading-playfair text-lg mb-2">Jordana Cantarelli</h3>
             <p className="body-inter text-sm leading-relaxed" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
               Pastora da Lagoinha Morumbi, psicanalista clínica e terapeuta cristã, com mais de 10 anos de experiência. Ela une fé, sensibilidade humana e ciência emocional para guiar mulheres que desejam viver sua fé com calma interior e organização emocional prática.
@@ -309,13 +360,22 @@ export default function SalesPageRevoluz() {
 
         {/* ─── GARANTIA ─── */}
         <section className="px-6 py-6">
-          <ScrollReveal>
-            <div className="card-cream p-6 border-2" style={{ borderColor: "hsl(var(--sp-rose)/0.4)" }}>
+          <ScrollReveal scale blur>
+            <motion.div
+              className="card-cream p-6 border-2"
+              style={{ borderColor: "hsl(var(--sp-rose)/0.4)" }}
+              whileHover={{ y: -4, boxShadow: "0 20px 40px -12px hsl(var(--sp-rose) / 0.15)" }}
+              transition={{ duration: 0.4, ease: ease21st }}
+            >
               <div className="flex items-center gap-3 mb-4">
-                <div className="guarantee-badge">
+                <motion.div
+                  className="guarantee-badge"
+                  animate={{ rotate: [0, -5, 5, -3, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }}
+                >
                   <Shield className="w-5 h-5" />
                   <span className="text-[10px] mt-0.5">7 DIAS</span>
-                </div>
+                </motion.div>
                 <h2 className="heading-playfair text-lg">Você tem 7 dias para testar sem risco</h2>
               </div>
               <p className="body-inter text-sm leading-relaxed mb-4" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
@@ -324,55 +384,70 @@ export default function SalesPageRevoluz() {
               <p className="body-inter text-sm italic mb-6" style={{ color: "hsl(var(--sp-petrol-primary))" }}>
                 Sua paz interna merece uma chance — sem risco, sem pressão.
               </p>
-              <ButtonGold onClick={handlePurchase} className="w-full justify-center">
-                Garanta sua vaga
-              </ButtonGold>
-            </div>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.2 }}>
+                <ButtonGold onClick={handlePurchase} className="w-full justify-center">
+                  Garanta sua vaga
+                </ButtonGold>
+              </motion.div>
+            </motion.div>
           </ScrollReveal>
         </section>
 
         {/* ─── FAQ ─── */}
         <section id="faq" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Dúvidas Frequentes</TextReveal>
-          <ScrollReveal>
+          <ScrollReveal blur>
             <FAQAccordion items={faqItems} />
           </ScrollReveal>
         </section>
 
         {/* ─── CTA FINAL ─── */}
         <SectionRed className="py-12 text-center">
-          <ScrollReveal>
-            <h2 className="heading-playfair text-2xl mb-4">Comece Sua Transformação Hoje!</h2>
-            <p className="body-inter text-sm mb-8 opacity-90">
-              A transformação começa com uma decisão. Decida hoje ser a melhor versão de si mesmo com o Método REVOLUZ.
-            </p>
-            <ButtonOrange onClick={handlePurchase} size="large" className="w-full justify-center">
-              Entrar no Método REVOLUZ
-            </ButtonOrange>
+          <ScrollReveal scale blur>
+            <TextReveal className="heading-playfair text-2xl mb-4">Comece Sua Transformação Hoje!</TextReveal>
+            <ScrollReveal delay={0.15} blur>
+              <p className="body-inter text-sm mb-8 opacity-90">
+                A transformação começa com uma decisão. Decida hoje ser a melhor versão de si mesmo com o Método REVOLUZ.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.25} blur>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.25 }}>
+                <ButtonOrange onClick={handlePurchase} size="large" className="w-full justify-center">
+                  Entrar no Método REVOLUZ
+                </ButtonOrange>
+              </motion.div>
+            </ScrollReveal>
           </ScrollReveal>
         </SectionRed>
 
         {/* ─── FOOTER ─── */}
         <footer className="px-6 py-8 text-center">
-          <p className="body-inter text-sm italic mb-2" style={{ color: "hsl(var(--sp-text-dark)/0.6)" }}>
-            Esse é um passo que sua alma pode agradecer amanhã.
-          </p>
-          <a
-            href="https://jordanacantarelli.com.br/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="body-inter text-xs underline"
-            style={{ color: "hsl(var(--sp-petrol-primary))" }}
-          >
-            Site oficial
-          </a>
+          <ScrollReveal blur>
+            <p className="body-inter text-sm italic mb-2" style={{ color: "hsl(var(--sp-text-dark)/0.6)" }}>
+              Esse é um passo que sua alma pode agradecer amanhã.
+            </p>
+            <a
+              href="https://jordanacantarelli.com.br/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="body-inter text-xs underline"
+              style={{ color: "hsl(var(--sp-petrol-primary))" }}
+            >
+              Site oficial
+            </a>
+          </ScrollReveal>
         </footer>
 
         {/* spacer for sticky CTA */}
         <div className="h-16 md:hidden" />
 
         {/* ─── STICKY CTA MOBILE ─── */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[hsl(var(--sp-paper)/0.95)] backdrop-blur-md border-t border-[hsl(var(--sp-cream))] px-4 py-3 flex items-center gap-3">
+        <motion.div
+          className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[hsl(var(--sp-paper)/0.95)] backdrop-blur-md border-t border-[hsl(var(--sp-cream))] px-4 py-3 flex items-center gap-3"
+          initial={{ y: 80 }}
+          animate={{ y: 0 }}
+          transition={{ delay: 1.5, duration: 0.6, ease: ease21st }}
+        >
           <button
             onClick={() => scrollTo("conteudo")}
             className="body-inter text-xs underline shrink-0"
@@ -380,10 +455,14 @@ export default function SalesPageRevoluz() {
           >
             Ver conteúdo
           </button>
-          <button onClick={handlePurchase} className="btn-orange flex-1 py-3 text-xs">
+          <motion.button
+            onClick={handlePurchase}
+            className="btn-orange flex-1 py-3 text-xs"
+            whileTap={{ scale: 0.96 }}
+          >
             Entrar no REVOLUZ
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </div>
   );
