@@ -7,3 +7,4 @@ export { default as Notebook } from "./Notebook";
 export { default as Library } from "./Library";
 export { default as Profile } from "./Profile";
 export { default as JourneyCompletion } from "./JourneyCompletion";
+export { default as ProductsShowcase } from "./ProductsShowcase";

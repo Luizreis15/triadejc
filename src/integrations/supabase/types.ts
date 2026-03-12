@@ -883,6 +883,48 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_leads: {
+        Row: {
+          availability: string | null
+          city: string | null
+          created_at: string
+          email: string
+          goal: string | null
+          id: string
+          main_challenge: string
+          name: string
+          product: string
+          state: string | null
+          whatsapp: string
+        }
+        Insert: {
+          availability?: string | null
+          city?: string | null
+          created_at?: string
+          email: string
+          goal?: string | null
+          id?: string
+          main_challenge: string
+          name: string
+          product: string
+          state?: string | null
+          whatsapp: string
+        }
+        Update: {
+          availability?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string
+          goal?: string | null
+          id?: string
+          main_challenge?: string
+          name?: string
+          product?: string
+          state?: string | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

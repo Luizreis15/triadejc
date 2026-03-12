@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Heart } from "lucide-react";
+import { ArrowRight, Heart, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -126,6 +126,22 @@ export default function Home() {
           </Link>
         )}
       </section>
+
+      {/* Products Showcase Card */}
+      <Link to="/membros/app/conheca">
+        <div className="bg-gradient-to-r from-secondary/20 to-accent/10 rounded-2xl p-5 border border-secondary/30 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] active:scale-[0.99]">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center shrink-0">
+              <Sparkles className="w-6 h-6 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-serif text-base font-semibold text-foreground">Conheça todos os produtos</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Método REVOLUZ, Mentoria DSL e mais</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-muted-foreground shrink-0" />
+          </div>
+        </div>
+      </Link>
 
       {/* Overall Progress */}
       <section className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
