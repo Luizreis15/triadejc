@@ -100,7 +100,7 @@ e escolha o próximo passo da sua transformação.
 
         {/* VOCÊ SENTE ISSO? */}
         <ScrollReveal>
-          <section className="px-6 py-10">
+          <section className="px-6 py-8">
             <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">Você sente isso?</h2>
             <div className="space-y-3">
               {["Você ama a Deus, mas sente que por dentro está tudo desorganizado?",
