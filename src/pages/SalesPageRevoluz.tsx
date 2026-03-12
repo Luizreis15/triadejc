@@ -332,7 +332,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── FAQ ─── */}
-        <section id="faq" className="px-6 py-10">
+        <section id="faq" className="px-6 py-6">
           <TextReveal className="heading-playfair text-xl mb-6">Dúvidas Frequentes</TextReveal>
           <ScrollReveal>
             <FAQAccordion items={faqItems} />
