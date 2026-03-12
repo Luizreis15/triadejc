@@ -212,21 +212,22 @@ export default function ModuleDetail() {
 
       {/* Quick Actions — adapt based on available content */}
       <section className="grid grid-cols-2 gap-3">
-        {introCards.length > 0 ? (
+        {introCards.length > 0 && (
           <QuickActionButton
             icon={Play}
             label="Começar"
             color="bg-primary/10 text-primary"
             onClick={() => scrollToSection(introRef)}
           />
-        ) : moduleDays.length > 0 ? (
+        )}
+        {moduleDays.length > 0 && (
           <QuickActionButton
-            icon={Play}
-            label="Começar"
-            color="bg-primary/10 text-primary"
+            icon={Calendar}
+            label="Jornada Diária"
+            color="bg-purple-100 text-purple-700"
             onClick={() => scrollToSection(journeyRef)}
           />
-        ) : null}
+        )}
         {selahCards.length > 0 && (
           <QuickActionButton
             icon={Heart}
