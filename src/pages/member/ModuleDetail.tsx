@@ -165,6 +165,11 @@ export default function ModuleDetail() {
     );
   }
 
+  // If chapter-based product, delegate to ProductDetail
+  if (hasChapters) {
+    return <ProductDetail module={module} />;
+  }
+
   return (
     <div className="space-y-8">
       {/* Back Button */}
