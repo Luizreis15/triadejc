@@ -1,10 +1,13 @@
 import "@/styles/sales-page.css";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Star, Users, Zap, Calendar, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WaitlistModal } from "@/components/member/WaitlistModal";
 import { ScrollReveal } from "@/components/sales/ScrollReveal";
+import { StaggerContainer, StaggerItem } from "@/components/sales/StaggerContainer";
+import { TextReveal } from "@/components/sales/TextReveal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import jordanaHero from "@/assets/jordana-hero.jpg";
 import jordanaAbout from "@/assets/jordana-about.jpg";
@@ -12,52 +15,52 @@ import jordanaAbout from "@/assets/jordana-about.jpg";
 const REVOLUZ_URL = "https://pay.kiwify.com.br/IFBt2d0";
 
 const revoluzModules = [
-{
-  title: "Módulo 1 — Espiritualidade",
-  lessons: [
-  "Poder das Disciplinas Espirituais",
-  "Orações que Acessam o Coração de Deus",
-  "Meditação Cristã na Prática da Vida",
-  "Como Colocar Deus em Sua Rotina?"]
-
-},
-{
-  title: "Módulo 2 — Autoconhecimento",
-  lessons: [
-  "Identifique Bloqueios, Traumas e Feridas Emocionais",
-  "Consequências desses Bloqueios",
-  "O Que Está te Impedindo de Viver sua Melhor Versão?",
-  "Autoanálise",
-  "Identidade — Quem Você Realmente Nasceu para Ser?"]
-
-},
-{
-  title: "Módulo 3 — Inteligência Emocional",
-  lessons: [
-  "O que é Inteligência Emocional?",
-  "Inteligência Emocional sob o Olhar Bíblico",
-  "Como Superar Traumas e Feridas Emocionais?",
-  "Como Lidar com o Caminho até a Superação?",
-  "Como Não Repetir os Padrões Negativos Hereditários?"]
-
-},
-{
-  title: "Módulo 4 — Reprogramação Mental",
-  lessons: [
-  "Técnica M.C.P.®",
-  "Exercícios Terapêuticos de Fé",
-  "A Importância do Ecossistema",
-  "Constância, o Caminho do Sucesso",
-  "O Passaporte para a Sua Melhor Versão!"]
-
-}];
-
+  {
+    title: "Módulo 1 — Espiritualidade",
+    lessons: [
+      "Poder das Disciplinas Espirituais",
+      "Orações que Acessam o Coração de Deus",
+      "Meditação Cristã na Prática da Vida",
+      "Como Colocar Deus em Sua Rotina?",
+    ],
+  },
+  {
+    title: "Módulo 2 — Autoconhecimento",
+    lessons: [
+      "Identifique Bloqueios, Traumas e Feridas Emocionais",
+      "Consequências desses Bloqueios",
+      "O Que Está te Impedindo de Viver sua Melhor Versão?",
+      "Autoanálise",
+      "Identidade — Quem Você Realmente Nasceu para Ser?",
+    ],
+  },
+  {
+    title: "Módulo 3 — Inteligência Emocional",
+    lessons: [
+      "O que é Inteligência Emocional?",
+      "Inteligência Emocional sob o Olhar Bíblico",
+      "Como Superar Traumas e Feridas Emocionais?",
+      "Como Lidar com o Caminho até a Superação?",
+      "Como Não Repetir os Padrões Negativos Hereditários?",
+    ],
+  },
+  {
+    title: "Módulo 4 — Reprogramação Mental",
+    lessons: [
+      "Técnica M.C.P.®",
+      "Exercícios Terapêuticos de Fé",
+      "A Importância do Ecossistema",
+      "Constância, o Caminho do Sucesso",
+      "O Passaporte para a Sua Melhor Versão!",
+    ],
+  },
+];
 
 const testimonials = [
-"Pela primeira vez entendi o que sinto por dentro, sem culpa e com direção.",
-"Não é promessa, é clareza. Me ajudou a acalmar a mente e viver com mais serenidade.",
-"A forma como a Jordana aplica fé + clareza emocional fez sentido pra mim."];
-
+  "Pela primeira vez entendi o que sinto por dentro, sem culpa e com direção.",
+  "Não é promessa, é clareza. Me ajudou a acalmar a mente e viver com mais serenidade.",
+  "A forma como a Jordana aplica fé + clareza emocional fez sentido pra mim.",
+];
 
 export default function ProductsShowcase() {
   const navigate = useNavigate();
@@ -86,62 +89,87 @@ export default function ProductsShowcase() {
 
         {/* HERO */}
         <section className="px-6 py-6 text-center">
-          <h1 className="heading-playfair text-2xl md:text-3xl mb-4 px-2">
-            Conheça todos os meus produtos 
-e escolha o próximo passo da sua transformação.
-          </h1>
-          <p className="body-inter text-base mb-6 opacity-80 px-2">
-            Fé com presença. Clareza emocional com responsabilidade. Um caminho prático para restaurar identidade e propósito.
-          </p>
-          <div className="mt-8 rounded-2xl overflow-hidden shadow-lg">
-            <img src={jordanaHero} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
-          </div>
+          <TextReveal as="h1" className="heading-playfair text-2xl md:text-3xl mb-4 px-2">
+            Conheça todos os meus produtos e escolha o próximo passo da sua transformação.
+          </TextReveal>
+          <ScrollReveal delay={0.2}>
+            <p className="body-inter text-base mb-6 opacity-80 px-2">
+              Fé com presença. Clareza emocional com responsabilidade. Um caminho prático para restaurar identidade e propósito.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={0.3} scale>
+            <div className="mt-8 rounded-2xl overflow-hidden shadow-lg">
+              <motion.img 
+                src={jordanaHero} 
+                alt="Jordana Cantarelli" 
+                className="w-full aspect-[4/5] object-cover object-top" 
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </div>
+          </ScrollReveal>
         </section>
 
         {/* VOCÊ SENTE ISSO? */}
-        <ScrollReveal>
-          <section className="px-6 py-8">
-            <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">Você sente isso?</h2>
-            <div className="space-y-3">
-              {["Você ama a Deus, mas sente que por dentro está tudo desorganizado?",
+        <section className="px-6 py-8">
+          <TextReveal as="h2" className="heading-playfair text-xl md:text-2xl mb-6 text-center">
+            Você sente isso?
+          </TextReveal>
+          <StaggerContainer className="space-y-3">
+            {["Você ama a Deus, mas sente que por dentro está tudo desorganizado?",
               "Você já tentou mudar hábitos, pensamentos e reações… mas volta para os mesmos ciclos?",
               "Você sente que precisa de direção — espiritual e emocional — para não viver no modo sobrevivência?",
-              "Você sabe que existe uma 'melhor versão', mas falta um caminho prático para sustentar isso?"].
-              map((q, i) =>
-              <div key={i} className="card-cream p-4">
+              "Você sabe que existe uma 'melhor versão', mas falta um caminho prático para sustentar isso?",
+            ].map((q, i) => (
+              <StaggerItem key={i}>
+                <div className="card-cream p-4">
                   <p className="body-inter text-sm">{q}</p>
                 </div>
-              )}
-            </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+          <ScrollReveal delay={0.3}>
             <p className="body-inter text-center text-sm mt-6 opacity-70 italic">
               Não é sobre perfeição. É sobre clareza + constância.
             </p>
-          </section>
-        </ScrollReveal>
+          </ScrollReveal>
+        </section>
 
         {/* QUEM TE ACOMPANHA */}
-        <ScrollReveal>
-          <section className="section-red px-6 py-8">
-            <h2 className="heading-playfair text-xl md:text-2xl mb-4 text-center">Quem te acompanha</h2>
+        <section className="section-red px-6 py-8">
+          <TextReveal as="h2" className="heading-playfair text-xl md:text-2xl mb-4 text-center text-white">
+            Quem te acompanha
+          </TextReveal>
+          <ScrollReveal delay={0.1} scale>
             <div className="rounded-2xl overflow-hidden mb-5">
               <img src={jordanaAbout} alt="Jordana Cantarelli" className="w-full aspect-[4/5] object-cover object-top" />
             </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
             <p className="body-inter text-sm leading-relaxed opacity-90">
               Eu sou Jordana Cantarelli — pastora da Lagoinha Morumbi e psicanalista clínica, com mais de 10 anos de atuação acompanhando mulheres em processos de restauração emocional e espiritual. Meu trabalho une fé, sensibilidade humana e ferramentas práticas para ajudar você a organizar o que está por dentro, recuperar clareza e caminhar com propósito.
             </p>
+          </ScrollReveal>
+          <ScrollReveal delay={0.3}>
             <p className="body-inter text-center text-sm mt-5 italic opacity-80">
               "Aqui não existe atalho. Existe caminho."
             </p>
-          </section>
-        </ScrollReveal>
+          </ScrollReveal>
+        </section>
 
         {/* ESCOLHA SEU PRÓXIMO PASSO */}
-        <ScrollReveal>
-          <section className="px-6 py-8">
-            <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">Escolha o seu próximo passo</h2>
-            <div className="space-y-6">
-              {/* CARD 1 — REVOLUZ */}
-              <div className="bg-card rounded-2xl border border-border shadow-md overflow-hidden">
+        <section className="px-6 py-8">
+          <TextReveal as="h2" className="heading-playfair text-xl md:text-2xl mb-6 text-center">
+            Escolha o seu próximo passo
+          </TextReveal>
+          <StaggerContainer className="space-y-6" staggerDelay={0.15}>
+            {/* CARD 1 — REVOLUZ */}
+            <StaggerItem>
+              <motion.div 
+                className="bg-card rounded-2xl border border-border shadow-md overflow-hidden"
+                whileHover={{ y: -4, boxShadow: "0 12px 40px -12px hsl(212 30% 21% / 0.15)" }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
                 <div className="px-5 pt-5 pb-0">
                   <span className="inline-block text-xs font-semibold uppercase tracking-wider bg-secondary/20 text-secondary-foreground px-3 py-1 rounded-full mb-3">
                     <Zap className="w-3 h-3 inline mr-1" />Acesso imediato
@@ -152,17 +180,17 @@ e escolha o próximo passo da sua transformação.
                   </p>
                   <ul className="space-y-2 mb-4">
                     {[
-                    "Transformação espiritual e emocional (sem religiosidade vazia)",
-                    "Autoconhecimento profundo para identificar bloqueios, traumas e padrões",
-                    "Inteligência emocional sob um olhar bíblico + ferramentas práticas",
-                    "Reprogramação mental com técnica e constância",
-                    "Acesso por 365 dias"].
-                    map((b, i) =>
-                    <li key={i} className="flex items-start gap-2 text-sm body-inter">
+                      "Transformação espiritual e emocional (sem religiosidade vazia)",
+                      "Autoconhecimento profundo para identificar bloqueios, traumas e padrões",
+                      "Inteligência emocional sob um olhar bíblico + ferramentas práticas",
+                      "Reprogramação mental com técnica e constância",
+                      "Acesso por 365 dias",
+                    ].map((b, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm body-inter">
                         <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
                         <span>{b}</span>
                       </li>
-                    )}
+                    ))}
                   </ul>
                 </div>
                 <div className="px-5 pb-5">
@@ -172,33 +200,43 @@ e escolha o próximo passo da sua transformação.
                   </a>
                   <p className="text-xs text-center mt-2 opacity-60 body-inter">Garantia de 7 dias</p>
 
-                  {/* Collapsible curriculum */}
                   <button
                     onClick={() => setShowCurriculum(!showCurriculum)}
-                    className="flex items-center justify-center gap-1 w-full mt-4 text-sm font-medium text-primary">
-                    
+                    className="flex items-center justify-center gap-1 w-full mt-4 text-sm font-medium text-primary"
+                  >
                     O que você vai aprender
                     {showCurriculum ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
-                  {showCurriculum &&
-                  <div className="mt-3 space-y-4">
-                      {revoluzModules.map((mod, i) =>
-                    <div key={i}>
+                  {showCurriculum && (
+                    <motion.div 
+                      className="mt-3 space-y-4"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {revoluzModules.map((mod, i) => (
+                        <div key={i}>
                           <h4 className="text-sm font-semibold text-foreground mb-1">{mod.title}</h4>
                           <ul className="space-y-1 pl-4">
-                            {mod.lessons.map((l, j) =>
-                        <li key={j} className="text-xs text-muted-foreground list-disc">{l}</li>
-                        )}
+                            {mod.lessons.map((l, j) => (
+                              <li key={j} className="text-xs text-muted-foreground list-disc">{l}</li>
+                            ))}
                           </ul>
                         </div>
-                    )}
-                    </div>
-                  }
+                      ))}
+                    </motion.div>
+                  )}
                 </div>
-              </div>
+              </motion.div>
+            </StaggerItem>
 
-              {/* CARD 2 — MENTORIA DSL */}
-              <div className="bg-card rounded-2xl border border-border shadow-md overflow-hidden">
+            {/* CARD 2 — MENTORIA DSL */}
+            <StaggerItem>
+              <motion.div 
+                className="bg-card rounded-2xl border border-border shadow-md overflow-hidden"
+                whileHover={{ y: -4, boxShadow: "0 12px 40px -12px hsl(212 30% 21% / 0.15)" }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
                 <div className="px-5 pt-5 pb-0">
                   <span className="inline-block text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary px-3 py-1 rounded-full mb-3">
                     <Users className="w-3 h-3 inline mr-1" />Ao vivo • Em grupo
@@ -209,15 +247,15 @@ e escolha o próximo passo da sua transformação.
                   </p>
                   <ul className="space-y-2 mb-4">
                     {[
-                    "Direcionamento para decisões e posicionamento",
-                    "Ambiente de constância: você não caminha sozinha",
-                    "Clareza para identificar bloqueios e alinhar fé + vida emocional"].
-                    map((b, i) =>
-                    <li key={i} className="flex items-start gap-2 text-sm body-inter">
+                      "Direcionamento para decisões e posicionamento",
+                      "Ambiente de constância: você não caminha sozinha",
+                      "Clareza para identificar bloqueios e alinhar fé + vida emocional",
+                    ].map((b, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm body-inter">
                         <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
                         <span>{b}</span>
                       </li>
-                    )}
+                    ))}
                   </ul>
                 </div>
                 <div className="px-5 pb-5">
@@ -226,10 +264,16 @@ e escolha o próximo passo da sua transformação.
                     <ArrowRight className="w-4 h-4 inline ml-1" />
                   </button>
                 </div>
-              </div>
+              </motion.div>
+            </StaggerItem>
 
-              {/* CARD 3 — REVOLUZ EXPERIENCE */}
-              <div className="bg-card rounded-2xl border border-border shadow-md overflow-hidden">
+            {/* CARD 3 — REVOLUZ EXPERIENCE */}
+            <StaggerItem>
+              <motion.div 
+                className="bg-card rounded-2xl border border-border shadow-md overflow-hidden"
+                whileHover={{ y: -4, boxShadow: "0 12px 40px -12px hsl(212 30% 21% / 0.15)" }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
                 <div className="px-5 pt-5 pb-0">
                   <span className="inline-block text-xs font-semibold uppercase tracking-wider bg-accent/10 text-accent px-3 py-1 rounded-full mb-3">
                     <Calendar className="w-3 h-3 inline mr-1" />Presencial • 1 dia
@@ -240,15 +284,15 @@ e escolha o próximo passo da sua transformação.
                   </p>
                   <ul className="space-y-2 mb-4">
                     {[
-                    "Um dia para destravar, reorganizar e tomar decisões práticas",
-                    "Experiência de presença: fé aplicada com intencionalidade",
-                    "Vivência concentrada para sair do modo 'só conteúdo' e ir para 'ação'"].
-                    map((b, i) =>
-                    <li key={i} className="flex items-start gap-2 text-sm body-inter">
+                      "Um dia para destravar, reorganizar e tomar decisões práticas",
+                      "Experiência de presença: fé aplicada com intencionalidade",
+                      "Vivência concentrada para sair do modo 'só conteúdo' e ir para 'ação'",
+                    ].map((b, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm body-inter">
                         <Check className="w-4 h-4 text-success mt-0.5 shrink-0" />
                         <span>{b}</span>
                       </li>
-                    )}
+                    ))}
                   </ul>
                 </div>
                 <div className="px-5 pb-5">
@@ -257,29 +301,31 @@ e escolha o próximo passo da sua transformação.
                     <ArrowRight className="w-4 h-4 inline ml-1" />
                   </button>
                 </div>
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
+              </motion.div>
+            </StaggerItem>
+          </StaggerContainer>
+        </section>
 
         {/* PROVA SOCIAL */}
-        <ScrollReveal>
-          <section className="px-6 py-8 bg-muted/30">
-            <h2 className="heading-playfair text-xl md:text-2xl mb-6 text-center">O que elas dizem</h2>
-            <div className="space-y-4">
-              {testimonials.map((t, i) =>
-              <div key={i} className="card-cream p-5 text-center">
+        <section className="px-6 py-8 bg-muted/30">
+          <TextReveal as="h2" className="heading-playfair text-xl md:text-2xl mb-6 text-center">
+            O que elas dizem
+          </TextReveal>
+          <StaggerContainer className="space-y-4">
+            {testimonials.map((t, i) => (
+              <StaggerItem key={i}>
+                <div className="card-cream p-5 text-center">
                   <div className="flex justify-center gap-1 mb-2">
-                    {[...Array(5)].map((_, j) =>
-                  <Star key={j} className="w-4 h-4 fill-secondary text-secondary" />
-                  )}
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="w-4 h-4 fill-secondary text-secondary" />
+                    ))}
                   </div>
                   <p className="body-inter text-sm italic">"{t}"</p>
                 </div>
-              )}
-            </div>
-          </section>
-        </ScrollReveal>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </section>
 
         {/* LISTA DE ESPERA SECTION */}
         <ScrollReveal>
@@ -312,12 +358,16 @@ e escolha o próximo passo da sua transformação.
         </ScrollReveal>
 
         {/* CTA FINAL */}
-        <ScrollReveal>
-          <section className="section-red px-6 py-8 text-center">
-            <h2 className="heading-playfair text-xl md:text-2xl mb-4">Comece sua transformação hoje</h2>
+        <section className="section-red px-6 py-8 text-center">
+          <TextReveal as="h2" className="heading-playfair text-xl md:text-2xl mb-4 text-white">
+            Comece sua transformação hoje
+          </TextReveal>
+          <ScrollReveal delay={0.15}>
             <p className="body-inter text-sm mb-6 opacity-90">
               A transformação começa com uma decisão. Se você sente que esse é o seu tempo, comece pelo Método REVOLUZ — acesso imediato, e você tem 7 dias para testar sem risco.
             </p>
+          </ScrollReveal>
+          <ScrollReveal delay={0.25}>
             <div className="flex flex-col gap-3 max-w-xs mx-auto">
               <a href={REVOLUZ_URL} target="_blank" rel="noopener noreferrer" className="btn-orange w-full text-center text-sm py-4 block">
                 GARANTA SUA VAGA NO REVOLUZ
@@ -327,11 +377,13 @@ e escolha o próximo passo da sua transformação.
                 Entrar na lista de espera
               </button>
             </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.35}>
             <p className="body-inter text-xs mt-6 italic opacity-70">
               "Não é sobre ser perfeita — é sobre viver com presença."
             </p>
-          </section>
-        </ScrollReveal>
+          </ScrollReveal>
+        </section>
 
         {/* Spacer for sticky CTA */}
         <div className="h-20 md:hidden" />
@@ -349,6 +401,6 @@ e escolha o próximo passo da sua transformação.
       </div>
 
       <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} product={waitlistProduct} />
-    </div>);
-
+    </div>
+  );
 }

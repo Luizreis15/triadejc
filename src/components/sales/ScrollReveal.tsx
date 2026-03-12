@@ -6,22 +6,26 @@ interface ScrollRevealProps {
   delay?: number;
   direction?: "up" | "down" | "left" | "right";
   className?: string;
+  blur?: boolean;
+  scale?: boolean;
 }
 
 export function ScrollReveal({ 
   children, 
   delay = 0, 
   direction = "up",
-  className = "" 
+  className = "",
+  blur = true,
+  scale = false,
 }: ScrollRevealProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.15 });
 
   const directionOffsets = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { y: 0, x: 40 },
-    right: { y: 0, x: -40 },
+    up: { y: 50, x: 0 },
+    down: { y: -50, x: 0 },
+    left: { y: 0, x: 50 },
+    right: { y: 0, x: -50 },
   };
 
   const offset = directionOffsets[direction];
@@ -30,12 +34,28 @@ export function ScrollReveal({
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, ...offset }}
-      animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, ...offset }}
+      initial={{ 
+        opacity: 0, 
+        ...offset,
+        filter: blur ? "blur(8px)" : "blur(0px)",
+        scale: scale ? 0.92 : 1,
+      }}
+      animate={isInView ? { 
+        opacity: 1, 
+        x: 0, 
+        y: 0, 
+        filter: "blur(0px)",
+        scale: 1,
+      } : { 
+        opacity: 0, 
+        ...offset,
+        filter: blur ? "blur(8px)" : "blur(0px)",
+        scale: scale ? 0.92 : 1,
+      }}
       transition={{ 
-        duration: 0.7, 
+        duration: 0.8, 
         delay, 
-        ease: [0.25, 0.4, 0.25, 1] 
+        ease: [0.22, 1, 0.36, 1],
       }}
     >
       {children}
