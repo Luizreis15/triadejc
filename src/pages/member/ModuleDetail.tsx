@@ -210,37 +210,48 @@ export default function ModuleDetail() {
         </div>
       </section>
 
-      {/* Quick Actions */}
+      {/* Quick Actions — adapt based on available content */}
       <section className="grid grid-cols-2 gap-3">
-        <QuickActionButton
-          icon={Play}
-          label="Começar"
-          color="bg-primary/10 text-primary"
-          onClick={() => scrollToSection(introRef)}
-          disabled={introCards.length === 0}
-        />
-        <QuickActionButton
-          icon={Heart}
-          label="Momentos Selah"
-          color="bg-purple-100 text-purple-700"
-          onClick={() => scrollToSection(selahRef)}
-          disabled={selahCards.length === 0}
-        />
-        <QuickActionButton
-          icon={PenLine}
-          label="Atividade"
-          color="bg-green-100 text-green-700"
-          onClick={() => scrollToSection(activityRef)}
-          disabled={activityCards.length === 0}
-        />
-        <QuickActionButton
-          icon={FileDown}
-          label="PDFs"
-          color="bg-orange-100 text-orange-700"
-          count={pdfs.length}
-          onClick={() => scrollToSection(pdfsRef)}
-          disabled={pdfs.length === 0}
-        />
+        {introCards.length > 0 ? (
+          <QuickActionButton
+            icon={Play}
+            label="Começar"
+            color="bg-primary/10 text-primary"
+            onClick={() => scrollToSection(introRef)}
+          />
+        ) : moduleDays.length > 0 ? (
+          <QuickActionButton
+            icon={Play}
+            label="Começar"
+            color="bg-primary/10 text-primary"
+            onClick={() => scrollToSection(journeyRef)}
+          />
+        ) : null}
+        {selahCards.length > 0 && (
+          <QuickActionButton
+            icon={Heart}
+            label="Momentos Selah"
+            color="bg-purple-100 text-purple-700"
+            onClick={() => scrollToSection(selahRef)}
+          />
+        )}
+        {activityCards.length > 0 && (
+          <QuickActionButton
+            icon={PenLine}
+            label="Atividade"
+            color="bg-green-100 text-green-700"
+            onClick={() => scrollToSection(activityRef)}
+          />
+        )}
+        {pdfs.length > 0 && (
+          <QuickActionButton
+            icon={FileDown}
+            label="PDFs"
+            color="bg-orange-100 text-orange-700"
+            count={pdfs.length}
+            onClick={() => scrollToSection(pdfsRef)}
+          />
+        )}
       </section>
 
       {/* JORNADA DIÁRIA — Sub-módulos colapsáveis */}
