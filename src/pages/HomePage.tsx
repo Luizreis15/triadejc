@@ -142,7 +142,7 @@ function JornadasSection() {
     { title: "Confissões de Fé", desc: "30 dias para reprogramar sua mente com a Palavra e redescobrir sua identidade em Deus.", icon: Sparkles },
   ];
   const outros = [
-    { title: "Método Revoluz", desc: "Programa de transformação que une princípios cristãos, inteligência emocional e reprogramação mental para restaurar sua identidade e propósito.", cta: "Acessar checkout do Método Revoluz", href: REVOLUZ_CHECKOUT, external: true },
+    { title: "Método Revoluz", desc: "Programa de transformação que une princípios cristãos, inteligência emocional e reprogramação mental para restaurar sua identidade e propósito.", cta: "Conhecer o Método Revoluz", href: "/revoluz", external: false },
     { title: "Mentoria DSL", desc: "Mentoria em grupo, ao vivo, com direcionamento espiritual e emocional para destravar bloqueios e viver com clareza, equilíbrio e propósito.", cta: "Quero entrar na lista de espera", href: "/contato#lista-espera", external: false },
     { title: "Revoluz Experience", desc: "Imersão presencial de um dia para viver, sentir e aplicar o Método Revoluz com intensidade e resultados imediatos.", cta: "Quero ser avisada da próxima edição", href: "/contato#lista-espera", external: false },
   ];
