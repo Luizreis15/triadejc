@@ -33,9 +33,9 @@ const outros = [
   {
     title: "Método Revoluz",
     desc: "Programa de transformação que une princípios cristãos, inteligência emocional e reprogramação mental para restaurar sua identidade e propósito.",
-    cta: "Acessar checkout do Método Revoluz",
-    href: REVOLUZ_CHECKOUT,
-    external: true,
+    cta: "Conhecer o Método Revoluz",
+    href: "/revoluz",
+    external: false,
   },
   {
     title: "Mentoria DSL",
