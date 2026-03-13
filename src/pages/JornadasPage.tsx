@@ -97,6 +97,7 @@ export default function JornadasPage() {
               </StaggerItem>
             ))}
           </StaggerContainer>
+          </div>
 
           {/* Outros */}
           <ScrollReveal>
