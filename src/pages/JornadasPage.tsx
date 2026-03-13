@@ -77,7 +77,8 @@ export default function JornadasPage() {
           </ScrollReveal>
 
           {/* Main grid */}
-          <StaggerContainer id="jornadas-catalogo" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 scroll-mt-20">
+          <div id="jornadas-catalogo" className="scroll-mt-20">
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             {jornadas.map((j) => (
               <StaggerItem key={j.title}>
                 <div className="card-cream p-6 h-full flex flex-col">
