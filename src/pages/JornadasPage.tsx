@@ -82,7 +82,7 @@ export default function JornadasPage() {
                   <h2 className="font-['Playfair_Display'] text-xl font-semibold text-foreground mb-2">{j.title}</h2>
                   <p className="font-['Poppins'] text-sm text-muted-foreground flex-1 mb-4">{j.desc}</p>
                   <Link to={j.appLink} className="btn-gold py-3 px-5 text-xs w-full">
-                    Acessar no app <ArrowRight className="w-4 h-4" />
+                    Conhecer a Jornada <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </StaggerItem>
