@@ -92,7 +92,7 @@ export default function SalesPageRevoluz() {
           </ScrollReveal>
 
           <TextReveal as="h1" className="heading-playfair text-2xl md:text-3xl mb-4">
-            Organize o que está por dentro — e viva com propósito.
+            Organize o que está por dentro e viva com propósito.
           </TextReveal>
 
           <ScrollReveal delay={0.15} blur>
