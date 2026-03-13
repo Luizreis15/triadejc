@@ -13,19 +13,19 @@ const jornadas = [
     title: "Respira, Alma",
     desc: "Reconexão emocional e espiritual para quem sente que se perdeu de si mesma.",
     icon: Heart,
-    appLink: "/membros/app",
+    appLink: "/jornada",
   },
   {
     title: "Cadeias Invisíveis",
     desc: "Jornada de rompimento de padrões emocionais, cura de traumas e transformação interior.",
     icon: BookOpen,
-    appLink: "/membros/app",
+    appLink: "/jornada",
   },
   {
     title: "Confissões de Fé",
     desc: "30 dias para reprogramar sua mente com a Palavra e redescobrir sua identidade em Deus.",
     icon: Sparkles,
-    appLink: "/membros/app",
+    appLink: "/jornada",
   },
 ];
 
