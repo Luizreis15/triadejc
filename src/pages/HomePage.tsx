@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { InstitutionalHeader } from "@/components/institutional/InstitutionalHeader";
 import { InstitutionalFooter } from "@/components/institutional/InstitutionalFooter";
+import { BackToTopButton } from "@/components/institutional/BackToTopButton";
 import { ScrollReveal } from "@/components/sales/ScrollReveal";
 import { StaggerContainer, StaggerItem } from "@/components/sales/StaggerContainer";
 import { IconSquare } from "@/components/sales/IconSquare";
@@ -11,12 +12,11 @@ import jordanaHero from "@/assets/jordana-hero.jpg";
 import jordanaAbout from "@/assets/jordana-about.jpg";
 
 const WHATSAPP_URL = "https://wa.link/0fz5bp";
-const REVOLUZ_CHECKOUT = "https://pay.kiwify.com.br/IFBt2d0";
 
 // ── Hero ──
 function HeroSection() {
   return (
-    <section className="pt-24 pb-12 px-6 md:px-8">
+    <section id="topo" className="pt-24 pb-12 px-6 md:px-8 scroll-mt-20">
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         <ScrollReveal>
           <div>
@@ -30,7 +30,7 @@ function HeroSection() {
             <p className="font-['Poppins'] text-base md:text-lg text-muted-foreground leading-relaxed mb-8">
               Conduzindo mulheres cansadas e fragmentadas a reencontrarem paz, identidade e propósito em Cristo.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn-gold py-4 px-8 text-sm">
                 Agendar Sessão Individual <ArrowRight className="w-4 h-4" />
               </a>
@@ -38,6 +38,9 @@ function HeroSection() {
                 Conhecer as Jornadas <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
+            <p className="font-['Poppins'] text-xs text-muted-foreground italic">
+              Sem atalhos. Um caminho com direção, fé e responsabilidade.
+            </p>
           </div>
         </ScrollReveal>
         <ScrollReveal delay={0.2} direction="right">
@@ -84,7 +87,7 @@ function SobreSection() {
 // ── Missão ──
 function MissaoSection() {
   return (
-    <section className="py-16 px-6 md:px-8 bg-primary text-primary-foreground">
+    <section id="missao" className="py-16 px-6 md:px-8 bg-primary text-primary-foreground scroll-mt-20">
       <div className="max-w-[800px] mx-auto text-center">
         <ScrollReveal>
           <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold mb-6">Minha Missão</h2>
@@ -143,8 +146,8 @@ function JornadasSection() {
   ];
   const outros = [
     { title: "Método Revoluz", desc: "Programa de transformação que une princípios cristãos, inteligência emocional e reprogramação mental para restaurar sua identidade e propósito.", cta: "Conhecer o Método Revoluz", href: "/revoluz", external: false },
-    { title: "Mentoria DSL", desc: "Mentoria em grupo, ao vivo, com direcionamento espiritual e emocional para destravar bloqueios e viver com clareza, equilíbrio e propósito.", cta: "Quero entrar na lista de espera", href: "/contato#lista-espera", external: false },
-    { title: "Revoluz Experience", desc: "Imersão presencial de um dia para viver, sentir e aplicar o Método Revoluz com intensidade e resultados imediatos.", cta: "Quero ser avisada da próxima edição", href: "/contato#lista-espera", external: false },
+    { title: "Mentoria DSL", desc: "Mentoria em grupo, ao vivo, com direcionamento espiritual e emocional para destravar bloqueios e viver com clareza, equilíbrio e propósito.", cta: "Entrar na lista de espera", href: "/contato#lista-espera", external: false },
+    { title: "Revoluz Experience", desc: "Imersão presencial de um dia para viver, sentir e aplicar o Método Revoluz com intensidade e resultados imediatos.", cta: "Entrar na lista de espera", href: "/contato#lista-espera", external: false },
   ];
 
   return (
@@ -154,8 +157,11 @@ function JornadasSection() {
           <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold text-foreground text-center mb-3">
             Jornadas e Programas
           </h2>
-          <p className="font-['Poppins'] text-base text-muted-foreground text-center mb-10 max-w-2xl mx-auto">
+          <p className="font-['Poppins'] text-base text-muted-foreground text-center mb-2 max-w-2xl mx-auto">
             Programas terapêuticos exclusivos criados por mim, que combinam fé, desenvolvimento pessoal e experiência prática com mulheres reais.
+          </p>
+          <p className="font-['Poppins'] text-sm text-secondary text-center mb-10 italic">
+            Se você não sabe por onde começar, comece por uma jornada.
           </p>
         </ScrollReveal>
 
@@ -180,7 +186,7 @@ function JornadasSection() {
         </div>
 
         <ScrollReveal>
-          <h3 className="font-['Playfair_Display'] text-xl font-semibold text-foreground text-center mb-6">Outros Produtos</h3>
+          <h3 id="produtos" className="font-['Playfair_Display'] text-xl font-semibold text-foreground text-center mb-6 scroll-mt-20">Outros Produtos</h3>
         </ScrollReveal>
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {outros.map((p) => (
@@ -215,7 +221,7 @@ function ParaQuemSection() {
     "Filhas de Deus que desejam voltar a se sentir seguras, amadas e fortes",
   ];
   return (
-    <section className="py-16 px-6 md:px-8">
+    <section id="publico" className="py-16 px-6 md:px-8 scroll-mt-20">
       <div className="max-w-[800px] mx-auto">
         <ScrollReveal>
           <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold text-foreground text-center mb-8">
@@ -287,13 +293,13 @@ function PalestrasSection() {
 function FormacaoSection() {
   const items = [
     { icon: GraduationCap, text: "Psicanalista clínica com atuação em terapia cristã" },
-    { icon: Users, text: "Pastora com atuação ativa no aconselhamento feminino e ministerial" },
+    { icon: Users, text: "Pastora da Lagoinha Morumbi com atuação ativa no aconselhamento feminino e ministerial" },
     { icon: Clock, text: "Mais de 10 anos de experiência atendendo mulheres em crise, dores emocionais e processos espirituais" },
     { icon: Mic, text: "Palestrante, mentora e criadora de jornadas terapêuticas com base bíblica" },
     { icon: MapPin, text: "Atendimentos online • Segunda a Sexta – 9h às 18h • Valores sob consulta" },
   ];
   return (
-    <section className="py-16 px-6 md:px-8 bg-primary text-primary-foreground">
+    <section id="formacao" className="py-16 px-6 md:px-8 bg-primary text-primary-foreground scroll-mt-20">
       <div className="max-w-[800px] mx-auto">
         <ScrollReveal>
           <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold text-center mb-8">
@@ -332,6 +338,9 @@ function DepoimentosSection() {
     <section id="depoimentos" className="py-16 px-6 md:px-8 bg-muted/50 scroll-mt-20">
       <div className="max-w-[1200px] mx-auto">
         <ScrollReveal>
+          <p className="font-['Poppins'] text-xs text-muted-foreground text-center mb-2 uppercase tracking-wider">
+            Depoimentos reais de mulheres impactadas pelo conteúdo e pelas jornadas.
+          </p>
           <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold text-foreground text-center mb-10">
             O que dizem sobre mim
           </h2>
@@ -367,7 +376,7 @@ function DepoimentosSection() {
 // ── CTA Final ──
 function CTAFinalSection() {
   return (
-    <section className="py-16 px-6 md:px-8">
+    <section id="cta-final" className="py-16 px-6 md:px-8 scroll-mt-20">
       <div className="max-w-[800px] mx-auto text-center">
         <ScrollReveal>
           <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold text-foreground mb-4">
@@ -379,6 +388,9 @@ function CTAFinalSection() {
           <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn-orange py-5 px-10 text-base">
             Clique aqui e fale comigo no WhatsApp <ArrowRight className="w-5 h-5" />
           </a>
+          <p className="font-['Poppins'] text-xs text-muted-foreground mt-4">
+            Resposta em horário comercial. Segunda a Sexta – 9h às 18h.
+          </p>
         </ScrollReveal>
       </div>
     </section>
@@ -403,6 +415,7 @@ export default function HomePage() {
         <CTAFinalSection />
       </main>
       <InstitutionalFooter />
+      <BackToTopButton />
     </div>
   );
 }

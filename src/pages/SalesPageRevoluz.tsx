@@ -84,7 +84,7 @@ export default function SalesPageRevoluz() {
       <div className="sales-container relative">
 
         {/* ─── HERO ─── */}
-        <section className="px-6 pt-8 pb-6 text-center">
+        <section id="revoluz-topo" className="px-6 pt-8 pb-6 text-center scroll-mt-20">
           <ScrollReveal blur scale>
             <span className="inline-block text-xs body-inter tracking-widest uppercase mb-4" style={{ color: "hsl(var(--sp-rose))" }}>
               Método REVOLUZ • Online
@@ -102,7 +102,7 @@ export default function SalesPageRevoluz() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.25} blur>
-            <div className="flex flex-wrap justify-center gap-3 text-xs body-inter mb-6" style={{ color: "hsl(var(--sp-text-dark)/0.6)" }}>
+            <div className="flex flex-wrap justify-center gap-3 text-xs body-inter mb-4" style={{ color: "hsl(var(--sp-text-dark)/0.6)" }}>
               <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Acesso online</span>
               <span>•</span>
               <span>365 dias de acesso</span>
@@ -111,7 +111,22 @@ export default function SalesPageRevoluz() {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.3} scale blur>
+          {/* Quick links */}
+          <ScrollReveal delay={0.3} blur>
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              <button onClick={() => scrollTo("inclui")} className="body-inter text-[10px] font-medium py-1.5 px-3 rounded-full border transition-colors" style={{ borderColor: "hsl(var(--sp-petrol-primary)/0.3)", color: "hsl(var(--sp-petrol-primary))" }}>
+                O que está incluído
+              </button>
+              <button onClick={() => scrollTo("para-quem")} className="body-inter text-[10px] font-medium py-1.5 px-3 rounded-full border transition-colors" style={{ borderColor: "hsl(var(--sp-petrol-primary)/0.3)", color: "hsl(var(--sp-petrol-primary))" }}>
+                Para quem é
+              </button>
+              <button onClick={() => scrollTo("garantia")} className="body-inter text-[10px] font-medium py-1.5 px-3 rounded-full border transition-colors" style={{ borderColor: "hsl(var(--sp-petrol-primary)/0.3)", color: "hsl(var(--sp-petrol-primary))" }}>
+                Garantia
+              </button>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.35} scale blur>
             <motion.div
               className="rounded-2xl overflow-hidden mb-6"
               whileHover={{ scale: 1.02 }}
@@ -136,6 +151,9 @@ export default function SalesPageRevoluz() {
                   Quero Começar Agora
                 </ButtonOrange>
               </motion.div>
+              <p className="body-inter text-[10px] opacity-50" style={{ color: "hsl(var(--sp-text-dark))" }}>
+                Compra e acesso pela Kiwify.
+              </p>
               <motion.button
                 onClick={() => scrollTo("conteudo")}
                 className="body-inter text-sm font-medium py-3 px-6 rounded-xl border-2 transition-colors text-center"
@@ -154,7 +172,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── VOCÊ SENTE ISSO? ─── */}
-        <section id="voce-sente" className="px-6 py-6">
+        <section id="voce-sente" className="px-6 py-6 scroll-mt-20">
           <TextReveal className="heading-playfair text-xl mb-6">Você sente isso?</TextReveal>
 
           <StaggerContainer className="space-y-3 mb-6" staggerDelay={0.12}>
@@ -191,7 +209,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── POR QUE EXISTE ─── */}
-        <section className="px-6 py-6">
+        <section id="por-que" className="px-6 py-6 scroll-mt-20">
           <TextReveal className="heading-playfair text-xl mb-6">Por que esse método existe</TextReveal>
 
           <ScrollReveal direction="left" blur>
@@ -212,7 +230,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── O QUE ESTÁ INCLUÍDO ─── */}
-        <SectionRed className="py-6">
+        <SectionRed id="inclui" className="py-6 scroll-mt-20">
           <TextReveal className="heading-playfair text-xl mb-6">O que está incluído</TextReveal>
 
           <StaggerContainer className="space-y-4 mb-8" staggerDelay={0.1}>
@@ -242,12 +260,26 @@ export default function SalesPageRevoluz() {
                 Garanta sua vaga
               </ButtonOrange>
             </motion.div>
+            <p className="body-inter text-[10px] text-center mt-2 opacity-50" style={{ color: "hsl(var(--sp-text-dark))" }}>
+              Compra e acesso pela Kiwify.
+            </p>
           </ScrollReveal>
         </SectionRed>
 
         {/* ─── CONTEÚDO / ACCORDION ─── */}
-        <section id="conteudo" className="px-6 py-6">
-          <TextReveal className="heading-playfair text-xl mb-6">O que você vai receber dentro</TextReveal>
+        <section id="conteudo" className="px-6 py-6 scroll-mt-20">
+          <TextReveal className="heading-playfair text-xl mb-4">O que você vai receber dentro</TextReveal>
+
+          <ScrollReveal blur>
+            <div className="mb-6 space-y-2">
+              <p className="body-inter text-sm leading-relaxed" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
+                4 módulos completos: <strong>Espiritualidade</strong>, <strong>Autoconhecimento</strong>, <strong>Inteligência Emocional</strong> e <strong>Reprogramação Mental</strong>.
+              </p>
+              <p className="body-inter text-sm leading-relaxed" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
+                Ferramentas e exercícios para aplicar no seu tempo.
+              </p>
+            </div>
+          </ScrollReveal>
 
           <StaggerContainer className="mb-8" staggerDelay={0.1}>
             <Accordion type="single" collapsible>
@@ -291,11 +323,14 @@ export default function SalesPageRevoluz() {
                 Comece agora (acesso imediato)
               </ButtonOrange>
             </motion.div>
+            <p className="body-inter text-[10px] text-center mt-2 opacity-50" style={{ color: "hsl(var(--sp-text-dark))" }}>
+              Compra e acesso pela Kiwify.
+            </p>
           </ScrollReveal>
         </section>
 
         {/* ─── PARA QUEM É ─── */}
-        <section id="para-quem" className="px-6 py-6">
+        <section id="para-quem" className="px-6 py-6 scroll-mt-20">
           <TextReveal className="heading-playfair text-xl mb-6">O REVOLUZ é para você que…</TextReveal>
 
           <ScrollReveal blur scale>
@@ -329,7 +364,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── QUEM TE ACOMPANHA ─── */}
-        <section className="px-6 py-6">
+        <section id="sobre-jordana" className="px-6 py-6 scroll-mt-20">
           <TextReveal className="heading-playfair text-xl mb-6">Quem te acompanha nessa jornada</TextReveal>
 
           <ScrollReveal scale blur>
@@ -359,7 +394,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── GARANTIA ─── */}
-        <section className="px-6 py-6">
+        <section id="garantia" className="px-6 py-6 scroll-mt-20">
           <ScrollReveal scale blur>
             <motion.div
               className="card-cream p-6 border-2"
@@ -394,7 +429,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── FAQ ─── */}
-        <section id="faq" className="px-6 py-6">
+        <section id="faq" className="px-6 py-6 scroll-mt-20">
           <TextReveal className="heading-playfair text-xl mb-6">Dúvidas Frequentes</TextReveal>
           <ScrollReveal blur>
             <FAQAccordion items={faqItems} />
@@ -402,7 +437,7 @@ export default function SalesPageRevoluz() {
         </section>
 
         {/* ─── CTA FINAL ─── */}
-        <SectionRed className="py-12 text-center">
+        <SectionRed id="cta-final" className="py-12 text-center scroll-mt-20">
           <ScrollReveal scale blur>
             <TextReveal className="heading-playfair text-2xl mb-4">Comece Sua Transformação Hoje!</TextReveal>
             <ScrollReveal delay={0.15} blur>
@@ -416,6 +451,9 @@ export default function SalesPageRevoluz() {
                   Entrar no Método REVOLUZ
                 </ButtonOrange>
               </motion.div>
+              <p className="body-inter text-[10px] text-center mt-2 opacity-50">
+                Compra e acesso pela Kiwify.
+              </p>
             </ScrollReveal>
           </ScrollReveal>
         </SectionRed>
@@ -460,7 +498,7 @@ export default function SalesPageRevoluz() {
             className="btn-orange flex-1 py-3 text-xs"
             whileTap={{ scale: 0.96 }}
           >
-            Entrar no REVOLUZ
+            Checkout REVOLUZ
           </motion.button>
         </motion.div>
       </div>
