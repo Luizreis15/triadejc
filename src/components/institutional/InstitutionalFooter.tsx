@@ -3,6 +3,8 @@ import { Instagram, Youtube } from "lucide-react";
 import { ScrollReveal } from "@/components/sales/ScrollReveal";
 import { StaggerContainer, StaggerItem } from "@/components/sales/StaggerContainer";
 
+const WHATSAPP_URL = "https://wa.link/0fz5bp";
+
 export function InstitutionalFooter() {
   return (
     <footer className="bg-primary text-primary-foreground px-6 py-10">
@@ -15,6 +17,9 @@ export function InstitutionalFooter() {
               <p className="font-['Poppins'] text-sm opacity-70">
                 Psicanalista Clínica & Terapeuta Cristã
               </p>
+              <p className="font-['Poppins'] text-xs opacity-50 mt-1 italic">
+                Com fé, clareza e presença.
+              </p>
             </div>
           </StaggerItem>
 
@@ -22,17 +27,18 @@ export function InstitutionalFooter() {
           <StaggerItem>
             <div className="flex flex-col gap-2">
               <p className="font-['Poppins'] text-sm font-semibold mb-1">Navegação</p>
+              <Link to="/" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Início</Link>
               <Link to="/jornadas" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Jornadas</Link>
               <Link to="/revoluz" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Método Revoluz</Link>
               <Link to="/contato" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Contato</Link>
             </div>
           </StaggerItem>
 
-          {/* Social */}
+          {/* Social + WhatsApp */}
           <StaggerItem>
             <div className="flex flex-col gap-2">
               <p className="font-['Poppins'] text-sm font-semibold mb-1">Redes Sociais</p>
-              <div className="flex gap-3">
+              <div className="flex gap-3 mb-3">
                 <a href="https://www.instagram.com/jordanacantarelli" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">
                   <Instagram className="w-5 h-5" />
                 </a>
@@ -40,6 +46,14 @@ export function InstitutionalFooter() {
                   <Youtube className="w-5 h-5" />
                 </a>
               </div>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity"
+              >
+                Agendar Sessão Individual →
+              </a>
             </div>
           </StaggerItem>
         </StaggerContainer>

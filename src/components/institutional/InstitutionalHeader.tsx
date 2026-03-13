@@ -6,12 +6,11 @@ import { motion, AnimatePresence } from "framer-motion";
 const WHATSAPP_URL = "https://wa.link/0fz5bp";
 
 const navItems = [
-  { label: "Sobre", href: "/#sobre" },
-  { label: "Como posso te ajudar?", href: "/#ajuda" },
+  { label: "Início", href: "/" },
   { label: "Jornadas", href: "/jornadas" },
-  { label: "Palestras", href: "/#palestras" },
-  { label: "Depoimentos", href: "/#depoimentos" },
+  { label: "Revoluz", href: "/revoluz" },
   { label: "Contato", href: "/contato" },
+  { label: "Convites", href: "/contato#convites" },
 ];
 
 export function InstitutionalHeader() {
@@ -20,15 +19,17 @@ export function InstitutionalHeader() {
 
   const handleNav = (href: string) => {
     setOpen(false);
-    if (href.startsWith("/#")) {
-      const id = href.slice(2);
-      if (location.pathname === "/") {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    if (href.includes("#")) {
+      const [path, hash] = href.split("#");
+      if (location.pathname === path || (path === "" && location.pathname === "/")) {
+        document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
       } else {
         window.location.href = href;
       }
     }
   };
+
+  const isAnchorLink = (href: string) => href.includes("#");
 
   return (
     <motion.header
@@ -45,7 +46,7 @@ export function InstitutionalHeader() {
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-6">
           {navItems.map((item, i) =>
-            item.href.startsWith("/#") ? (
+            isAnchorLink(item.href) ? (
               <motion.button
                 key={item.label}
                 initial={{ opacity: 0, y: -10 }}
@@ -81,7 +82,7 @@ export function InstitutionalHeader() {
             rel="noopener noreferrer"
             className="btn-gold py-2.5 px-5 text-xs"
           >
-            Agendar Sessão
+            Agendar Sessão Individual
           </motion.a>
         </nav>
 
@@ -103,7 +104,7 @@ export function InstitutionalHeader() {
           >
             <nav className="flex flex-col gap-3">
               {navItems.map((item, i) =>
-                item.href.startsWith("/#") ? (
+                isAnchorLink(item.href) ? (
                   <motion.button
                     key={item.label}
                     initial={{ opacity: 0, x: -20 }}
