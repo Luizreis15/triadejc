@@ -163,7 +163,7 @@ export default function LinksPage() {
         <section
           className="relative w-full overflow-hidden"
           style={{
-            minHeight: "640px",
+            minHeight: "560px",
             background: "hsl(var(--sp-petrol-primary))",
           }}
         >
@@ -205,9 +205,9 @@ export default function LinksPage() {
           <div
             className="absolute inset-x-0 bottom-0 pointer-events-none"
             style={{
-              height: "55%",
+              height: "42%",
               background:
-                "linear-gradient(to top, hsl(var(--sp-paper)) 0%, hsl(var(--sp-paper)/0.95) 25%, hsl(var(--sp-paper)/0.6) 55%, transparent 100%)",
+                "linear-gradient(to top, hsl(var(--sp-paper)) 0%, hsl(var(--sp-paper)/0.92) 35%, hsl(var(--sp-paper)/0.5) 70%, transparent 100%)",
             }}
           />
 
@@ -228,11 +228,12 @@ export default function LinksPage() {
 
           {/* Tags flutuantes orbitando */}
           {floatingTags.map((tag, i) => {
+            // Foto object-top: rosto ocupa ~10-45% centro. Tags ficam nas bordas laterais.
             const positions = [
-              { top: "8%", right: "6%" },
-              { top: "28%", left: "4%" },
-              { top: "22%", right: "8%" },
-              { top: "42%", left: "6%" },
+              { top: "10%", right: "5%" },   // Fé — topo direito, próximo ao monograma
+              { top: "46%", left: "3%" },    // Autoconhecimento — meio esquerda
+              { top: "58%", right: "4%" },   // Inteligência Emocional — abaixo do rosto, direita
+              { top: "32%", right: "4%" },   // Reprogramação — direita média
             ];
             return (
               <motion.span
@@ -259,23 +260,25 @@ export default function LinksPage() {
           })}
 
           {/* Bloco de texto — sobre a base dissolvida */}
-          <div className="absolute bottom-0 inset-x-0 px-6 pb-8 pt-16 z-10">
+          <div className="absolute bottom-0 inset-x-0 px-6 pb-6 pt-12 z-10 text-center">
             <TextReveal as="h1" className="heading-playfair text-4xl sm:text-5xl mb-3 leading-tight">
               <span style={{ color: "hsl(var(--sp-petrol-primary))" }}>Jordana Cantarelli</span>
             </TextReveal>
 
             <ScrollReveal delay={0.15} blur>
-              <span
-                className="inline-block body-inter text-[10px] tracking-widest uppercase py-1.5 px-3 rounded-full border mb-3"
-                style={{
-                  borderColor: "hsl(var(--sp-rose)/0.6)",
-                  color: "hsl(var(--sp-petrol-primary))",
-                  background: "hsl(var(--sp-cream)/0.5)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                Pastora · Psicanalista · Terapeuta Cristã
-              </span>
+              <div className="flex justify-center mb-3">
+                <span
+                  className="inline-block body-inter text-[10px] tracking-widest uppercase py-1.5 px-3 rounded-full border"
+                  style={{
+                    borderColor: "hsl(var(--sp-rose)/0.6)",
+                    color: "hsl(var(--sp-petrol-primary))",
+                    background: "hsl(var(--sp-cream)/0.5)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  Pastora · Psicanalista · Terapeuta Cristã
+                </span>
+              </div>
             </ScrollReveal>
 
             <ScrollReveal delay={0.25} blur>
@@ -290,9 +293,9 @@ export default function LinksPage() {
         </section>
 
         {/* ─── ÁRVORE DE LINKS ─── */}
-        <section className="px-6 py-8" style={{ background: "hsl(var(--sp-paper))" }}>
+        <section className="px-6 pt-2 pb-8" style={{ background: "hsl(var(--sp-paper))" }}>
           <ScrollReveal blur>
-            <p className="text-center body-inter text-xs tracking-widest uppercase mb-6" style={{ color: "hsl(var(--sp-petrol-primary)/0.6)" }}>
+            <p className="text-center body-inter text-xs tracking-widest uppercase mb-5" style={{ color: "hsl(var(--sp-petrol-primary)/0.6)" }}>
               Escolha por onde começar
             </p>
           </ScrollReveal>
