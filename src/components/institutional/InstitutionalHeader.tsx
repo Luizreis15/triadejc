@@ -10,7 +10,7 @@ const navItems = [
   { label: "Jornadas", href: "/jornadas" },
   { label: "Revoluz", href: "/revoluz" },
   { label: "Contato", href: "/contato" },
-  { label: "Convites", href: "/contato#convites" },
+  { label: "Enviar convite", href: "/contato#convites" },
 ];
 
 export function InstitutionalHeader() {
