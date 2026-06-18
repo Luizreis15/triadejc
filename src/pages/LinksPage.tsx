@@ -25,11 +25,12 @@ interface LinkCard {
 
 const linkCards: LinkCard[] = [
   {
-    title: "Método REVOLUZ",
-    description: "Organize o que está por dentro e viva com propósito.",
-    href: "/revoluz",
-    icon: Sparkles,
-    variant: "orange",
+    title: "Sessão Individual",
+    description: "Atendimento personalizado com Jordana.",
+    href: "https://wa.link/z8p2f9",
+    external: true,
+    icon: Heart,
+    variant: "gold",
   },
   {
     title: "Jornadas",
@@ -39,12 +40,11 @@ const linkCards: LinkCard[] = [
     variant: "gold",
   },
   {
-    title: "Sessão Individual",
-    description: "Atendimento personalizado com Jordana.",
-    href: "https://wa.link/z8p2f9",
-    external: true,
-    icon: Heart,
-    variant: "gold",
+    title: "Método REVOLUZ",
+    description: "Organize o que está por dentro e viva com propósito.",
+    href: "/revoluz",
+    icon: Sparkles,
+    variant: "orange",
   },
   {
     title: "Enviar convite",
