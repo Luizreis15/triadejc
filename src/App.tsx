@@ -14,6 +14,7 @@ import SalesPageRevoluz from "./pages/SalesPageRevoluz";
 import HomePage from "./pages/HomePage";
 import JornadasPage from "./pages/JornadasPage";
 import ContatoPage from "./pages/ContatoPage";
+import LinksPage from "./pages/LinksPage";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/metodo-revoluz" element={<SalesPageRevoluz />} />
             <Route path="/jornadas" element={<JornadasPage />} />
             <Route path="/contato" element={<ContatoPage />} />
+            <Route path="/links" element={<LinksPage />} />
             
             {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
