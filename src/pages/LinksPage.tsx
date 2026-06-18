@@ -205,9 +205,9 @@ export default function LinksPage() {
           <div
             className="absolute inset-x-0 bottom-0 pointer-events-none"
             style={{
-              height: "55%",
+              height: "42%",
               background:
-                "linear-gradient(to top, hsl(var(--sp-paper)) 0%, hsl(var(--sp-paper)/0.95) 25%, hsl(var(--sp-paper)/0.6) 55%, transparent 100%)",
+                "linear-gradient(to top, hsl(var(--sp-paper)) 0%, hsl(var(--sp-paper)/0.92) 35%, hsl(var(--sp-paper)/0.5) 70%, transparent 100%)",
             }}
           />
 
