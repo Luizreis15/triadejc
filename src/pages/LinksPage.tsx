@@ -382,16 +382,16 @@ export default function LinksPage() {
             </motion.div>
           </ScrollReveal>
 
-          {/* CTA WhatsApp */}
+          {/* CTA Instagram */}
           <ScrollReveal blur delay={0.3}>
             <a
-              href="https://wa.link/z8p2f9"
+              href="https://instagram.com/jordanacantarelli"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 btn-gold py-4 px-8 text-sm w-full justify-center inline-flex"
             >
-              <MessageCircle className="w-5 h-5" />
-              Falar com Maria
+              <Instagram className="w-5 h-5" />
+              Conheça a Jordana
               <ArrowRight className="w-5 h-5" />
             </a>
           </ScrollReveal>
