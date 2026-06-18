@@ -402,12 +402,6 @@ export default function LinksPage() {
           className="px-6 py-8 text-center"
           style={{ background: "hsl(var(--sp-petrol-primary))" }}
         >
-          <div
-            className="w-10 h-10 rounded-full mx-auto mb-3 flex items-center justify-center"
-            style={{ background: "hsl(var(--sp-cream))", color: "hsl(var(--sp-petrol-primary))" }}
-          >
-            <span className="heading-playfair text-sm italic">JC</span>
-          </div>
           <div className="flex justify-center gap-4 mb-3 body-inter text-xs" style={{ color: "hsl(var(--sp-cream)/0.8)" }}>
             <Link to="/">Início</Link>
             <Link to="/jornadas">Jornadas</Link>
