@@ -211,20 +211,6 @@ export default function LinksPage() {
             }}
           />
 
-          {/* Monograma JC — canto superior esquerdo */}
-          <motion.div
-            className="absolute top-5 left-5 w-14 h-14 rounded-full flex items-center justify-center z-10"
-            style={{
-              background: "hsl(var(--sp-cream))",
-              color: "hsl(var(--sp-petrol-primary))",
-              boxShadow: "0 0 30px hsl(var(--sp-rose)/0.4), 0 8px 20px hsl(0 0% 0% / 0.25)",
-            }}
-            initial={{ scale: 0, rotate: -180, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.9, ease: ease21st, delay: 0.3 }}
-          >
-            <span className="heading-playfair text-lg italic">JC</span>
-          </motion.div>
 
           {/* Tags flutuantes orbitando */}
           {floatingTags.map((tag, i) => {
