@@ -260,23 +260,25 @@ export default function LinksPage() {
           })}
 
           {/* Bloco de texto — sobre a base dissolvida */}
-          <div className="absolute bottom-0 inset-x-0 px-6 pb-8 pt-16 z-10">
+          <div className="absolute bottom-0 inset-x-0 px-6 pb-6 pt-12 z-10 text-center">
             <TextReveal as="h1" className="heading-playfair text-4xl sm:text-5xl mb-3 leading-tight">
               <span style={{ color: "hsl(var(--sp-petrol-primary))" }}>Jordana Cantarelli</span>
             </TextReveal>
 
             <ScrollReveal delay={0.15} blur>
-              <span
-                className="inline-block body-inter text-[10px] tracking-widest uppercase py-1.5 px-3 rounded-full border mb-3"
-                style={{
-                  borderColor: "hsl(var(--sp-rose)/0.6)",
-                  color: "hsl(var(--sp-petrol-primary))",
-                  background: "hsl(var(--sp-cream)/0.5)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                Pastora · Psicanalista · Terapeuta Cristã
-              </span>
+              <div className="flex justify-center mb-3">
+                <span
+                  className="inline-block body-inter text-[10px] tracking-widest uppercase py-1.5 px-3 rounded-full border"
+                  style={{
+                    borderColor: "hsl(var(--sp-rose)/0.6)",
+                    color: "hsl(var(--sp-petrol-primary))",
+                    background: "hsl(var(--sp-cream)/0.5)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  Pastora · Psicanalista · Terapeuta Cristã
+                </span>
+              </div>
             </ScrollReveal>
 
             <ScrollReveal delay={0.25} blur>
