@@ -246,8 +246,17 @@ export default function ContatoPage() {
               <p className="font-['Poppins'] text-sm text-muted-foreground text-center mb-8 max-w-xl mx-auto">
                 Jordana está disponível para ministrações, eventos de mulheres, workshops e retiros voltados à restauração emocional e identidade cristã.
               </p>
+              <div className="flex justify-center">
+                <a
+                  href="https://wa.link/z8p2f9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-gold py-4 px-8 text-sm"
+                >
+                  Enviar convite <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
             </ScrollReveal>
-            <ConvitesForm />
           </div>
         </section>
 
