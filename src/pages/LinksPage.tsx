@@ -228,11 +228,12 @@ export default function LinksPage() {
 
           {/* Tags flutuantes orbitando */}
           {floatingTags.map((tag, i) => {
+            // Foto object-top: rosto ocupa ~10-45% centro. Tags ficam nas bordas laterais.
             const positions = [
-              { top: "8%", right: "6%" },
-              { top: "28%", left: "4%" },
-              { top: "22%", right: "8%" },
-              { top: "42%", left: "6%" },
+              { top: "10%", right: "5%" },   // Fé — topo direito, próximo ao monograma
+              { top: "46%", left: "3%" },    // Autoconhecimento — meio esquerda
+              { top: "58%", right: "4%" },   // Inteligência Emocional — abaixo do rosto, direita
+              { top: "32%", right: "4%" },   // Reprogramação — direita média
             ];
             return (
               <motion.span
