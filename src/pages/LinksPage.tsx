@@ -163,7 +163,7 @@ export default function LinksPage() {
         <section
           className="relative w-full overflow-hidden"
           style={{
-            minHeight: "640px",
+            minHeight: "560px",
             background: "hsl(var(--sp-petrol-primary))",
           }}
         >
