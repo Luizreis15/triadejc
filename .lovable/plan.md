@@ -1,73 +1,67 @@
-# Plano — Página /links (Árvore de Links Premium)
+# Plano — Nova Hero da página /links
 
-Criar nova rota `/links` inspirada na referência enviada (Dra. Andréa Vermont), mas adaptada 100% à identidade visual da Jordana Cantarelli (Petrol Blue, Burnt Rose, Light Nude, Brown, White + tipografia Playfair Display/Inter) e com animações 21st.dev já usadas no projeto (ScrollReveal, StaggerContainer, TextReveal, framer-motion easing [0.22, 1, 0.36, 1]).
+A hero atual está chapada: foto pequena (144px), tudo centralizado vertical, fundo sólido petrol. A referência (Andrea Vermont) usa **a foto da pessoa como protagonista visual**, ocupando toda a largura/altura do topo, com elementos flutuando ao redor e um **overlay gradiente na base** que dissolve a imagem na cor de fundo da seção seguinte.
 
----
+## O que muda (somente hero — resto da página intocado)
 
-## Estrutura da página (mobile-first, max-width ~480px centrado)
+### 1. Estrutura — foto ocupa o topo inteiro
+- Container `relative` com altura `min-h-[560px]` (mobile) / `min-h-[640px]` (desktop)
+- Foto de Jordana (`heroImg`) renderizada como `<img>` em `absolute inset-0 w-full h-full object-cover object-top` — **fundo da hero é a própria foto**, não mais o petrol sólido
+- Removida a foto circular pequena de 144px
 
-### 1) Topo — Identidade
-- Fundo: Petrol Blue (`--sp-petrol-primary`) com leve gradient/vinheta
-- Tags flutuantes animadas (badges pequenos com borda Rose): "Fé", "Autoconhecimento", "Inteligência Emocional", "Reprogramação Mental"
-- Logo/monograma "JC" pequeno (círculo dourado)
-- Foto da Jordana centralizada, formato circular (ring dourado/rose), ~140px, com animação de entrada (scale + blur)
-- Nome: "Jordana Cantarelli" (Playfair, grande, cream)
-- Subtítulo: "Pastora · Psicanalista · Terapeuta Cristã" (Inter, pequeno, opacity 70%)
-- Microcopy: "Com fé, clareza e presença."
+### 2. Overlay em camadas (transição suave)
+Três camadas sobrepostas para profundidade e legibilidade:
+- **Topo:** gradiente vertical `from-petrol/70 via-petrol/20 to-transparent` (escurece área do monograma + tags)
+- **Base:** gradiente `from-paper via-paper/85 to-transparent` ocupando 45% inferior — **dissolve a foto na cor `--sp-paper`** da seção de links abaixo (transição suave, sem corte)
+- **Vinheta lateral sutil:** `radial-gradient` rose 8% nas bordas para foco no rosto
 
-### 2) Árvore de Links (cards stagger)
-Cada card: fundo cream/petrol-glass com borda sutil, thumbnail à esquerda (64x64 rounded), título Playfair, descrição curta Inter, botão CTA dourado/laranja full-width estilo `btn-gold` / `btn-orange` (replicando os botões do site). Hover: lift + glow. Entrada: StaggerContainer.
+### 3. Elementos orbitando a foto (estilo referência Andrea)
+Posicionados em `absolute` ao redor da foto, com float animation:
+- **Monograma JC** — canto superior esquerdo (não mais centralizado), círculo cream 56px, flutuação suave
+- **4 tags flutuantes** ("Fé", "Autoconhecimento", "Inteligência Emocional", "Reprogramação") — distribuídas: 2 à esquerda, 2 à direita, em alturas diferentes, com `backdrop-blur` e borda rose
+- **Selo "Pastora · Psicanalista · Terapeuta Cristã"** — chip horizontal logo abaixo do nome, com borda rose
 
-Cards propostos (confirmar conteúdo final com a Jordana, mas começar com):
-1. **Método REVOLUZ** — "Organize o que está por dentro e viva com propósito." → `/revoluz` (btn-orange)
-2. **Jornadas** — "Conteúdos e trilhas para sua transformação." → `/jornadas` (btn-gold)
-3. **Sessão Individual** — "Atendimento personalizado com Jordana." → WhatsApp Maria `https://wa.link/z8p2f9` (btn-gold)
-4. **Enviar convite** — "Pregações, palestras e eventos." → `https://wa.link/z8p2f9` (btn outline)
-5. **Instagram** — "@jordanacantarelli" → link externo (btn outline)
-6. **YouTube** — "Mensagens e ensinos" → link externo (btn outline)
-7. **Site oficial** — `jordanacantarelli.com.br` → externo (btn outline)
+### 4. Bloco de texto — sobre a base dissolvida
+Posicionado em `absolute bottom-0` com `z-10`, alinhado à esquerda (não centralizado), padding lateral 24px:
+- **Nome "Jordana Cantarelli"** — `heading-playfair`, 36px mobile / 48px desktop, cor petrol-primary (legível sobre overlay paper)
+- **Subtítulo em chip** — "Pastora · Psicanalista · Terapeuta Cristã" com borda rose
+- **Microcopy itálico** — "Com fé, clareza e presença." em petrol/70
 
-### 3) Bloco "Quem é Jordana" (igual à referência, adaptado)
-- Foto secundária (aboutImg) com legenda overlay glass
-- Badge "Conheça a especialista"
-- Headline Playfair: "Quem é **Jordana Cantarelli**" (nome em rose/dourado itálico)
-- Parágrafo de bio (reaproveitar texto já existente em SalesPageRevoluz)
-- 4 stat-cards (estilo da referência, em cream/petrol-glass):
-  - "+ 10 anos" — Experiência clínica
-  - "Pastora" — Lagoinha Morumbi
-  - "Psicanalista" — Clínica e terapeuta cristã
-  - "Método REVOLUZ" — Criado por ela
-- Citação destacada (card com borda rose): "Sua paz interna merece uma chance — sem risco, sem pressão." — Jordana Cantarelli
+### 5. Animações (mantém ease21st `[0.22, 1, 0.36, 1]`)
+- Foto: `scale 1.1 → 1` + `opacity 0 → 1` em 1.2s (efeito Ken Burns sutil contínuo via `animate` repeat)
+- Monograma: rotate-in inicial
+- Tags: stagger fade-in + float Y infinito (já existe, reaproveitar)
+- Nome: `TextReveal` palavra a palavra
+- Subtítulo/microcopy: `ScrollReveal` com delay
 
-### 4) Footer minimalista
-- Monograma JC
-- Links: Início · Jornadas · Revoluz · Contato
-- "© 2026 Jordana Cantarelli · Com fé, clareza e presença."
+### 6. Responsividade
+- Mobile: foto `object-position: top center`, texto sobre overlay paper na base
+- Desktop: mesma estrutura, foto maior, tags mais espalhadas
 
----
+## Arquivos
+- **Editar apenas** `src/pages/LinksPage.tsx` — substituir o bloco `<section>` da hero (linhas ~163-254). Resto da página (cards, "Quem é Jordana", footer) **não muda**.
 
-## Animações 21st.dev
-- `ScrollReveal` (blur+scale) nos blocos
-- `StaggerContainer`/`StaggerItem` nos cards de links (delay 0.08s)
-- `TextReveal` no nome e na headline "Quem é Jordana"
-- Tags flutuantes do topo: `motion.div` com `animate={{ y: [0,-6,0] }}` loop suave
-- Cards: `whileHover={{ y: -4, scale: 1.02 }}` + `whileTap={{ scale: 0.98 }}`
-- Foto principal: entrada com `scale: 1.1 → 1` + ring pulsante dourado
-- BackToTop reaproveitado
+## Detalhes técnicos
+- Usar `heroImg` (`@/assets/jordana-hero.jpg`) já importado
+- Cor de transição base = `hsl(var(--sp-paper))` (mesma cor da seção de cards abaixo — garante continuidade visual perfeita)
+- Sem novos assets, sem novas dependências
 
----
-
-## Arquivos a criar/editar
-
-1. **`src/pages/LinksPage.tsx`** (novo) — página completa
-2. **`src/App.tsx`** — adicionar `<Route path="/links" element={<LinksPage />} />`
-3. **Reutilizar**: `ScrollReveal`, `StaggerContainer`, `TextReveal`, `ButtonGold`, `ButtonOrange`, `CardCream`, `BackToTopButton`, assets `jordana-hero.jpg` e `jordana-about.jpg`, estilos `sales-page.css`
-
-Sem alterações em outras páginas. Sem header/footer institucional (página standalone tipo linktree).
-
----
-
-## Perguntas rápidas antes de implementar
-1. Os 7 cards/links propostos cobrem o que você quer, ou prefere uma lista diferente (quais links exatos e em qual ordem)?
-2. Links externos (Instagram, YouTube): você pode confirmar as URLs corretas?
-3. Os stat-cards do bloco "Quem é Jordana" — os 4 sugeridos servem, ou prefere outros números/labels?
+```text
+┌─────────────────────────────┐
+│ [JC]              [tag]     │  ← overlay petrol topo
+│   [tag]                     │
+│                             │
+│      FOTO JORDANA           │  ← imagem cobre tudo
+│      (object-top)           │
+│                             │
+│  [tag]              [tag]   │
+│ ░░░░░░░░░░░░░░░░░░░░░░░░░░ │  ← gradiente paper começa
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │
+│ Jordana Cantarelli          │  ← texto sobre paper
+│ [Pastora · Psicanalista]    │
+│ Com fé, clareza e presença. │
+└─────────────────────────────┘
+   ↓ transição invisível ↓
+┌─────────────────────────────┐
+│ [cards de links — sp-paper] │
+```

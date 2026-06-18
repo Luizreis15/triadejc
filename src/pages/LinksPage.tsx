@@ -159,98 +159,134 @@ export default function LinksPage() {
   return (
     <div className="sales-page">
       <div className="sales-container relative">
-        {/* ─── TOPO IDENTIDADE ─── */}
+        {/* ─── HERO — Foto protagonista com overlay dissolvente ─── */}
         <section
-          className="relative px-6 pt-10 pb-8 text-center overflow-hidden"
+          className="relative w-full overflow-hidden"
           style={{
-            background:
-              "radial-gradient(ellipse at top, hsl(var(--sp-petrol-primary)) 0%, hsl(var(--sp-petrol-primary)/0.92) 60%, hsl(var(--sp-petrol-primary)/0.85) 100%)",
+            minHeight: "640px",
+            background: "hsl(var(--sp-petrol-primary))",
           }}
         >
-          {/* Tags flutuantes */}
-          <div className="relative h-24 mb-2">
-            {floatingTags.map((tag, i) => {
-              const positions = [
-                { top: "0%", left: "8%" },
-                { top: "10%", right: "6%" },
-                { top: "55%", left: "4%" },
-                { top: "60%", right: "10%" },
-              ];
-              return (
-                <motion.span
-                  key={tag}
-                  className="absolute body-inter text-[10px] font-medium py-1.5 px-3 rounded-full border backdrop-blur-sm"
-                  style={{
-                    ...positions[i],
-                    borderColor: "hsl(var(--sp-rose)/0.5)",
-                    color: "hsl(var(--sp-cream))",
-                    background: "hsl(var(--sp-petrol-primary)/0.4)",
-                  }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
-                  transition={{
-                    opacity: { delay: 0.3 + i * 0.15, duration: 0.6, ease: ease21st },
-                    scale: { delay: 0.3 + i * 0.15, duration: 0.6, ease: ease21st },
-                    y: { delay: 0.6 + i * 0.2, duration: 3 + i * 0.4, repeat: Infinity, ease: "easeInOut" },
-                  }}
-                >
-                  {tag}
-                </motion.span>
-              );
-            })}
+          {/* Foto de fundo — protagonista */}
+          <motion.div
+            className="absolute inset-0"
+            initial={{ scale: 1.15, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.4, ease: ease21st }}
+          >
+            <motion.img
+              src={heroImg}
+              alt="Jordana Cantarelli"
+              className="absolute inset-0 w-full h-full object-cover object-top"
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
 
-            {/* Monograma JC */}
-            <motion.div
-              className="absolute top-2 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full flex items-center justify-center"
-              style={{
-                background: "hsl(var(--sp-cream))",
-                color: "hsl(var(--sp-petrol-primary))",
-                boxShadow: "0 0 30px hsl(var(--sp-rose)/0.3)",
-              }}
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ duration: 0.8, ease: ease21st, delay: 0.2 }}
-            >
-              <span className="heading-playfair text-lg italic">JC</span>
-            </motion.div>
+          {/* Overlay topo — escurece para legibilidade do monograma */}
+          <div
+            className="absolute inset-x-0 top-0 h-40 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(to bottom, hsl(var(--sp-petrol-primary)/0.75) 0%, hsl(var(--sp-petrol-primary)/0.2) 60%, transparent 100%)",
+            }}
+          />
+
+          {/* Vinheta lateral sutil */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, transparent 55%, hsl(var(--sp-rose)/0.08) 100%)",
+            }}
+          />
+
+          {/* Overlay base — dissolve foto na cor da seção seguinte (sp-paper) */}
+          <div
+            className="absolute inset-x-0 bottom-0 pointer-events-none"
+            style={{
+              height: "55%",
+              background:
+                "linear-gradient(to top, hsl(var(--sp-paper)) 0%, hsl(var(--sp-paper)/0.95) 25%, hsl(var(--sp-paper)/0.6) 55%, transparent 100%)",
+            }}
+          />
+
+          {/* Monograma JC — canto superior esquerdo */}
+          <motion.div
+            className="absolute top-5 left-5 w-14 h-14 rounded-full flex items-center justify-center z-10"
+            style={{
+              background: "hsl(var(--sp-cream))",
+              color: "hsl(var(--sp-petrol-primary))",
+              boxShadow: "0 0 30px hsl(var(--sp-rose)/0.4), 0 8px 20px hsl(0 0% 0% / 0.25)",
+            }}
+            initial={{ scale: 0, rotate: -180, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.9, ease: ease21st, delay: 0.3 }}
+          >
+            <span className="heading-playfair text-lg italic">JC</span>
+          </motion.div>
+
+          {/* Tags flutuantes orbitando */}
+          {floatingTags.map((tag, i) => {
+            const positions = [
+              { top: "8%", right: "6%" },
+              { top: "28%", left: "4%" },
+              { top: "22%", right: "8%" },
+              { top: "42%", left: "6%" },
+            ];
+            return (
+              <motion.span
+                key={tag}
+                className="absolute body-inter text-[10px] font-medium py-1.5 px-3 rounded-full border backdrop-blur-md z-10"
+                style={{
+                  ...positions[i],
+                  borderColor: "hsl(var(--sp-rose)/0.6)",
+                  color: "hsl(var(--sp-cream))",
+                  background: "hsl(var(--sp-petrol-primary)/0.35)",
+                  boxShadow: "0 4px 12px hsl(0 0% 0% / 0.15)",
+                }}
+                initial={{ opacity: 0, scale: 0.7, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
+                transition={{
+                  opacity: { delay: 0.5 + i * 0.15, duration: 0.7, ease: ease21st },
+                  scale: { delay: 0.5 + i * 0.15, duration: 0.7, ease: ease21st },
+                  y: { delay: 0.8 + i * 0.2, duration: 3.5 + i * 0.4, repeat: Infinity, ease: "easeInOut" },
+                }}
+              >
+                {tag}
+              </motion.span>
+            );
+          })}
+
+          {/* Bloco de texto — sobre a base dissolvida */}
+          <div className="absolute bottom-0 inset-x-0 px-6 pb-8 pt-16 z-10">
+            <TextReveal as="h1" className="heading-playfair text-4xl sm:text-5xl mb-3 leading-tight">
+              <span style={{ color: "hsl(var(--sp-petrol-primary))" }}>Jordana Cantarelli</span>
+            </TextReveal>
+
+            <ScrollReveal delay={0.15} blur>
+              <span
+                className="inline-block body-inter text-[10px] tracking-widest uppercase py-1.5 px-3 rounded-full border mb-3"
+                style={{
+                  borderColor: "hsl(var(--sp-rose)/0.6)",
+                  color: "hsl(var(--sp-petrol-primary))",
+                  background: "hsl(var(--sp-cream)/0.5)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                Pastora · Psicanalista · Terapeuta Cristã
+              </span>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.25} blur>
+              <p
+                className="body-inter text-sm italic"
+                style={{ color: "hsl(var(--sp-petrol-primary)/0.75)" }}
+              >
+                Com fé, clareza e presença.
+              </p>
+            </ScrollReveal>
           </div>
-
-          {/* Foto circular */}
-          <ScrollReveal scale blur>
-            <motion.div
-              className="relative mx-auto mb-5 w-36 h-36 rounded-full overflow-hidden"
-              style={{
-                boxShadow: "0 0 0 4px hsl(var(--sp-cream)), 0 0 0 6px hsl(var(--sp-rose)/0.6), 0 20px 40px -10px hsl(0 0% 0% / 0.4)",
-              }}
-              initial={{ scale: 1.2, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1, ease: ease21st, delay: 0.4 }}
-            >
-              <img src={heroImg} alt="Jordana Cantarelli" className="w-full h-full object-cover object-top" />
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{ boxShadow: "0 0 0 2px hsl(var(--sp-rose)/0.4)" }}
-                animate={{ scale: [1, 1.08, 1], opacity: [0.6, 0, 0.6] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </motion.div>
-          </ScrollReveal>
-
-          <TextReveal as="h1" className="heading-playfair text-3xl mb-2" >
-            <span style={{ color: "hsl(var(--sp-cream))" }}>Jordana Cantarelli</span>
-          </TextReveal>
-
-          <ScrollReveal delay={0.15} blur>
-            <p className="body-inter text-xs tracking-wider uppercase mb-3" style={{ color: "hsl(var(--sp-rose))" }}>
-              Pastora · Psicanalista · Terapeuta Cristã
-            </p>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.25} blur>
-            <p className="body-inter text-sm italic" style={{ color: "hsl(var(--sp-cream)/0.8)" }}>
-              Com fé, clareza e presença.
-            </p>
-          </ScrollReveal>
         </section>
 
         {/* ─── ÁRVORE DE LINKS ─── */}
