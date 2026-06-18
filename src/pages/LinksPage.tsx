@@ -293,9 +293,9 @@ export default function LinksPage() {
         </section>
 
         {/* ─── ÁRVORE DE LINKS ─── */}
-        <section className="px-6 py-8" style={{ background: "hsl(var(--sp-paper))" }}>
+        <section className="px-6 pt-2 pb-8" style={{ background: "hsl(var(--sp-paper))" }}>
           <ScrollReveal blur>
-            <p className="text-center body-inter text-xs tracking-widest uppercase mb-6" style={{ color: "hsl(var(--sp-petrol-primary)/0.6)" }}>
+            <p className="text-center body-inter text-xs tracking-widest uppercase mb-5" style={{ color: "hsl(var(--sp-petrol-primary)/0.6)" }}>
               Escolha por onde começar
             </p>
           </ScrollReveal>
