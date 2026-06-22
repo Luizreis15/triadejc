@@ -27,7 +27,7 @@ const linkCards: LinkCard[] = [
   {
     title: "Sessão Individual",
     description: "Atendimento personalizado com Jordana.",
-    href: "https://wa.link/z8p2f9",
+    href: "https://api.whatsapp.com/send?phone=5511988396576&text=Ol%C3%A1%2C%20gostaria%20de%20saber%20como%20funciona%20para%20marcar%20Terapia%20com%20a%20Jordana%3F",
     external: true,
     icon: Heart,
     variant: "gold",
