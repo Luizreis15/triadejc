@@ -8,12 +8,18 @@ interface VideoPlayerProps {
   className?: string;
 }
 
+// Temporário: vídeos ocultos na área de membros enquanto a hospedagem é reconfigurada.
+// Basta voltar para `true` para reexibir todos os players (nada foi removido do banco).
+const VIDEOS_ENABLED = false;
+
 export function VideoPlayer({ 
   videoUrl, 
   thumbnailUrl, 
   title,
   className 
 }: VideoPlayerProps) {
+  if (!VIDEOS_ENABLED) return null;
+
   // Check if it's a YouTube URL
   const isYouTube = videoUrl?.includes("youtube.com") || videoUrl?.includes("youtu.be");
   
