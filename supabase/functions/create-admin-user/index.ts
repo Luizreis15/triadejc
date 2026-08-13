@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
           name: name || email.split("@")[0],
           email,
           password,
-          loginUrl: "https://jornada.jordanacantarelli.com.br/membros",
+          loginUrl: "https://www.jordanacantarelli.com.br/membros",
         }),
       });
 

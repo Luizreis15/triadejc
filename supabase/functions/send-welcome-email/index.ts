@@ -36,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const firstName = name ? name.split(" ")[0] : "querida";
-    const accessUrl = loginUrl || "https://jornada.jordanacantarelli.com.br/membros";
+    const accessUrl = loginUrl || "https://www.jordanacantarelli.com.br/membros";
 
     const emailHtml = `
 <!DOCTYPE html>

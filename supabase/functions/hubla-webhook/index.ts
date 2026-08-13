@@ -170,7 +170,7 @@ const handler = async (req: Request): Promise<Response> => {
         name: customerName || customerEmail.split("@")[0],
         email: customerEmail,
         password: DEFAULT_PASSWORD,
-        loginUrl: "https://jornada.jordanacantarelli.com.br/membros",
+        loginUrl: "https://www.jordanacantarelli.com.br/membros",
       }),
     });
 

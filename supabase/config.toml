@@ -1,9 +1,6 @@
-project_id = "kggwatdbzbgnndvytbzw"
+project_id = "spxxlspesoybioowvjmb"
 
 [functions.create-admin-user]
-verify_jwt = false
-
-[functions.generate-mockup]
 verify_jwt = false
 
 [functions.hubla-webhook]

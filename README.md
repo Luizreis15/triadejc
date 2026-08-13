@@ -1,6 +1,6 @@
 # Triade_Jordana
 
-# BLUEPRINT — CADERNO DIGITAL “CARROSSÉIS MAGNÉTICOS” (Lovable + Supabase)
+# BLUEPRINT — CADERNO DIGITAL “CARROSSÉIS MAGNÉTICOS” (Supabase)
 
 ## 1) Visão do Produto
 
@@ -343,31 +343,23 @@ Tipografia:
 
 ---
 
-# PROMPT PARA COLAR NO LOVABLE (construção do app)
+# PROMPT DE REFERÊNCIA (construção do app)
 
 “Crie um web app mobile-first chamado ‘Caderno Digital — Carrosséis Magnéticos’. Stack: Next.js + Supabase. Use Supabase Auth (magic link). Crie as tabelas: profiles, entitlements, modules, module_cards, progress, library_items, favorites, notebook_entries, uploads, results. Implemente paywall via entitlements. Telas: /login, /onboarding, /app (dashboard), /app/modulos, /app/modulos/[slug], /app/biblioteca (tabs + filtros + copiar + favoritar + salvar no caderno), /app/caderno (seções), /app/calendario, /app/resultados. Crie /admin com CRUD de modules, module_cards e library_items. UI com cards e progresso. Persistir progresso por módulo e última posição. Implementar RLS por user_id. Paleta: vermelho #B21F2D, marrom #4B2E2A, nude #E8D6C8, fundo #F6EFEA, texto #1C1B1A.”
 
 ---
 
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://traide.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/deabe2ce-3def-4648-8c3c-cc5b64013b88).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
+git clone https://github.com/Luizreis15/triadejc.git
+cd triadejc
 npm i
 npm run dev
+```
+
+Build de produção:
+
+```sh
+npm run build
 ```

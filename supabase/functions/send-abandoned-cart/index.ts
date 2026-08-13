@@ -294,7 +294,7 @@ const handler = async (req: Request): Promise<Response> => {
             "Authorization": `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "Jordana Cantarelli <contato@traide.lovable.app>",
+            from: "Jordana Cantarelli <contato@jordanacantarelli.com.br>",
             to: [lead.email],
             subject: template.subject,
             html: template.html(firstName, checkoutUrl),
