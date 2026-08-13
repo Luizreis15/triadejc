@@ -22,7 +22,7 @@ export default function Signup() {
 
   useEffect(() => {
     if (user) {
-      navigate("/membrosvmcm/app", { replace: true });
+      navigate("/membros/app", { replace: true });
     }
   }, [user, navigate]);
 

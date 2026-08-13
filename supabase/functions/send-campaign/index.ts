@@ -49,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
         const content = campaign.content_html
           .replace(/{nome}/g, profile.name || "Querida")
           .replace(/{email}/g, profile.email)
-          .replace(/{link}/g, "https://traide.lovable.app/membrosvmcm/app");
+          .replace(/{link}/g, "https://traide.lovable.app/membros/app");
 
         await resend.emails.send({
           from: "Jornada Única <noreply@resend.dev>",
