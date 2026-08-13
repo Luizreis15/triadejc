@@ -193,13 +193,25 @@ const handler = async (req: Request): Promise<Response> => {
     const type = email_data.email_action_type;
     
     // Build the action URL with the token
-    let actionUrl = email_data.redirect_to || email_data.site_url;
-    
+    const SITE = "https://www.jordanacantarelli.com.br";
+    let actionUrl = email_data.redirect_to || email_data.site_url || SITE;
+
+    // Fix legacy/broken destinations: recovery and invite must land on the reset page
+    actionUrl = actionUrl.replace("/membrosvmcm", "/membros");
+    if (type === "recovery" || type === "invite") {
+      const url = new URL(actionUrl.startsWith("http") ? actionUrl : SITE);
+      if (!url.pathname.includes("/membros/reset-password")) {
+        url.pathname = "/membros/reset-password";
+      }
+      actionUrl = url.origin + url.pathname;
+    }
+
     // Append token_hash to the URL for verification
     if (email_data.token_hash) {
       const separator = actionUrl.includes("?") ? "&" : "?";
       actionUrl = `${actionUrl}${separator}token_hash=${email_data.token_hash}&type=${type}`;
     }
+
 
     console.log(`Preparing ${type} email for: ${email}`);
     
