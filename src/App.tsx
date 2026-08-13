@@ -75,7 +75,7 @@ const App = () => (
             
             {/* Legacy routes redirect */}
             <Route path="/membrosvmcm/*" element={<Navigate to="/membros" replace />} />
-            <Route path="/vmcm" element={<Navigate to="/jornada" replace />} />
+
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
