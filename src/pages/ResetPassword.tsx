@@ -20,24 +20,52 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  
+  const [verifying, setVerifying] = useState(false);
+
+  const tokenHash = searchParams.get("token_hash");
+  const linkType = searchParams.get("type");
+  const [sessionReady, setSessionReady] = useState(false);
+
   // Check if we're in password update mode (user clicked link from email)
-  const isUpdateMode = searchParams.get("type") === "recovery";
+  const isUpdateMode = linkType === "recovery" || linkType === "invite" || sessionReady;
 
   useEffect(() => {
     // Listen for auth state changes to detect password recovery
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        // User clicked the recovery link, show password update form
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        setSessionReady(true);
+      }
+    });
+
+    // Links from e-mail may come as token_hash (needs explicit verification)
+    const verify = async () => {
+      if (!tokenHash) return;
+      setVerifying(true);
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: linkType === "invite" ? "invite" : "recovery",
+      });
+      setVerifying(false);
+      if (error) {
+        toast({
+          title: "Link inválido ou expirado",
+          description: "Solicite um novo link de redefinição de senha.",
+          variant: "destructive",
+        });
+      } else {
+        setSessionReady(true);
         toast({
           title: "Link validado",
           description: "Agora você pode definir sua nova senha.",
         });
       }
-    });
+    };
+    verify();
 
     return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
