@@ -63,6 +63,10 @@ export function LeadCaptureModal({ open, onOpenChange, checkoutUrl, price = 97 }
 
     setIsSubmitting(true);
 
+    // Open the tab synchronously, still inside the click's event handler,
+    // so browsers don't treat it as a blocked popup once we start awaiting below.
+    const checkoutWindow = window.open("", "_blank");
+
     try {
       // Save lead to database
       const { error } = await supabase.from("leads").insert({
@@ -101,12 +105,20 @@ export function LeadCaptureModal({ open, onOpenChange, checkoutUrl, price = 97 }
       }
 
       const finalUrl = `${checkoutUrl}?${params.toString()}`;
-      window.open(finalUrl, "_blank", "noopener,noreferrer");
-      
+
+      if (checkoutWindow) {
+        checkoutWindow.opener = null;
+        checkoutWindow.location.href = finalUrl;
+      } else {
+        // Popup was blocked despite the synchronous open (rare) — fall back to same-tab navigation.
+        window.location.href = finalUrl;
+      }
+
       onOpenChange(false);
       setFormData({ name: "", email: "", phone: "" });
     } catch (err) {
       console.error("Error in lead capture:", err);
+      checkoutWindow?.close();
       toast.error("Ocorreu um erro. Tente novamente.");
     } finally {
       setIsSubmitting(false);
