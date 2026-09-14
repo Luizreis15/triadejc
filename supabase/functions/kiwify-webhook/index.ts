@@ -90,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Received signature:", signature);
     
     // Verify signature (optional - can be disabled for testing)
-    if (signature && !verifySignature(rawBody, signature)) {
+    if (signature && !(await verifySignature(rawBody, signature))) {
       console.error("Invalid signature");
       return new Response(
         JSON.stringify({ error: "Invalid signature" }),
