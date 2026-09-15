@@ -8,6 +8,7 @@ import { MarkdownPreview } from "@/components/member/MarkdownPreview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
 import { useProductChapters, ProductChapter } from "@/hooks/useProductChapters";
 import {
   Accordion,
@@ -205,7 +206,7 @@ export default function ProductDetail({ module }: ProductDetailProps) {
             </p>
             <div className="space-y-2">
               {chaptersWithPdf.map((chapter) => (
-                <a
+                <SignedFileLink
                   key={chapter.id}
                   href={chapter.pdf_url!}
                   target="_blank"
@@ -216,7 +217,7 @@ export default function ProductDetail({ module }: ProductDetailProps) {
                     <FileDown className="w-5 h-5 text-red-600" />
                   </div>
                   <span className="flex-1 text-sm font-medium">{chapter.title}</span>
-                </a>
+                </SignedFileLink>
               ))}
             </div>
           </section>
@@ -314,7 +315,7 @@ function IntroChapterCard({
 
       {/* PDF Download */}
       {chapter.pdf_url && (
-        <a
+        <SignedFileLink
           href={chapter.pdf_url}
           target="_blank"
           rel="noopener noreferrer"
@@ -322,7 +323,7 @@ function IntroChapterCard({
         >
           <FileDown className="w-4 h-4" />
           Baixar PDF
-        </a>
+        </SignedFileLink>
       )}
 
       {/* Complete button */}
@@ -438,7 +439,7 @@ function ChapterAccordionItem({
 
           {/* PDF Download */}
           {chapter.pdf_url && (
-            <a
+            <SignedFileLink
               href={chapter.pdf_url}
               target="_blank"
               rel="noopener noreferrer"
@@ -446,7 +447,7 @@ function ChapterAccordionItem({
             >
               <FileDown className="w-4 h-4" />
               Baixar PDF do módulo
-            </a>
+            </SignedFileLink>
           )}
 
           {/* Exercises */}

@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
 import { useModuleDays } from "@/hooks/useModuleDays";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
 import { toast } from "@/hooks/use-toast";
 import { useRef } from "react";
 import { useQuery as useRQQuery } from "@tanstack/react-query";
@@ -529,7 +530,7 @@ export default function ModuleDetail() {
             </p>
             <div className="space-y-2">
               {pdfs.map((pdf) => (
-                <a
+                <SignedFileLink
                   key={pdf.id}
                   href={pdf.file_url}
                   target="_blank"
@@ -540,7 +541,7 @@ export default function ModuleDetail() {
                     <FileDown className="w-5 h-5 text-red-600" />
                   </div>
                   <span className="flex-1 text-sm font-medium">{pdf.title}</span>
-                </a>
+                </SignedFileLink>
               ))}
             </div>
           </ContentSection>

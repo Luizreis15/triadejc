@@ -10,5 +10,6 @@ Este agente é o **owner** e o implementador do **Track B** (`agent/cursor-acces
 - Não editar paths do Track A: `kiwify-webhook`, `send-welcome-email`, `send-abandoned-cart`, `supabase/functions/_shared`.
 - Freeze sem o usuário pedir: `supabase/config.toml`, `package.json`, `types.ts`, `supabase/migrations/**`.
 - P1: Track B lê entitlement via `has_any_entitlement`. Não editar `kiwify-webhook`.
+- P2: Track B — invite admin, financeiro do webhook, kiwify_product_id, audit_log, signed URL de PDF.
 - Fail-closed. Sem senha padrão. Sem signup público. Sem Hubla.
 - Se o Track A precisar de um arquivo freeze, anotar o pedido no PR/chat; não “adiantar” o arquivo do outro.

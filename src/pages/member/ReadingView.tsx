@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { useProgress } from "@/hooks/useProgress";
 import { VideoPlayer } from "@/components/member/VideoPlayer";
 import { MarkdownContent } from "@/components/member/MarkdownPreview";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
 
 export default function ReadingView() {
   const { slug, cardId } = useParams<{ slug: string; cardId: string }>();
@@ -158,16 +159,16 @@ export default function ReadingView() {
                   </div>
                   <span className="font-medium text-sm">{pdf.title}</span>
                 </div>
-                <a 
-                  href={pdf.file_url} 
-                  target="_blank" 
+                <SignedFileLink
+                  href={pdf.file_url}
+                  target="_blank"
                   rel="noopener noreferrer"
                 >
                   <Button variant="outline" size="sm">
                     <Download className="w-4 h-4 mr-2" />
                     Baixar
                   </Button>
-                </a>
+                </SignedFileLink>
               </div>
             ))}
           </div>

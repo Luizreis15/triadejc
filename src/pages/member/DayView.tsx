@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useModuleDays, type ModuleDay } from "@/hooks/useModuleDays";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
 import { useState, useEffect } from "react";
 
 export default function DayView() {
@@ -303,7 +304,7 @@ export default function DayView() {
 
       {/* PDF */}
       {day.pdf_url && (
-        <a
+        <SignedFileLink
           href={day.pdf_url}
           target="_blank"
           rel="noopener noreferrer"
@@ -313,7 +314,7 @@ export default function DayView() {
             <FileDown className="w-5 h-5 text-red-600" />
           </div>
           <span className="flex-1 text-sm font-medium">Baixar PDF original</span>
-        </a>
+        </SignedFileLink>
       )}
 
       {/* Action Buttons */}

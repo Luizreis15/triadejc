@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
 
 export default function Library() {
   const { user } = useAuth();
@@ -161,7 +162,7 @@ export default function Library() {
           </h2>
           <div className="space-y-2">
             {filteredPdfs.map((pdf) => (
-              <a
+              <SignedFileLink
                 key={pdf.id}
                 href={pdf.file_url}
                 target="_blank"
@@ -177,7 +178,7 @@ export default function Library() {
                     <p className="text-xs text-muted-foreground">{pdf.modules.title}</p>
                   )}
                 </div>
-              </a>
+              </SignedFileLink>
             ))}
           </div>
         </section>
