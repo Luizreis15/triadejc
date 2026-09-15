@@ -32,7 +32,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
 
   if (accessError || !isActive) {
-    return <AccessDisabled />;
+    return <AccessDisabled variant="inactive" />;
   }
 
   return <>{children}</>;

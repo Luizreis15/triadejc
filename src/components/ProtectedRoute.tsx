@@ -19,7 +19,7 @@ function LoadingScreen() {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, authLoading, accessLoading, isActive, accessError, refetch } =
+  const { user, authLoading, accessLoading, isActive, hasEntitlement, accessError, refetch } =
     useMemberAccess();
 
   if (authLoading || accessLoading) {
@@ -50,7 +50,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isActive) {
-    return <AccessDisabled />;
+    return <AccessDisabled variant="inactive" />;
+  }
+
+  if (!hasEntitlement) {
+    return <AccessDisabled variant="no_entitlement" />;
   }
 
   return <>{children}</>;

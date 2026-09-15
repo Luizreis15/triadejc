@@ -2,21 +2,21 @@
 
 Owner: Cursor Grok (este agente). Implementadores: **Track A = Claude Code**, **Track B = Cursor Grok**. Não editar arquivo do outro track. Arquivo compartilhado = só o owner, ou PR de sync.
 
-Objetivo: P0+P1 em paralelo sem conflito de merge. Stack permanece Vite + React + Supabase + Vercel.
+Objetivo: P1 em paralelo sem conflito de merge. Stack permanece Vite + React + Supabase + Vercel. Checkout é **somente Kiwify**.
 
 ## Branches
 
 | Agente | Branch | Base |
 |--------|--------|------|
-| Claude Code | `agent/claude-ingress` | `main` |
-| Cursor Grok | `agent/cursor-access` | `main` |
-| Integração | `sec/p0` | merge das duas |
+| Claude Code | `agent/claude-ingress` | `sec/p1` |
+| Cursor Grok | `agent/cursor-access` | `sec/p1` |
+| Integração | `sec/p1` | merge das duas |
 
-Não rebase na branch do outro. Merge só via owner em `sec/p0`.
+Não rebase na branch do outro. Merge só via owner em `sec/p1`. Não mergear `sec/p1` em `main` sem o owner.
 
 ## Track A — Claude Code (plano de compra)
 
-Ingresso: webhook → identidade → e-mail de boas-vindas → (depois) entitlement.
+Ingresso: webhook autenticado → identidade → entitlement → transação → e-mail de boas-vindas.
 
 **Pode editar**
 
@@ -25,21 +25,27 @@ Ingresso: webhook → identidade → e-mail de boas-vindas → (depois) entitlem
 - `supabase/functions/send-abandoned-cart/**`
 - `supabase/functions/_shared/**` (criar)
 
-**Não editar:** `src/**`, `supabase/config.toml`, `package.json`, `App.tsx`, migrations (salvo as listadas abaixo se o owner liberar o pacote SQL).
+**Não editar:** `src/**`, `supabase/config.toml`, `package.json`, `App.tsx`, `src/integrations/supabase/types.ts`, `supabase/migrations/**`.
 
-**P0 (agora)**
+**P0 (feito — não reabrir)**
 
-1. HMAC fail-closed. Header ausente = 401. Sem log do body cru.
-2. Parar `DEFAULT_PASSWORD = "Mudar@123"`. Usar `auth.admin.generateLink` (invite/recovery). Welcome recebe `action_link`, nunca senha.
-3. `getUserByEmail` paginado — nunca `listUsers()` página 1 só.
-4. Welcome só se a conta for nova. Replay de webhook não reenvia.
-5. `_shared/crypto.ts`: `verifyHmacSha256(raw, header, secret)` timing-safe.
-6. Abandoned-cart: exigir `x-internal-secret`; não processar sem ele.
+HMAC fail-closed, `generateLink` invite, welcome só conta nova, `_shared/crypto.ts`, abandoned-cart com `x-internal-secret`.
+
+**P1 (agora)**
+
+1. Persistir `webhook_events` **antes** de processar. `provider = 'kiwify'`. `event_id` estável: `order_id + ':' + eventType` (ou id único do payload se existir). `UNIQUE (provider, event_id)`.
+2. Se o insert colidir e `status = 'processed'`, retornar 200 **sem** reenviar welcome e sem reprocessar. Se colidir com `received`/`failed`, continuar o grant (retry).
+3. Resolver produto: `products.kiwify_product_id = payload.Product.product_id`. Se não achar, **fallback** `slug = 'jornada_unica'` (produto único). Não falhar o webhook por SKU desconhecido.
+4. `entitlements` upsert em `(user_id, product_id)`: `status='active'`, `source='kiwify'`, `external_id=order_id`. Não revogar em eventos de pagamento.
+5. Escrever `transactions`: `provider='kiwify'`, `external_id=order_id`, `product_id`, `user_id`, `type`/`amount`/`currency` a partir do payload (amount 0 se ausente). Respeitar o índice único `(provider, external_id)`. Replay não duplica.
+6. Depois do grant+transaction, marcar `webhook_events.status='processed'` e `processed_at=now()`. Em erro de grant, `status='failed'` e 500 para a Kiwify retentar.
+7. Welcome continua só conta nova. Replay nunca reenvia.
+8. Service role no webhook. Sem `console.log` do body cru / PII.
 
 **Secrets que o Track A lê (não commitar)**
 
-- `KIWIFY_WEBHOOK_TOKEN` (já existe)
-- `INTERNAL_FUNCTION_SECRET` (novo)
+- `KIWIFY_WEBHOOK_TOKEN`
+- `INTERNAL_FUNCTION_SECRET`
 - `RESEND_API_KEY`
 
 ## Track B — Cursor Grok (plano de acesso)
@@ -48,64 +54,65 @@ App: auth, rotas, gates, e-mail admin, hook de auth.
 
 **Pode editar**
 
-- `src/**` (exceto se o owner marcar um arquivo como freeze)
+- `src/**` (exceto freeze)
 - `supabase/functions/send-campaign/**`
 - `supabase/functions/send-auth-email/**`
 - `supabase/functions/create-admin-user/**`
 
 **Não editar:** `kiwify-webhook`, `send-welcome-email`, `send-abandoned-cart`, `_shared`.
 
-**P0 (agora)**
+**P0 (feito — não reabrir)**
 
-1. Remover `/membros/signup` de `App.tsx`. Tirar o link em `Login.tsx`. Remover `signUp` de `useAuth.tsx`.
-2. `ProtectedRoute`: além de sessão, ler `profiles.is_active`. Inativo → tela “acesso desativado”, sem loop de login.
-3. `send-campaign` e `send-auth-email`: recusar sem prova. Campaign = JWT + `has_role(admin)`. Auth-email = `SEND_AUTH_HOOK_SECRET` no header.
-4. CORS das functions B: origin do domínio de produção, não `*`.
-5. Não colocar senha em e-mail.
+Signup público removido, `is_active` no `ProtectedRoute`, campaign JWT+admin, Auth Hook HTTPS.
+
+**P1 (agora)**
+
+1. `useMemberAccess`: `profiles.is_active` **e** `rpc('has_any_entitlement')`.
+2. `ProtectedRoute`: inativo → `AccessDisabled` inactive; ativo sem entitlement → `no_entitlement`.
+3. `AdminRoute` continua só `is_active` (admin passa no SQL via `has_role`).
+4. Não contornar RLS no client. UI não é a trava.
 
 **Secrets que o Track B lê**
 
 - `INTERNAL_FUNCTION_SECRET`
-- `SEND_AUTH_HOOK_SECRET` (novo)
+- `SEND_AUTH_HOOK_SECRET`
 - `RESEND_API_KEY`
 
 ## Freeze — só o owner
 
-Estes arquivos não entram em PR de agente sem o owner no diff:
-
 - `supabase/config.toml`
 - `package.json` / `package-lock.json`
 - `src/integrations/supabase/types.ts`
-- `supabase/migrations/**` (até o pacote SQL P1)
+- `supabase/migrations/**`
 - `vercel.json`
 - `AGENTS.md` / `CLAUDE.md`
 
-Pedido típico ao owner: “ligar `verify_jwt = true` em send-campaign”.
+Pedido típico ao owner: “preciso de coluna X na migration”.
 
 ## Contratos (não negociar no código)
 
 - Fail-closed: sem assinatura/secret → 401, não 200.
-- UI não é trava. P1: `can_read_module` no SQL.
+- UI não é trava. Conteúdo: `can_read_module` / `has_any_entitlement` no SQL.
+- SKU Kiwify desconhecido → `jornada_unica`.
 - Sem `any` novo. Sem `console.log` de payload PII.
 - Deno `_shared` não importa de `src/`.
-- Teste mínimo P0: request sem HMAC/secret retorna 401.
+- Teste mínimo P1 Track A: replay do mesmo `event_id` não duplica entitlement/transaction e não reenvia welcome.
 
 ## Sync
 
 | Ponto | Quando | Quem |
 |-------|--------|------|
 | S0 | Contratos neste arquivo | Owner (feito) |
-| S1 | P0 merge em `sec/p0` | Owner |
-| S2 | Migration products/entitlements | Owner escreve SQL; A consome; B consome types |
+| S1 | P0 merge em `main` | Owner (feito) |
+| S2 | Migration products/entitlements | Owner (este commit em `sec/p1`) |
 | S3 | RLS + gates | A grava entitlement no webhook; B lê no React |
-
-P1 não começa em paralelo no schema. Owner abre a migration; depois A e B voltam a paralelizar.
 
 ## Prompt curto para o Claude Code
 
 ```
-Leia AGENTS.md. Você é Track A. Branch agent/claude-ingress a partir de main.
-Não edite src/, config.toml, package.json nem migrations.
-Implemente só o P0 do Track A. HMAC fail-closed, sem senha padrão, getUserByEmail paginado.
-Abra PR para sec/p0 quando o 401 sem header estiver coberto.
+Leia AGENTS.md. Você é Track A. Branch agent/claude-ingress a partir de sec/p1 (não main).
+Não edite src/, config.toml, package.json, types.ts nem migrations.
+Implemente só o P1 do Track A em kiwify-webhook: persistir webhook_events, grant de entitlements, escrever transactions, marcar processed.
+SKU desconhecido → jornada_unica. Replay do mesmo event_id não reenvia welcome nem duplica grant.
+Abra PR para sec/p1 quando o replay estiver coberto.
 ```

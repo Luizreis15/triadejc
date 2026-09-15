@@ -158,7 +158,7 @@ export default function ModuleDetail() {
   if (!module) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Módulo não encontrado</p>
+        <p className="text-muted-foreground">Este módulo não está disponível para a sua conta.</p>
         <Link to="/membros/app/modulos">
           <Button variant="ghost" className="mt-4">Voltar para módulos</Button>
         </Link>

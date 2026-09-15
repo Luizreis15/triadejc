@@ -31,7 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Search, UserPlus, Shield, Users, UserCheck, UserX, Mail, ShieldCheck, Send } from "lucide-react";
+import { Search, UserPlus, Shield, Users, UserCheck, UserX, ShieldCheck, Send, BadgeCheck } from "lucide-react";
+import { getDefaultProductId } from "@/lib/products";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -64,13 +65,24 @@ export function UsersAdmin() {
         .from("user_roles")
         .select("user_id, role");
 
-      const rolesMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+      const { data: entitlements, error: entitlementsError } = await supabase
+        .from("entitlements")
+        .select("user_id, status");
 
-      return profiles.map(profile => ({
+      if (entitlementsError) throw entitlementsError;
+
+      const rolesMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+      const entitled = new Set(
+        (entitlements ?? [])
+          .filter((row) => row.status === "active")
+          .map((row) => row.user_id),
+      );
+
+      return (profiles ?? []).map(profile => ({
         ...profile,
         role: rolesMap.get(profile.id) || "user",
-        is_active: (profile as any).is_active ?? true,
-        last_access_at: (profile as any).last_access_at,
+        is_active: profile.is_active ?? true,
+        has_entitlement: entitled.has(profile.id),
       }));
     },
   });
@@ -92,7 +104,7 @@ export function UsersAdmin() {
     mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
       const { error } = await supabase
         .from("profiles")
-        .update({ is_active: isActive } as any)
+        .update({ is_active: isActive })
         .eq("id", userId);
       
       if (error) throw error;
@@ -103,6 +115,29 @@ export function UsersAdmin() {
     },
     onError: () => {
       toast.error("Erro ao atualizar status");
+    },
+  });
+
+  const toggleEntitlement = useMutation({
+    mutationFn: async ({ userId, granted }: { userId: string; granted: boolean }) => {
+      const productId = await getDefaultProductId();
+      const { error } = await supabase.from("entitlements").upsert(
+        {
+          user_id: userId,
+          product_id: productId,
+          status: granted ? "active" : "revoked",
+          source: "admin",
+        },
+        { onConflict: "user_id,product_id" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Acesso à Jornada Única atualizado");
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar o acesso");
     },
   });
 
@@ -188,6 +223,7 @@ export function UsersAdmin() {
 
   const activeCount = users?.filter(u => u.is_active).length || 0;
   const inactiveCount = users?.filter(u => !u.is_active).length || 0;
+  const entitledCount = users?.filter(u => u.has_entitlement).length || 0;
 
   return (
     <div className="space-y-6">
@@ -286,7 +322,7 @@ export function UsersAdmin() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -326,6 +362,19 @@ export function UsersAdmin() {
             </div>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <BadgeCheck className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Com compra</p>
+                <p className="text-2xl font-bold">{entitledCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -342,7 +391,7 @@ export function UsersAdmin() {
             </div>
             <Select
               value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as any)}
+              onValueChange={(v) => setStatusFilter(v as "all" | "active" | "inactive")}
             >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Status" />
@@ -376,6 +425,7 @@ export function UsersAdmin() {
                     <TableHead>Último Acesso</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Compra</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -417,6 +467,19 @@ export function UsersAdmin() {
                           />
                           <span className="text-sm text-muted-foreground">
                             {user.is_active ? "Ativo" : "Inativo"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={user.has_entitlement}
+                            onCheckedChange={(checked) =>
+                              toggleEntitlement.mutate({ userId: user.id, granted: checked })
+                            }
+                          />
+                          <span className="text-sm text-muted-foreground">
+                            {user.has_entitlement ? "Liberada" : "Sem acesso"}
                           </span>
                         </div>
                       </TableCell>

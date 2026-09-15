@@ -7,6 +7,8 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const KIWIFY_WEBHOOK_TOKEN = Deno.env.get("KIWIFY_WEBHOOK_TOKEN");
 const INTERNAL_FUNCTION_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
 
+const DEFAULT_PRODUCT_SLUG = "jornada_unica";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-kiwify-signature",
@@ -26,11 +28,18 @@ interface KiwifyWebhookPayload {
   Product?: {
     product_id: string;
     product_name: string;
+    // Best-effort — Kiwify's real payload shape for price varies by event;
+    // amount falls back to 0 when none of these are present (see extractAmount).
+    price?: number;
   };
   Subscription?: {
     id: string;
     status: string;
   };
+  // Best-effort locations for the charged amount across Kiwify event types.
+  charge_amount?: number;
+  amount?: number;
+  Commissions?: { charge_amount?: number | string; currency?: string };
 }
 
 const VALID_EVENTS = [
@@ -54,6 +63,84 @@ async function findUserIdByEmail(admin: SupabaseClient, email: string): Promise<
     if (data.users.length < perPage) return null;
   }
   return null;
+}
+
+// Reserves (or finds) the webhook_events row for this event, atomically enough
+// to survive retries: a UNIQUE(provider, event_id) collision on insert is
+// treated as "someone already has this", not an error.
+async function claimWebhookEvent(
+  admin: SupabaseClient,
+  eventId: string,
+  eventType: string,
+  payload: unknown,
+): Promise<{ rowId: string; alreadyProcessed: boolean }> {
+  const { data: existing } = await admin
+    .from("webhook_events")
+    .select("id, status")
+    .eq("provider", "kiwify")
+    .eq("event_id", eventId)
+    .maybeSingle();
+
+  if (existing) {
+    return { rowId: existing.id, alreadyProcessed: existing.status === "processed" };
+  }
+
+  const { data: inserted, error } = await admin
+    .from("webhook_events")
+    .insert({ provider: "kiwify", event_id: eventId, event_type: eventType, status: "received", payload })
+    .select("id")
+    .single();
+
+  if (error) {
+    // 23505 = unique_violation: another request claimed this event_id concurrently.
+    if (error.code === "23505") {
+      const { data: raceRow } = await admin
+        .from("webhook_events")
+        .select("id, status")
+        .eq("provider", "kiwify")
+        .eq("event_id", eventId)
+        .single();
+      if (raceRow) return { rowId: raceRow.id, alreadyProcessed: raceRow.status === "processed" };
+    }
+    throw error;
+  }
+
+  return { rowId: inserted.id, alreadyProcessed: false };
+}
+
+// Unknown/missing Kiwify SKU falls back to the single default product.
+async function resolveProductId(admin: SupabaseClient, kiwifyProductId: string | undefined): Promise<string> {
+  if (kiwifyProductId) {
+    const { data } = await admin
+      .from("products")
+      .select("id")
+      .eq("kiwify_product_id", kiwifyProductId)
+      .maybeSingle();
+    if (data) return data.id;
+  }
+
+  const { data: fallback, error } = await admin
+    .from("products")
+    .select("id")
+    .eq("slug", DEFAULT_PRODUCT_SLUG)
+    .single();
+
+  if (error || !fallback) {
+    throw new Error(`default product '${DEFAULT_PRODUCT_SLUG}' not found`);
+  }
+  return fallback.id;
+}
+
+function extractAmount(payload: KiwifyWebhookPayload): number {
+  // Kiwify documents Commissions.charge_amount in cents (e.g. 12424 = R$124.24).
+  const fromCommissions = payload.Commissions?.charge_amount;
+  if (fromCommissions != null) {
+    const parsed = typeof fromCommissions === "number" ? fromCommissions : Number(fromCommissions);
+    return Number.isFinite(parsed) ? parsed / 100 : 0;
+  }
+  const raw = payload.charge_amount ?? payload.amount ?? payload.Product?.price;
+  const parsed = typeof raw === "number" ? raw : Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -117,6 +204,30 @@ const handler = async (req: Request): Promise<Response> => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // Idempotency: persisted BEFORE any processing. A replay that already
+    // reached 'processed' short-circuits here — no reprocessing, no re-grant,
+    // no welcome resend.
+    if (!payload.order_id) {
+      return new Response(
+        JSON.stringify({ error: "order_id is required" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+    const eventId = `${payload.order_id}:${eventType}`;
+    const { rowId: webhookEventId, alreadyProcessed } = await claimWebhookEvent(
+      supabaseAdmin,
+      eventId,
+      eventType,
+      payload,
+    );
+
+    if (alreadyProcessed) {
+      return new Response(
+        JSON.stringify({ success: true, message: "Event already processed", duplicate: true }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
     const existingUserId = await findUserIdByEmail(supabaseAdmin, customerEmail);
 
     let userId: string;
@@ -138,6 +249,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (error || !data?.user) {
         console.error("kiwify-webhook: failed to create user", error?.message);
+        await supabaseAdmin.from("webhook_events").update({ status: "failed" }).eq("id", webhookEventId);
         return new Response(
           JSON.stringify({ error: "Failed to create user" }),
           { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
@@ -155,6 +267,53 @@ const handler = async (req: Request): Promise<Response> => {
       if (profileError) {
         console.error("kiwify-webhook: profile upsert failed", profileError.message);
       }
+    }
+
+    // Grant: entitlement + transaction. Any failure here marks the event
+    // 'failed' (not 'processed') and returns 500, so Kiwify's retry will
+    // pick it back up — it will not re-create the user or resend welcome
+    // since findUserIdByEmail will find them next time.
+    try {
+      const productId = await resolveProductId(supabaseAdmin, payload.Product?.product_id);
+
+      const { error: entitlementError } = await supabaseAdmin
+        .from("entitlements")
+        .upsert(
+          { user_id: userId, product_id: productId, status: "active", source: "kiwify", external_id: payload.order_id },
+          { onConflict: "user_id,product_id" },
+        );
+      if (entitlementError) throw entitlementError;
+
+      const { error: transactionError } = await supabaseAdmin
+        .from("transactions")
+        .upsert(
+          {
+            provider: "kiwify",
+            external_id: payload.order_id,
+            user_id: userId,
+            product_id: productId,
+            amount: extractAmount(payload),
+            currency: payload.Commissions?.currency || "BRL",
+            status: "paid",
+            type: payload.Subscription ? "subscription" : "purchase",
+            description: payload.Product?.product_name,
+          },
+          { onConflict: "provider,external_id" },
+        );
+      if (transactionError) throw transactionError;
+
+      await supabaseAdmin
+        .from("webhook_events")
+        .update({ status: "processed", processed_at: new Date().toISOString() })
+        .eq("id", webhookEventId);
+    } catch (grantError) {
+      const message = grantError instanceof Error ? grantError.message : "Unknown error";
+      console.error("kiwify-webhook: entitlement grant failed", message);
+      await supabaseAdmin.from("webhook_events").update({ status: "failed" }).eq("id", webhookEventId);
+      return new Response(
+        JSON.stringify({ error: "Failed to grant entitlement" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
     }
 
     // Welcome email only fires for a brand-new account — a replayed webhook
