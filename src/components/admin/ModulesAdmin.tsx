@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getDefaultProductId } from "@/lib/products";
 
 interface Module {
   id: string;
@@ -49,6 +50,7 @@ export function ModulesAdmin() {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      const productId = await getDefaultProductId();
       const { error } = await supabase.from("modules").insert({
         title: data.title,
         slug: data.slug,
@@ -56,6 +58,7 @@ export function ModulesAdmin() {
         order_index: data.order_index,
         is_free: data.is_free,
         cover_image_url: data.cover_image_url || null,
+        product_id: productId,
       });
       if (error) throw error;
     },

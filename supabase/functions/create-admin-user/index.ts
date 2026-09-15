@@ -114,8 +114,32 @@ Deno.serve(async (req) => {
       });
 
     if (profileError) {
-      console.error("Error creating profile:", profileError);
+      console.error("Error creating profile:", profileError.message);
       // Don't fail if profile already exists
+    }
+
+    const { data: defaultProduct } = await supabaseAdmin
+      .from("products")
+      .select("id")
+      .eq("slug", "jornada_unica")
+      .maybeSingle();
+
+    if (defaultProduct?.id) {
+      const { error: entitlementError } = await supabaseAdmin
+        .from("entitlements")
+        .upsert(
+          {
+            user_id: newUser.user.id,
+            product_id: defaultProduct.id,
+            status: "active",
+            source: "admin",
+          },
+          { onConflict: "user_id,product_id" },
+        );
+
+      if (entitlementError) {
+        console.error("Error granting entitlement:", entitlementError.message);
+      }
     }
 
     // If makeAdmin is true, add admin role

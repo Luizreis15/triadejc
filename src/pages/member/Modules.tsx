@@ -88,20 +88,26 @@ export default function Modules() {
 
       {/* Modules List */}
       <section className="space-y-3">
-        {modules.map((module) => {
-          const { progress: moduleProgress, status } = getModuleProgress(module.id);
-          return (
-            <ModuleCard
-              key={module.id}
-              title={module.title}
-              subtitle={module.description || ""}
-              slug={module.slug}
-              progress={moduleProgress}
-              status={status}
-              orderIndex={module.order_index}
-            />
-          );
-        })}
+        {modules.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhum módulo disponível nesta conta. Se você já comprou a Jornada Única, fale com o suporte.
+          </p>
+        ) : (
+          modules.map((module) => {
+            const { progress: moduleProgress, status } = getModuleProgress(module.id);
+            return (
+              <ModuleCard
+                key={module.id}
+                title={module.title}
+                subtitle={module.description || ""}
+                slug={module.slug}
+                progress={moduleProgress}
+                status={status}
+                orderIndex={module.order_index}
+              />
+            );
+          })
+        )}
       </section>
 
       {/* Encouragement */}
