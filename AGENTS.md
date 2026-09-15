@@ -21,7 +21,6 @@ Ingresso: webhook → identidade → e-mail de boas-vindas → (depois) entitlem
 **Pode editar**
 
 - `supabase/functions/kiwify-webhook/**`
-- `supabase/functions/hubla-webhook/**`
 - `supabase/functions/send-welcome-email/**`
 - `supabase/functions/send-abandoned-cart/**`
 - `supabase/functions/_shared/**` (criar)
@@ -40,7 +39,6 @@ Ingresso: webhook → identidade → e-mail de boas-vindas → (depois) entitlem
 **Secrets que o Track A lê (não commitar)**
 
 - `KIWIFY_WEBHOOK_TOKEN` (já existe)
-- `HUBLA_WEBHOOK_SECRET` (novo)
 - `INTERNAL_FUNCTION_SECRET` (novo)
 - `RESEND_API_KEY`
 
@@ -55,7 +53,7 @@ App: auth, rotas, gates, e-mail admin, hook de auth.
 - `supabase/functions/send-auth-email/**`
 - `supabase/functions/create-admin-user/**`
 
-**Não editar:** webhooks Kiwify/Hubla, `send-welcome-email`, `send-abandoned-cart`, `_shared`.
+**Não editar:** `kiwify-webhook`, `send-welcome-email`, `send-abandoned-cart`, `_shared`.
 
 **P0 (agora)**
 

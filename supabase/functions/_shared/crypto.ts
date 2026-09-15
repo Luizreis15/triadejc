@@ -1,4 +1,4 @@
-// Timing-safe HMAC-SHA256 verification shared by Track A webhook functions.
+// Timing-safe HMAC-SHA256 verification used by kiwify-webhook.
 // Uses crypto.subtle.verify (not a manual digest + string compare) so the
 // comparison itself is constant-time — no hand-rolled timing-safe-equal needed.
 
