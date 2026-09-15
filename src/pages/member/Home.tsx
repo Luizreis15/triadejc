@@ -100,26 +100,32 @@ export default function Home() {
       <motion.section className="space-y-4" variants={itemVariants}>
         <h2 className="font-serif text-lg font-semibold text-foreground">Jornada Diária</h2>
         <div className="space-y-3">
-          {modules.slice(0, 3).map((module, i) => {
-            const { progress: moduleProgress, status } = getModuleProgress(module.id);
-            return (
-              <motion.div
-                key={module.id}
-                initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                transition={{ delay: 0.3 + i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <ModuleCard
-                  title={module.title}
-                  subtitle={module.description || ""}
-                  slug={module.slug}
-                  progress={moduleProgress}
-                  status={status}
-                  orderIndex={module.order_index}
-                />
-              </motion.div>
-            );
-          })}
+          {modules.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Os módulos da jornada ainda não aparecem nesta conta. Se você já comprou, fale com o suporte.
+            </p>
+          ) : (
+            modules.slice(0, 3).map((module, i) => {
+              const { progress: moduleProgress, status } = getModuleProgress(module.id);
+              return (
+                <motion.div
+                  key={module.id}
+                  initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  transition={{ delay: 0.3 + i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <ModuleCard
+                    title={module.title}
+                    subtitle={module.description || ""}
+                    slug={module.slug}
+                    progress={moduleProgress}
+                    status={status}
+                    orderIndex={module.order_index}
+                  />
+                </motion.div>
+              );
+            })
+          )}
         </div>
         {modules.length > 3 && (
           <Link to="/membros/app/modulos">
