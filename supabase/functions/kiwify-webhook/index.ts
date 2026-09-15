@@ -39,7 +39,7 @@ interface KiwifyWebhookPayload {
   // Best-effort locations for the charged amount across Kiwify event types.
   charge_amount?: number;
   amount?: number;
-  Commissions?: { charge_amount?: number };
+  Commissions?: { charge_amount?: number | string; currency?: string };
 }
 
 const VALID_EVENTS = [
@@ -132,7 +132,13 @@ async function resolveProductId(admin: SupabaseClient, kiwifyProductId: string |
 }
 
 function extractAmount(payload: KiwifyWebhookPayload): number {
-  const raw = payload.Commissions?.charge_amount ?? payload.charge_amount ?? payload.amount ?? payload.Product?.price;
+  // Kiwify documents Commissions.charge_amount in cents (e.g. 12424 = R$124.24).
+  const fromCommissions = payload.Commissions?.charge_amount;
+  if (fromCommissions != null) {
+    const parsed = typeof fromCommissions === "number" ? fromCommissions : Number(fromCommissions);
+    return Number.isFinite(parsed) ? parsed / 100 : 0;
+  }
+  const raw = payload.charge_amount ?? payload.amount ?? payload.Product?.price;
   const parsed = typeof raw === "number" ? raw : Number(raw);
   return Number.isFinite(parsed) ? parsed : 0;
 }
@@ -287,7 +293,7 @@ const handler = async (req: Request): Promise<Response> => {
             user_id: userId,
             product_id: productId,
             amount: extractAmount(payload),
-            currency: "BRL",
+            currency: payload.Commissions?.currency || "BRL",
             status: "paid",
             type: payload.Subscription ? "subscription" : "purchase",
             description: payload.Product?.product_name,
