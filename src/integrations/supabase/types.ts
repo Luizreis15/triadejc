@@ -238,6 +238,54 @@ export type Database = {
           },
         ]
       }
+      entitlements: {
+        Row: {
+          expires_at: string | null
+          external_id: string | null
+          granted_at: string
+          id: string
+          product_id: string
+          source: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          external_id?: string | null
+          granted_at?: string
+          id?: string
+          product_id: string
+          source?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          external_id?: string | null
+          granted_at?: string
+          id?: string
+          product_id?: string
+          source?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           created_at: string
@@ -594,6 +642,7 @@ export type Database = {
           id: string
           is_free: boolean | null
           order_index: number
+          product_id: string
           slug: string
           title: string
           welcome_video_url: string | null
@@ -605,6 +654,7 @@ export type Database = {
           id?: string
           is_free?: boolean | null
           order_index: number
+          product_id: string
           slug: string
           title: string
           welcome_video_url?: string | null
@@ -616,11 +666,20 @@ export type Database = {
           id?: string
           is_free?: boolean | null
           order_index?: number
+          product_id?: string
           slug?: string
           title?: string
           welcome_video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "modules_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notebook_entries: {
         Row: {
@@ -732,6 +791,33 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          created_at: string
+          id: string
+          kiwify_product_id: string | null
+          name: string
+          slug: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kiwify_product_id?: string | null
+          name: string
+          slug: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kiwify_product_id?: string | null
+          name?: string
+          slug?: string
+          status?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -824,6 +910,8 @@ export type Database = {
           external_id: string | null
           id: string
           payment_method: string | null
+          product_id: string | null
+          provider: string | null
           status: string | null
           type: string
           updated_at: string | null
@@ -837,6 +925,8 @@ export type Database = {
           external_id?: string | null
           id?: string
           payment_method?: string | null
+          product_id?: string | null
+          provider?: string | null
           status?: string | null
           type: string
           updated_at?: string | null
@@ -850,12 +940,22 @@ export type Database = {
           external_id?: string | null
           id?: string
           payment_method?: string | null
+          product_id?: string | null
+          provider?: string | null
           status?: string | null
           type?: string
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_favorite_confessions: {
         Row: {
@@ -976,16 +1076,65 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_events: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_type: string | null
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          provider: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          provider?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          provider?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_read_module: {
+        Args: { _module_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_any_entitlement: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      has_entitlement: {
+        Args: { _product_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_active_member: {
+        Args: { _user_id: string }
         Returns: boolean
       }
     }
