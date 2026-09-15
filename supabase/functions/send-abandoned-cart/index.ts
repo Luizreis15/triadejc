@@ -2,11 +2,19 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const INTERNAL_FUNCTION_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 interface Lead {
   id: string;
@@ -198,6 +206,16 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Fail-closed: internal/cron-only endpoint, never callable from the public internet.
+  const providedSecret = req.headers.get("x-internal-secret");
+  if (!INTERNAL_FUNCTION_SECRET || !providedSecret || !timingSafeEqual(providedSecret, INTERNAL_FUNCTION_SECRET)) {
+    console.error("send-abandoned-cart: rejected, missing or invalid x-internal-secret");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
+    );
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -251,7 +269,6 @@ const handler = async (req: Request): Promise<Response> => {
     for (const lead of leads || []) {
       // Skip if lead already converted to customer
       if (customerEmails.has(lead.email?.toLowerCase())) {
-        console.log(`Skipping ${lead.email} - already a customer`);
         continue;
       }
 
@@ -259,14 +276,12 @@ const handler = async (req: Request): Promise<Response> => {
       const emailType = determineEmailType(hoursSinceCreation);
 
       if (!emailType) {
-        console.log(`Skipping ${lead.email} - too recent (${hoursSinceCreation.toFixed(1)}h)`);
         continue;
       }
 
       // Check if this specific email type was already sent
       const leadSentEmails = sentEmailsMap.get(lead.id) || new Set();
       if (leadSentEmails.has(emailType)) {
-        console.log(`Skipping ${lead.email} - ${emailType} already sent`);
         continue;
       }
 
@@ -285,8 +300,6 @@ const handler = async (req: Request): Promise<Response> => {
       const firstName = lead.name?.split(" ")[0] || "Amiga";
 
       try {
-        console.log(`Sending ${emailType} to ${lead.email}`);
-        
         const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -306,8 +319,6 @@ const handler = async (req: Request): Promise<Response> => {
           throw new Error(`Resend API error: ${errorData}`);
         }
 
-        console.log("Email sent successfully");
-
         // Log the sent email
         const { error: logError } = await supabase
           .from("abandoned_cart_emails")
@@ -317,14 +328,15 @@ const handler = async (req: Request): Promise<Response> => {
           });
 
         if (logError) {
-          console.error("Error logging email:", logError);
-          errors.push(`Failed to log email for ${lead.email}: ${logError.message}`);
+          console.error("send-abandoned-cart: failed to log sent email", lead.id, logError.message);
+          errors.push(`Failed to log email for lead ${lead.id}: ${logError.message}`);
         } else {
           emailsSent++;
         }
-      } catch (emailError: any) {
-        console.error(`Error sending email to ${lead.email}:`, emailError);
-        errors.push(`Failed to send to ${lead.email}: ${emailError.message}`);
+      } catch (emailError) {
+        const message = emailError instanceof Error ? emailError.message : "Unknown error";
+        console.error("send-abandoned-cart: failed to send email", lead.id, message);
+        errors.push(`Failed to send to lead ${lead.id}: ${message}`);
       }
     }
 

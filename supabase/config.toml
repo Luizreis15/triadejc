@@ -1,10 +1,13 @@
 project_id = "spxxlspesoybioowvjmb"
 
-[functions.create-admin-user]
-verify_jwt = false
+# JWT no gateway: só functions chamadas pelo browser com sessão de admin.
+# Webhooks, hook de Auth e internas usam HMAC/secret no handler.
 
-[functions.hubla-webhook]
-verify_jwt = false
+[functions.create-admin-user]
+verify_jwt = true
+
+[functions.send-campaign]
+verify_jwt = true
 
 [functions.kiwify-webhook]
 verify_jwt = false
@@ -13,9 +16,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-auth-email]
-verify_jwt = false
-
-[functions.send-campaign]
 verify_jwt = false
 
 [functions.send-welcome-email]

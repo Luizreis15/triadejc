@@ -20,7 +20,7 @@ Site institucional, páginas de venda e área de membros de Jordana Cantarelli, 
 ## Backend (Supabase)
 
 - Schema e RLS versionados em `supabase/migrations/`
-- Edge Functions em `supabase/functions/`: criação de usuários admin, e-mails transacionais (Resend), webhooks de compra (Kiwify e Hubla), campanhas de e-mail e recuperação de carrinho abandonado
+- Edge Functions em `supabase/functions/`: criação de usuários admin, e-mails transacionais (Resend), webhook de compra (Kiwify), campanhas de e-mail e recuperação de carrinho abandonado
 
 ## Development
 

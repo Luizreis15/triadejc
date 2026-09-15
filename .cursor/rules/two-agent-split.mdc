@@ -1,0 +1,13 @@
+---
+description: Divisão de dois agentes — este chat é Track B + owner
+alwaysApply: true
+---
+
+# Dois agentes
+
+Este agente é o **owner** e o implementador do **Track B** (`agent/cursor-access`). Claude Code é Track A. Ler `AGENTS.md`.
+
+- Não editar paths do Track A: `kiwify-webhook`, `send-welcome-email`, `send-abandoned-cart`, `supabase/functions/_shared`.
+- Freeze sem o usuário pedir: `supabase/config.toml`, `package.json`, `types.ts`, `supabase/migrations/**`.
+- Fail-closed. Sem senha padrão. Sem signup público.
+- Se o Track A precisar de um arquivo freeze, anotar o pedido no PR/chat; não “adiantar” o arquivo do outro.

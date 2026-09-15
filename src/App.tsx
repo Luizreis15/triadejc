@@ -18,7 +18,6 @@ import LinksPage from "./pages/LinksPage";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
-import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
 // Admin pages
@@ -53,7 +52,7 @@ const App = () => (
             
             {/* Member authentication */}
             <Route path="/membros" element={<Login />} />
-            <Route path="/membros/signup" element={<Signup />} />
+            <Route path="/membros/signup" element={<Navigate to="/membros" replace />} />
             <Route path="/membros/reset-password" element={<ResetPassword />} />
             
             {/* Protected member routes */}
