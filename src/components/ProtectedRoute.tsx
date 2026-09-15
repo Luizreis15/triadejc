@@ -1,27 +1,56 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { AccessDisabled } from "@/components/AccessDisabled";
+import { useMemberAccess } from "@/hooks/useMemberAccess";
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-muted-foreground text-sm">Carregando...</p>
+      </div>
+    </div>
+  );
+}
 
-  if (loading) {
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { user, authLoading, accessLoading, isActive, accessError, refetch } =
+    useMemberAccess();
+
+  if (authLoading || accessLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <Navigate to="/membros" replace />;
+  }
+
+  if (accessError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">Carregando...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="max-w-md text-center space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Não foi possível confirmar o status da sua conta. Tente de novo.
+          </p>
+          <button
+            type="button"
+            className="text-sm underline text-primary"
+            onClick={() => refetch()}
+          >
+            Tentar novamente
+          </button>
         </div>
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/membros" replace />;
+  if (!isActive) {
+    return <AccessDisabled />;
   }
 
   return <>{children}</>;

@@ -167,14 +167,10 @@ export default function Login() {
               >
                 Esqueci minha senha
               </a>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => navigate("/membros/signup")}
-              >
-                Criar conta
-              </Button>
+              <p className="text-xs text-muted-foreground pt-2">
+                O acesso é liberado após a compra. Se você já comprou, entre com
+                o e-mail da compra.
+              </p>
             </div>
           </div>
         </motion.div>
