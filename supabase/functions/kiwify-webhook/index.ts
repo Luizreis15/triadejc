@@ -1,17 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { encode as encodeHex } from "https://deno.land/std@0.168.0/encoding/hex.ts";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { verifyHmacSha256 } from "../_shared/crypto.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const KIWIFY_WEBHOOK_TOKEN = Deno.env.get("KIWIFY_WEBHOOK_TOKEN")!;
+const KIWIFY_WEBHOOK_TOKEN = Deno.env.get("KIWIFY_WEBHOOK_TOKEN");
+const INTERNAL_FUNCTION_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-kiwify-signature",
 };
-
-const DEFAULT_PASSWORD = "Mudar@123";
 
 // Kiwify webhook payload structure
 interface KiwifyWebhookPayload {
@@ -34,203 +33,173 @@ interface KiwifyWebhookPayload {
   };
 }
 
-// Verify Kiwify signature using Web Crypto API
-async function verifySignature(payload: string, signature: string | null): Promise<boolean> {
-  if (!signature || !KIWIFY_WEBHOOK_TOKEN) {
-    console.log("Missing signature or token");
-    return false;
+const VALID_EVENTS = [
+  "order_approved",
+  "order_paid",
+  "paid",
+  "subscription_created",
+  "subscription_renewed",
+  "subscription_reactivated",
+];
+
+// Paginates through auth.admin.listUsers() — never trust page 1 alone.
+async function findUserIdByEmail(admin: SupabaseClient, email: string): Promise<string | null> {
+  const perPage = 1000;
+  const target = email.toLowerCase();
+  for (let page = 1; page <= 50; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    const match = data.users.find((u) => u.email?.toLowerCase() === target);
+    if (match) return match.id;
+    if (data.users.length < perPage) return null;
   }
-  
-  try {
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(KIWIFY_WEBHOOK_TOKEN),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"]
-    );
-    
-    const signatureBuffer = await crypto.subtle.sign(
-      "HMAC",
-      key,
-      encoder.encode(payload)
-    );
-    
-    const hexSignature = new TextDecoder().decode(encodeHex(new Uint8Array(signatureBuffer)));
-    return signature === hexSignature;
-  } catch (error) {
-    console.error("Error verifying signature:", error);
-    return false;
-  }
+  return null;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("kiwify-webhook function called");
-  console.log("Request method:", req.method);
-
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Only accept POST requests
   if (req.method !== "POST") {
-    console.error("Invalid method:", req.method);
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders } },
     );
   }
 
   try {
     const rawBody = await req.text();
     const signature = req.headers.get("x-kiwify-signature");
-    
-    console.log("Received signature:", signature);
-    
-    // Verify signature (optional - can be disabled for testing)
-    if (signature && !(await verifySignature(rawBody, signature))) {
-      console.error("Invalid signature");
+
+    // Fail-closed: missing header, missing secret, or bad signature -> 401.
+    const signatureValid = await verifyHmacSha256(rawBody, signature, KIWIFY_WEBHOOK_TOKEN);
+    if (!signatureValid) {
+      console.error("kiwify-webhook: rejected, missing or invalid signature");
       return new Response(
         JSON.stringify({ error: "Invalid signature" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
 
-    const payload: KiwifyWebhookPayload = JSON.parse(rawBody);
-    console.log("Received webhook payload:", JSON.stringify(payload, null, 2));
+    let payload: KiwifyWebhookPayload;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON body" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
 
     const eventType = payload.webhook_event_type || payload.order_status;
     const customerEmail = payload.Customer?.email;
     const customerName = payload.Customer?.full_name || payload.Customer?.first_name || "";
 
     if (!customerEmail) {
-      console.error("Customer email is required. Payload structure:", JSON.stringify(payload, null, 2));
+      console.error("kiwify-webhook: payload missing Customer.email");
       return new Response(
         JSON.stringify({ error: "Customer email is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
 
-    // Process relevant Kiwify events
-    const validEvents = [
-      "order_approved",
-      "order_paid",
-      "paid",
-      "subscription_created",
-      "subscription_renewed",
-      "subscription_reactivated"
-    ];
-    
-    const isValidEvent = validEvents.includes(eventType) || payload.order_status === "paid";
-    
+    const isValidEvent = VALID_EVENTS.includes(eventType) || payload.order_status === "paid";
     if (!isValidEvent) {
-      console.log(`Ignoring event type: ${eventType}`);
+      console.log(`kiwify-webhook: ignored event type=${eventType}`);
       return new Response(
         JSON.stringify({ message: `Event ${eventType} ignored` }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
       );
     }
 
-    console.log(`Processing ${eventType} for ${customerEmail} (${customerName})`);
-
-    // Create Supabase admin client
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
+      auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // Check if user already exists
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find(u => u.email === customerEmail);
+    const existingUserId = await findUserIdByEmail(supabaseAdmin, customerEmail);
 
     let userId: string;
     let isNewUser = false;
+    let actionLink: string | undefined;
 
-    if (existingUser) {
-      console.log(`User already exists: ${customerEmail}`);
-      userId = existingUser.id;
+    if (existingUserId) {
+      userId = existingUserId;
     } else {
-      // Create new user with default password
-      console.log(`Creating new user: ${customerEmail}`);
-      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      // Creates the user and returns a one-time action_link — no password ever set or transmitted.
+      const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+        type: "invite",
         email: customerEmail,
-        password: DEFAULT_PASSWORD,
-        email_confirm: true,
-        user_metadata: {
-          name: customerName,
+        options: {
+          data: { name: customerName },
+          redirectTo: "https://www.jordanacantarelli.com.br/membros/reset-password",
         },
       });
 
-      if (authError) {
-        console.error("Error creating user:", authError);
+      if (error || !data?.user) {
+        console.error("kiwify-webhook: failed to create user", error?.message);
         return new Response(
-          JSON.stringify({ error: `Failed to create user: ${authError.message}` }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+          JSON.stringify({ error: "Failed to create user" }),
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
         );
       }
 
-      userId = authUser.user.id;
+      userId = data.user.id;
       isNewUser = true;
-      console.log(`User created successfully: ${userId}`);
+      actionLink = data.properties?.action_link;
 
-      // Update profile with name from Kiwify
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
-        .upsert({
-          id: userId,
-          email: customerEmail,
-          name: customerName,
-        }, { onConflict: "id" });
+        .upsert({ id: userId, email: customerEmail, name: customerName }, { onConflict: "id" });
 
       if (profileError) {
-        console.error("Error updating profile:", profileError);
+        console.error("kiwify-webhook: profile upsert failed", profileError.message);
       }
     }
 
-    // Send welcome email with credentials
-    console.log("Sending welcome email...");
-    const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, {
-      method: "POST",
-      headers: {
+    // Welcome email only fires for a brand-new account — a replayed webhook
+    // for an existing customer (e.g. subscription_renewed) never resends it.
+    if (isNewUser && actionLink) {
+      const welcomeHeaders: Record<string, string> = {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      },
-      body: JSON.stringify({
-        name: customerName || customerEmail.split("@")[0],
-        email: customerEmail,
-        password: DEFAULT_PASSWORD,
-        loginUrl: "https://www.jordanacantarelli.com.br/membros",
-      }),
-    });
+      };
+      if (INTERNAL_FUNCTION_SECRET) {
+        welcomeHeaders["x-internal-secret"] = INTERNAL_FUNCTION_SECRET;
+      }
 
-    if (!emailResponse.ok) {
-      const emailError = await emailResponse.text();
-      console.error("Error sending welcome email:", emailError);
-    } else {
-      console.log("Welcome email sent successfully");
+      const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, {
+        method: "POST",
+        headers: welcomeHeaders,
+        body: JSON.stringify({
+          name: customerName || customerEmail.split("@")[0],
+          email: customerEmail,
+          actionLink,
+          loginUrl: "https://www.jordanacantarelli.com.br/membros",
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error("kiwify-webhook: welcome email request failed", emailResponse.status);
+      }
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: isNewUser ? "User created and email sent" : "User already exists, email sent",
+      JSON.stringify({
+        success: true,
+        message: isNewUser ? "User created and invite sent" : "User already exists, no email sent",
         userId,
-        email: customerEmail,
-        name: customerName,
-        source: "kiwify"
+        isNewUser,
+        source: "kiwify",
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
     );
-
-  } catch (error: any) {
-    console.error("Error in kiwify-webhook function:", error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("kiwify-webhook: unhandled error", message);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      JSON.stringify({ error: "Internal error" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
     );
   }
 };
