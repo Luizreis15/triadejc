@@ -1,12 +1,26 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.jordanacantarelli.com.br",
+  "https://jordanacantarelli.com.br",
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+];
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    Vary: "Origin",
+  };
+}
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
+  const corsHeaders = corsHeadersFor(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -124,12 +138,18 @@ Deno.serve(async (req) => {
     let emailSent = false;
     try {
       console.log(`Sending welcome email to ${email}`);
+      const internalSecret = Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "";
+      const welcomeHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseServiceRoleKey}`,
+      };
+      if (internalSecret) {
+        welcomeHeaders["x-internal-secret"] = internalSecret;
+      }
+
       const welcomeResponse = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseServiceRoleKey}`,
-        },
+        headers: welcomeHeaders,
         body: JSON.stringify({
           name: name || email.split("@")[0],
           email,

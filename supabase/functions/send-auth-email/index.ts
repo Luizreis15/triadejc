@@ -1,11 +1,64 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const ALLOWED_ORIGINS = [
+  "https://www.jordanacantarelli.com.br",
+  "https://jordanacantarelli.com.br",
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+];
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-send-auth-hook-secret, webhook-id, webhook-timestamp, webhook-signature",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    Vary: "Origin",
+  };
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let out = 0;
+  for (let i = 0; i < a.length; i++) {
+    out |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return out === 0;
+}
+
+function hookSecret(): string | null {
+  return Deno.env.get("SEND_AUTH_HOOK_SECRET") ?? Deno.env.get("SEND_EMAIL_HOOK_SECRET") ?? null;
+}
+
+function authorizeAuthHook(req: Request, rawBody: string): boolean {
+  const secret = hookSecret();
+  if (!secret) return false;
+
+  const auth = req.headers.get("Authorization") ?? "";
+  const bearer = auth.replace(/^Bearer\s+/i, "").trim();
+  const headerSecret = req.headers.get("x-send-auth-hook-secret") ?? "";
+
+  if (bearer && timingSafeEqual(bearer, secret)) return true;
+  if (headerSecret && timingSafeEqual(headerSecret, secret)) return true;
+
+  if (secret.includes("whsec_")) {
+    try {
+      const key = secret.replace(/^v1,/, "").replace(/^whsec_/, "");
+      const wh = new Webhook(key);
+      wh.verify(rawBody, Object.fromEntries(req.headers));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
 
 interface AuthEmailPayload {
   user: {
@@ -162,21 +215,34 @@ const getEmailContent = (type: string, email: string, name: string, actionUrl: s
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("send-auth-email function called");
+  const corsHeaders = corsHeadersFor(req);
 
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  const rawBody = await req.text();
+  if (!authorizeAuthHook(req, rawBody)) {
+    return new Response(JSON.stringify({ error: "Não autorizado" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
   try {
-    const payload: AuthEmailPayload = await req.json();
-    
-    console.log("Auth email payload received:", JSON.stringify({
-      email: payload.user?.email,
+    const payload: AuthEmailPayload = JSON.parse(rawBody);
+
+    console.log("Auth email received", {
       type: payload.email_data?.email_action_type,
-      redirect_to: payload.email_data?.redirect_to
-    }));
+      hasEmail: Boolean(payload.user?.email),
+    });
 
     const { user, email_data } = payload;
     
@@ -247,10 +313,11 @@ const handler = async (req: Request): Promise<Response> => {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
-  } catch (error: any) {
-    console.error("Error in send-auth-email function:", error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error in send-auth-email function:", message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
