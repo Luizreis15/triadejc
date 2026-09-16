@@ -56,6 +56,15 @@ export async function hasPendingEmail(
   return !!data;
 }
 
+interface ClaimEmailOutboxRow {
+  id: string;
+  kind: string;
+  to_email: string;
+  payload: unknown;
+  status: string;
+  attempts: number;
+}
+
 export async function claimPendingEmails(
   admin: SupabaseClient,
   kind: string,
@@ -64,7 +73,7 @@ export async function claimPendingEmails(
   const { data, error } = await admin.rpc("claim_email_outbox", { _limit: limit, _kind: kind });
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
+  return ((data ?? []) as ClaimEmailOutboxRow[]).map((row) => ({
     id: row.id,
     kind: row.kind,
     recipient_email: row.to_email,
