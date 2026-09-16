@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { SignedFileLink } from "@/components/member/SignedFileLink";
+import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 
 export default function Library() {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ export default function Library() {
   });
 
   // Fetch library items
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["library-items"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -98,6 +99,16 @@ export default function Library() {
   const filteredPdfs = selectedModule
     ? pdfs.filter(pdf => pdf.modules?.slug === selectedModule)
     : pdfs;
+
+  if (isError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetch();
+        }}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -227,15 +238,10 @@ export default function Library() {
 
       {/* Empty State */}
       {filteredPdfs.length === 0 && items.length === 0 && (
-        <div className="text-center py-12 bg-muted/30 rounded-2xl">
-          <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-          <p className="text-muted-foreground">
-            A biblioteca está sendo preparada com carinho.
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Volte em breve!
-          </p>
-        </div>
+        <MemberEmptyState
+          title="Biblioteca em preparação"
+          body="Os materiais de apoio ainda não estão nesta conta. Volte em breve."
+        />
       )}
     </div>
   );

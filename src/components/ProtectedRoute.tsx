@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { AccessDisabled } from "@/components/AccessDisabled";
+import { MemberErrorState } from "@/components/member/MemberState";
 import { useMemberAccess } from "@/hooks/useMemberAccess";
 
 interface ProtectedRouteProps {
@@ -33,17 +34,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (accessError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
-        <div className="max-w-md text-center space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Não foi possível confirmar o status da sua conta. Tente de novo.
-          </p>
-          <button
-            type="button"
-            className="text-sm underline text-primary"
-            onClick={() => refetch()}
-          >
-            Tentar novamente
-          </button>
+        <div className="max-w-md w-full">
+          <MemberErrorState
+            message="Não foi possível confirmar o status da sua conta."
+            onRetry={() => {
+              void refetch();
+            }}
+          />
         </div>
       </div>
     );

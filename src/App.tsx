@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
+import { MemberErrorState } from "@/components/member/MemberState";
 
 // Public pages
 import SalesPage from "./pages/SalesPage";
@@ -28,9 +30,25 @@ import AdminProfile from "./pages/AdminProfile";
 import { AppLayout } from "@/components/member/AppLayout";
 import { Home, Modules, ModuleDetail, DayView, ReadingView, Notebook, Library, Profile, JourneyCompletion, ProductsShowcase } from "./pages/member";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
+  <Sentry.ErrorBoundary
+    fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="max-w-md w-full">
+          <MemberErrorState />
+        </div>
+      </div>
+    }
+  >
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -83,6 +101,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
+  </Sentry.ErrorBoundary>
 );
 
 export default App;

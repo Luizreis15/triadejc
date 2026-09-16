@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar, ModuleCard, CalmModal } from "@/components/member";
+import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const containerVariants = {
   hidden: {},
@@ -25,7 +27,7 @@ export default function Home() {
   const { user } = useAuth();
   const [calmModalOpen, setCalmModalOpen] = useState(false);
 
-  const { data: modules = [] } = useQuery({
+  const { data: modules = [], isLoading: modulesLoading, isError: modulesError, refetch: refetchModules } = useQuery({
     queryKey: ["modules"],
     queryFn: async () => {
       const { data, error } = await supabase.from("modules").select("*").order("order_index");
@@ -72,6 +74,27 @@ export default function Home() {
     return p.status === "in_progress";
   }) || modules[0];
 
+  if (modulesLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="aspect-video w-full rounded-2xl" />
+        <Skeleton className="h-8 w-64 mx-auto" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (modulesError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetchModules();
+        }}
+      />
+    );
+  }
+
   return (
     <motion.div
       className="space-y-8"
@@ -101,9 +124,10 @@ export default function Home() {
         <h2 className="font-serif text-lg font-semibold text-foreground">Jornada Diária</h2>
         <div className="space-y-3">
           {modules.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Os módulos da jornada ainda não aparecem nesta conta. Se você já comprou, fale com o suporte.
-            </p>
+            <MemberEmptyState
+              title="Jornada ainda sem módulos"
+              body="Os módulos ainda não aparecem nesta conta. Se você já comprou, fale com o suporte."
+            />
           ) : (
             modules.slice(0, 3).map((module, i) => {
               const { progress: moduleProgress, status } = getModuleProgress(module.id);
