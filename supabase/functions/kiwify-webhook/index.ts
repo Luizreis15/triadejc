@@ -17,7 +17,7 @@ const corsHeaders = {
 };
 
 // Kiwify webhook payload structure
-interface KiwifyWebhookPayload {
+export interface KiwifyWebhookPayload {
   order_id: string;
   order_status: string;
   webhook_event_type?: string;
@@ -55,7 +55,7 @@ const VALID_EVENTS = [
 // Reserves (or finds) the webhook_events row for this event, atomically enough
 // to survive retries: a UNIQUE(provider, event_id) collision on insert is
 // treated as "someone already has this", not an error.
-async function claimWebhookEvent(
+export async function claimWebhookEvent(
   admin: SupabaseClient,
   eventId: string,
   eventType: string,
@@ -95,7 +95,7 @@ async function claimWebhookEvent(
   return { rowId: inserted.id, alreadyProcessed: false };
 }
 
-function extractAmount(payload: KiwifyWebhookPayload): number {
+export function extractAmount(payload: KiwifyWebhookPayload): number {
   const fromCommissions = payload.Commissions?.charge_amount;
   if (fromCommissions != null) {
     const parsed = typeof fromCommissions === "number" ? fromCommissions : Number(fromCommissions);
@@ -121,7 +121,7 @@ function triggerWelcomeDrain(): void {
   });
 }
 
-const handler = async (req: Request): Promise<Response> => {
+export const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -285,4 +285,8 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+// Guarded so importing this module for tests doesn't start a real listener —
+// Supabase's runtime executes this file directly, where import.meta.main is true.
+if (import.meta.main) {
+  serve(handler);
+}
