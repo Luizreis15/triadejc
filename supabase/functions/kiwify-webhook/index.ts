@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { verifyHmacSha256 } from "../_shared/crypto.ts";
+import { verifyKiwifyRequest } from "../_shared/crypto.ts";
 import { ensureUser } from "../_shared/users.ts";
 import { resolveProductId } from "../_shared/products.ts";
 import { grantEntitlementAndTransaction } from "../_shared/entitlements.ts";
@@ -135,12 +135,20 @@ export const handler = async (req: Request): Promise<Response> => {
 
   try {
     const rawBody = await req.text();
-    const signature = req.headers.get("x-kiwify-signature");
 
-    // Fail-closed: missing header, missing secret, or bad signature -> 401.
-    const signatureValid = await verifyHmacSha256(rawBody, signature, KIWIFY_WEBHOOK_TOKEN);
+    // Fail-closed. Kiwify checkout signs HMAC-SHA1 as ?signature=; tests use x-kiwify-signature SHA-256.
+    const signatureValid = await verifyKiwifyRequest(req, rawBody, KIWIFY_WEBHOOK_TOKEN);
     if (!signatureValid) {
-      console.error("kiwify-webhook: rejected, missing or invalid signature");
+      let hasQuery = false;
+      try {
+        hasQuery = new URL(req.url).searchParams.has("signature");
+      } catch {
+        hasQuery = false;
+      }
+      console.error(
+        "kiwify-webhook: rejected, missing or invalid signature",
+        `header=${Boolean(req.headers.get("x-kiwify-signature"))} query=${hasQuery}`,
+      );
       return new Response(
         JSON.stringify({ error: "Invalid signature" }),
         { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
