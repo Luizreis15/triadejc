@@ -1,32 +1,15 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-// Requires the `email_outbox` table — NOT YET MIGRATED as of P2. Requested
-// from the owner; see PR description. Proposed shape:
-//
-//   create table public.email_outbox (
-//     id uuid primary key default gen_random_uuid(),
-//     kind text not null,                 -- 'welcome' | 'abandoned_cart_reminder_1h' | ...
-//     recipient_email text not null,
-//     payload jsonb not null default '{}',
-//     status text not null default 'pending' check (status in ('pending','sent','failed')),
-//     attempts int not null default 0,
-//     last_error text,
-//     created_at timestamptz not null default now(),
-//     sent_at timestamptz
-//   );
-//   create index email_outbox_pending_idx on public.email_outbox (kind, status, created_at)
-//     where status = 'pending';
-//
-// Until that migration lands, every function in this module will fail with
-// a Postgres "relation does not exist" error — callers must not treat that
-// as fatal to their own critical path (see kiwify-webhook's use).
+// Live schema (owner migration 20260915233000):
+//   to_email, status IN ('queued','sent','failed'), idempotency_key UNIQUE,
+//   next_attempt_at, rpc claim_email_outbox(_limit, _kind).
 
 export interface OutboxRow {
   id: string;
   kind: string;
   recipient_email: string;
   payload: Record<string, unknown>;
-  status: "pending" | "sent" | "failed";
+  status: "queued" | "sent" | "failed";
   attempts: number;
 }
 
@@ -34,21 +17,28 @@ export interface EnqueueEmailParams {
   kind: string;
   recipientEmail: string;
   payload: Record<string, unknown>;
+  idempotencyKey?: string;
+}
+
+function asPayload(value: unknown): Record<string, unknown> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return {};
 }
 
 export async function enqueueEmail(admin: SupabaseClient, params: EnqueueEmailParams): Promise<void> {
   const { error } = await admin.from("email_outbox").insert({
     kind: params.kind,
-    recipient_email: params.recipientEmail,
+    to_email: params.recipientEmail,
     payload: params.payload,
-    status: "pending",
+    status: "queued",
+    idempotency_key: params.idempotencyKey ?? `${params.kind}:${params.recipientEmail}`,
   });
+  if (error?.code === "23505") return;
   if (error) throw error;
 }
 
-// True if a pending (not yet resolved) row already exists for this
-// kind+recipient — use before enqueueing to avoid piling up duplicate
-// attempts for the same recipient across repeated invocations (e.g. cron).
 export async function hasPendingEmail(
   admin: SupabaseClient,
   kind: string,
@@ -58,8 +48,8 @@ export async function hasPendingEmail(
     .from("email_outbox")
     .select("id")
     .eq("kind", kind)
-    .eq("recipient_email", recipientEmail)
-    .eq("status", "pending")
+    .eq("to_email", recipientEmail)
+    .eq("status", "queued")
     .limit(1)
     .maybeSingle();
   if (error) throw error;
@@ -71,15 +61,17 @@ export async function claimPendingEmails(
   kind: string,
   limit = 20,
 ): Promise<OutboxRow[]> {
-  const { data, error } = await admin
-    .from("email_outbox")
-    .select("id, kind, recipient_email, payload, status, attempts")
-    .eq("kind", kind)
-    .eq("status", "pending")
-    .order("created_at", { ascending: true })
-    .limit(limit);
+  const { data, error } = await admin.rpc("claim_email_outbox", { _limit: limit, _kind: kind });
   if (error) throw error;
-  return data ?? [];
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    kind: row.kind,
+    recipient_email: row.to_email,
+    payload: asPayload(row.payload),
+    status: row.status as OutboxRow["status"],
+    attempts: row.attempts,
+  }));
 }
 
 export async function markEmailSent(admin: SupabaseClient, id: string): Promise<void> {
@@ -87,24 +79,27 @@ export async function markEmailSent(admin: SupabaseClient, id: string): Promise<
     .from("email_outbox")
     .update({ status: "sent", sent_at: new Date().toISOString() })
     .eq("id", id);
-  if (error) console.error("_shared/outbox: failed to mark sent", id, error.message);
+  if (error) console.error("_shared/outbox: failed to mark sent", error.message);
 }
 
-const MAX_ATTEMPTS = 5;
+const BACKOFF_SECONDS = [3600, 86400, 259200];
 
-// Failure sets status back to 'pending' so the next run retries, unless
-// attempts have exhausted MAX_ATTEMPTS — then it becomes terminal 'failed'.
 export async function markEmailFailed(
   admin: SupabaseClient,
   id: string,
   previousAttempts: number,
   errorMessage: string,
 ): Promise<void> {
-  const attempts = previousAttempts + 1;
-  const status = attempts >= MAX_ATTEMPTS ? "failed" : "pending";
+  const delay = BACKOFF_SECONDS[Math.min(Math.max(previousAttempts - 1, 0), BACKOFF_SECONDS.length - 1)];
+  const nextAttemptAt = new Date(Date.now() + delay * 1000).toISOString();
+  const status = previousAttempts >= 8 ? "failed" : "queued";
   const { error } = await admin
     .from("email_outbox")
-    .update({ status, attempts, last_error: errorMessage })
+    .update({
+      status,
+      last_error: errorMessage,
+      next_attempt_at: nextAttemptAt,
+    })
     .eq("id", id);
-  if (error) console.error("_shared/outbox: failed to mark failed", id, error.message);
+  if (error) console.error("_shared/outbox: failed to mark failed", error.message);
 }

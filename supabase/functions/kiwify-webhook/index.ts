@@ -96,7 +96,12 @@ async function claimWebhookEvent(
 }
 
 function extractAmount(payload: KiwifyWebhookPayload): number {
-  const raw = payload.Commissions?.charge_amount ?? payload.charge_amount ?? payload.amount ?? payload.Product?.price;
+  const fromCommissions = payload.Commissions?.charge_amount;
+  if (fromCommissions != null) {
+    const parsed = typeof fromCommissions === "number" ? fromCommissions : Number(fromCommissions);
+    return Number.isFinite(parsed) ? parsed / 100 : 0;
+  }
+  const raw = payload.charge_amount ?? payload.amount ?? payload.Product?.price;
   const parsed = typeof raw === "number" ? raw : Number(raw);
   return Number.isFinite(parsed) ? parsed : 0;
 }
@@ -218,6 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
         await enqueueEmail(supabaseAdmin, {
           kind: "welcome",
           recipientEmail: customerEmail,
+          idempotencyKey: `welcome:${userId}`,
           payload: {
             name: customerName || customerEmail.split("@")[0],
             actionLink,
@@ -226,8 +232,6 @@ const handler = async (req: Request): Promise<Response> => {
         });
         triggerWelcomeDrain();
       } catch (outboxError) {
-        // email_outbox may not be migrated yet — never fail the webhook (the
-        // user + entitlement grant below are the critical path) for this.
         const message = outboxError instanceof Error ? outboxError.message : "unknown error";
         console.error("kiwify-webhook: welcome enqueue failed", message);
       }

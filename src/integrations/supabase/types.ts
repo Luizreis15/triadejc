@@ -1199,7 +1199,7 @@ export type Database = {
         Returns: boolean
       }
       claim_email_outbox: {
-        Args: { _limit?: number }
+        Args: { _kind?: string; _limit?: number }
         Returns: {
           attempts: number
           created_at: string
