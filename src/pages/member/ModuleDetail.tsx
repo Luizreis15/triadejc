@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
 import { useModuleDays } from "@/hooks/useModuleDays";
 import { SignedFileLink } from "@/components/member/SignedFileLink";
+import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 import { toast } from "@/hooks/use-toast";
 import { useRef } from "react";
 import { useQuery as useRQQuery } from "@tanstack/react-query";
@@ -45,7 +46,7 @@ export default function ModuleDetail() {
   const journeyRef = useRef<HTMLDivElement>(null);
 
   // Fetch module
-  const { data: module, isLoading: moduleLoading } = useQuery({
+  const { data: module, isLoading: moduleLoading, isError: moduleError, refetch: refetchModule } = useQuery({
     queryKey: ["module", slug],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -146,6 +147,16 @@ export default function ModuleDetail() {
     }
   };
 
+  if (moduleError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetchModule();
+        }}
+      />
+    );
+  }
+
   if (moduleLoading) {
     return (
       <div className="space-y-6">
@@ -158,11 +169,16 @@ export default function ModuleDetail() {
 
   if (!module) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Este módulo não está disponível para a sua conta.</p>
-        <Link to="/membros/app/modulos">
-          <Button variant="ghost" className="mt-4">Voltar para módulos</Button>
-        </Link>
+      <div className="space-y-4">
+        <MemberEmptyState
+          title="Módulo indisponível"
+          body="Este módulo não está disponível para a sua conta."
+        />
+        <div className="text-center">
+          <Link to="/membros/app/modulos">
+            <Button variant="ghost">Voltar para módulos</Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -550,14 +566,10 @@ export default function ModuleDetail() {
 
       {/* Empty State */}
       {cards.length === 0 && pdfs.length === 0 && moduleDays.length === 0 && (
-        <div className="text-center py-8 bg-muted/30 rounded-2xl">
-          <p className="text-muted-foreground">
-            O conteúdo deste módulo está sendo preparado com carinho.
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Volte em breve!
-          </p>
-        </div>
+        <MemberEmptyState
+          title="Conteúdo em preparação"
+          body="O conteúdo deste módulo ainda não foi publicado. Volte em breve."
+        />
       )}
     </div>
   );

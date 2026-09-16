@@ -17,6 +17,7 @@ import { DevotionalTimeline } from "@/components/member/DevotionalTimeline";
 import { DevotionalDayView } from "@/components/member/DevotionalDayView";
 import { ProgressDashboard } from "@/components/member/ProgressDashboard";
 import { exportNotebookToPdf } from "@/lib/exportNotebookPdf";
+import { MemberErrorState } from "@/components/member/MemberState";
 
 const moodOptions = [
   { value: 1, icon: Frown, label: "Difícil", color: "text-red-500" },
@@ -88,7 +89,7 @@ export default function Notebook() {
   });
 
   // Fetch all entries
-  const { data: entries = [] } = useQuery({
+  const { data: entries = [], isError: entriesError, refetch: refetchEntries } = useQuery({
     queryKey: ["notebook-entries", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -190,6 +191,16 @@ export default function Notebook() {
     const nextDay = devotionalDays.find(d => d.day_number === selectedDay.day_number + 1);
     if (nextDay) setSelectedDay(nextDay);
   };
+
+  if (entriesError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetchEntries();
+        }}
+      />
+    );
+  }
 
   // If viewing exercise detail
   if (selectedExercise) {

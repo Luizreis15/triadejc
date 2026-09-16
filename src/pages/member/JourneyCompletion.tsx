@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MemberErrorState } from "@/components/member/MemberState";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -29,7 +30,7 @@ export default function JourneyCompletion() {
   const queryClient = useQueryClient();
 
   // Check if Day 30 is completed
-  const { data: isDay30Complete, isLoading: checkingCompletion } = useQuery({
+  const { data: isDay30Complete, isLoading: checkingCompletion, isError: completionError, refetch: refetchCompletion } = useQuery({
     queryKey: ["day30-completion", user?.id],
     queryFn: async () => {
       if (!user?.id) return false;
@@ -261,6 +262,16 @@ export default function JourneyCompletion() {
     doc.save("certificado-jornada-30-dias.pdf");
     toast({ title: "Certificado baixado! 🎓" });
   };
+
+  if (completionError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetchCompletion();
+        }}
+      />
+    );
+  }
 
   if (checkingCompletion) {
     return (

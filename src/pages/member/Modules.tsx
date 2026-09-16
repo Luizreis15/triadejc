@@ -2,13 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ModuleCard, ProgressBar } from "@/components/member";
+import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Modules() {
   const { user } = useAuth();
 
   // Fetch modules
-  const { data: modules = [], isLoading: modulesLoading } = useQuery({
+  const { data: modules = [], isLoading: modulesLoading, isError: modulesError, refetch: refetchModules } = useQuery({
     queryKey: ["modules"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -47,6 +48,16 @@ export default function Modules() {
     if (moduleProgress.completed) return { progress: 100, status: "completed" as const };
     return { progress: moduleProgress.last_seen_card_index || 0, status: "in_progress" as const };
   };
+
+  if (modulesError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetchModules();
+        }}
+      />
+    );
+  }
 
   if (modulesLoading) {
     return (
@@ -89,9 +100,10 @@ export default function Modules() {
       {/* Modules List */}
       <section className="space-y-3">
         {modules.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhum módulo disponível nesta conta. Se você já comprou a Jornada Única, fale com o suporte.
-          </p>
+          <MemberEmptyState
+            title="Nenhum módulo nesta conta"
+            body="Se você já comprou a Jornada Única, fale com o suporte."
+          />
         ) : (
           modules.map((module) => {
             const { progress: moduleProgress, status } = getModuleProgress(module.id);
