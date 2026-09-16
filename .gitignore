@@ -14,6 +14,9 @@ dist-ssr
 
 # Environment variables (contains project keys, never commit)
 .env
+.env*
+!.env.example
+.vercel
 
 # Editor directories and files
 .vscode/*
@@ -26,5 +29,7 @@ dist-ssr
 *.sln
 *.sw?
 supabase/.temp
-.vercel
-.env*
+tmp/
+output/
+.premium-deck/
+premium-site/

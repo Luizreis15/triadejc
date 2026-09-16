@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/member";
+import { MemberErrorState } from "@/components/member/MemberState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 
@@ -13,7 +14,7 @@ export default function Profile() {
   const navigate = useNavigate();
 
   // Fetch profile
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -88,6 +89,16 @@ export default function Profile() {
         year: "numeric",
       })
     : null;
+
+  if (profileError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetchProfile();
+        }}
+      />
+    );
+  }
 
   if (profileLoading) {
     return (

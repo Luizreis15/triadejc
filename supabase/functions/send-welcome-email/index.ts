@@ -1,16 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { claimPendingEmails, markEmailFailed, markEmailSent } from "../_shared/outbox.ts";
 
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const INTERNAL_FUNCTION_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
+
+const OUTBOX_KIND = "welcome";
+const DRAIN_LIMIT = 20;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
-interface WelcomeEmailRequest {
+interface WelcomePayload {
   name: string;
-  email: string;
   // Preferred: a one-time Supabase action_link (invite/recovery) — never a password.
   actionLink?: string;
   // Legacy path: admin-created users where an admin explicitly chose a password
@@ -26,45 +32,14 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-const handler = async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+function buildWelcomeEmail(email: string, payload: WelcomePayload): { subject: string; html: string } {
+  const { name, actionLink, password, loginUrl } = payload;
+  const firstName = name ? name.split(" ")[0] : "querida";
+  const accessUrl = actionLink || loginUrl || "https://www.jordanacantarelli.com.br/membros";
+  const ctaLabel = actionLink ? "CRIAR MINHA SENHA E ACESSAR" : "ACESSAR MINHA JORNADA";
 
-  // Fail-closed: this function is only meant to be called server-to-server
-  // by other edge functions, never directly from the public internet.
-  const providedSecret = req.headers.get("x-internal-secret");
-  if (!INTERNAL_FUNCTION_SECRET || !providedSecret || !timingSafeEqual(providedSecret, INTERNAL_FUNCTION_SECRET)) {
-    console.error("send-welcome-email: rejected, missing or invalid x-internal-secret");
-    return new Response(
-      JSON.stringify({ error: "Unauthorized" }),
-      { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
-    );
-  }
-
-  try {
-    const { name, email, actionLink, password, loginUrl }: WelcomeEmailRequest = await req.json();
-
-    if (!email) {
-      return new Response(
-        JSON.stringify({ error: "Email is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
-    }
-
-    if (!actionLink && !password) {
-      return new Response(
-        JSON.stringify({ error: "actionLink or password is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
-    }
-
-    const firstName = name ? name.split(" ")[0] : "querida";
-    const accessUrl = actionLink || loginUrl || "https://www.jordanacantarelli.com.br/membros";
-    const ctaLabel = actionLink ? "CRIAR MINHA SENHA E ACESSAR" : "ACESSAR MINHA JORNADA";
-
-    const credentialsBoxHtml = actionLink
-      ? `
+  const credentialsBoxHtml = actionLink
+    ? `
                     <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #253244;">
                       🔐 Seu acesso:
                     </h3>
@@ -74,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <p style="margin: 0; font-size: 13px; color: #682A0C; font-weight: 500;">
                       ⚠️ Clique no botão abaixo para criar sua senha. Este link é pessoal e expira em breve.
                     </p>`
-      : `
+    : `
                     <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #253244;">
                       🔐 Seus dados de acesso:
                     </h3>
@@ -88,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
                       ⚠️ Recomendamos que você troque sua senha no primeiro acesso por uma senha de sua preferência.
                     </p>`;
 
-    const emailHtml = `
+  const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -188,30 +163,83 @@ const handler = async (req: Request): Promise<Response> => {
 </html>
     `;
 
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Jordana Cantarelli <noreply@jordanacantarelli.com.br>",
-        to: [email],
-        subject: "🌸 Bem-vinda à Jornada Única! Seu acesso está liberado",
-        html: emailHtml,
-      }),
-    });
+  return { subject: "🌸 Bem-vinda à Jornada Única! Seu acesso está liberado", html };
+}
 
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      console.error("send-welcome-email: Resend API error", response.status, data?.message);
-      return new Response(
-        JSON.stringify({ error: "Failed to send email" }),
-        { status: response.status, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
+async function sendViaResend(email: string, payload: WelcomePayload): Promise<void> {
+  const { subject, html } = buildWelcomeEmail(email, payload);
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: "Jordana Cantarelli <noreply@jordanacantarelli.com.br>", to: [email], subject, html }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(`Resend API error ${response.status}: ${data?.message ?? "unknown"}`);
+  }
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  // Fail-closed: this function is only meant to be called server-to-server
+  // by other edge functions, never directly from the public internet.
+  const providedSecret = req.headers.get("x-internal-secret");
+  if (!INTERNAL_FUNCTION_SECRET || !providedSecret || !timingSafeEqual(providedSecret, INTERNAL_FUNCTION_SECRET)) {
+    console.error("send-welcome-email: rejected, missing or invalid x-internal-secret");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
+    );
+  }
+
+  try {
+    // Legacy direct-send path: a caller (e.g. Track B's create-admin-user)
+    // still passing a full payload with `email` gets an immediate, synchronous
+    // send — unchanged behavior, no outbox involved.
+    const body = await req.json().catch(() => ({}));
+    if (body?.email) {
+      const { email, ...payload } = body as { email: string } & WelcomePayload;
+      if (!payload.actionLink && !payload.password) {
+        return new Response(
+          JSON.stringify({ error: "actionLink or password is required" }),
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+        );
+      }
+      await sendViaResend(email, payload);
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Outbox drain mode: no specific email in the body — process whatever's
+    // pending. This is how kiwify-webhook triggers delivery, and how a
+    // future cron sweep (owner's territory) would call this too.
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    const rows = await claimPendingEmails(supabaseAdmin, OUTBOX_KIND, DRAIN_LIMIT);
+    let sent = 0;
+    let failed = 0;
+
+    for (const row of rows) {
+      try {
+        await sendViaResend(row.recipient_email, row.payload as unknown as WelcomePayload);
+        await markEmailSent(supabaseAdmin, row.id);
+        sent++;
+      } catch (sendError) {
+        const message = sendError instanceof Error ? sendError.message : "unknown error";
+        console.error("send-welcome-email: outbox row failed", row.id, message);
+        await markEmailFailed(supabaseAdmin, row.id, row.attempts, message);
+        failed++;
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, processed: rows.length, sent, failed }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

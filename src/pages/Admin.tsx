@@ -13,6 +13,7 @@ import { FinanceAdmin } from "@/components/admin/FinanceAdmin";
 import { EmailAdmin } from "@/components/admin/EmailAdmin";
 import { ModulePdfsAdmin } from "@/components/admin/ModulePdfsAdmin";
 import { AbandonedCartDashboard } from "@/components/admin/AbandonedCartDashboard";
+import { ProductsAdmin } from "@/components/admin/ProductsAdmin";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -54,7 +55,10 @@ export default function Admin() {
           <LibraryAdmin />
         </TabsContent>
         <TabsContent value="settings" className="mt-0">
-          <AdminSettingsContent onTabChange={setActiveTab} />
+          <div className="space-y-6">
+            <ProductsAdmin />
+            <AdminSettingsContent onTabChange={setActiveTab} />
+          </div>
         </TabsContent>
       </Tabs>
     </AdminLayout>

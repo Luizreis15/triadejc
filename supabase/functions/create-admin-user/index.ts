@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const ALLOWED_ORIGINS = [
   "https://www.jordanacantarelli.com.br",
@@ -72,36 +72,34 @@ Deno.serve(async (req) => {
     }
 
     // Get request body
-    const { email, password, name, makeAdmin } = await req.json();
+    const { email, name, makeAdmin } = await req.json();
 
-    if (!email || !password) {
+    if (!email) {
       return new Response(
-        JSON.stringify({ error: "Email e senha são obrigatórios" }),
+        JSON.stringify({ error: "Email é obrigatório" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Creating user: ${email}, makeAdmin: ${makeAdmin}`);
-
-    // Create user with admin API
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    const { data, error: createError } = await supabaseAdmin.auth.admin.generateLink({
+      type: "invite",
       email,
-      password,
-      email_confirm: true, // Auto-confirm email
-      user_metadata: {
-        name,
+      options: {
+        data: { name },
+        redirectTo: "https://www.jordanacantarelli.com.br/membros/reset-password",
       },
     });
 
-    if (createError) {
-      console.error("Error creating user:", createError);
+    if (createError || !data?.user) {
+      console.error("Error creating user:", createError?.message);
       return new Response(
-        JSON.stringify({ error: createError.message }),
+        JSON.stringify({ error: createError?.message || "Falha ao criar usuário" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`User created: ${newUser.user.id}`);
+    const newUser = data;
+    const actionLink = data.properties?.action_link;
 
     // Create profile
     const { error: profileError } = await supabaseAdmin
@@ -158,39 +156,38 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send welcome email with credentials
+    // Welcome via invite link — never send a password.
     let emailSent = false;
-    try {
-      console.log(`Sending welcome email to ${email}`);
-      const internalSecret = Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "";
-      const welcomeHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${supabaseServiceRoleKey}`,
-      };
-      if (internalSecret) {
-        welcomeHeaders["x-internal-secret"] = internalSecret;
-      }
+    if (actionLink) {
+      try {
+        const internalSecret = Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "";
+        const welcomeHeaders: Record<string, string> = {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseServiceRoleKey}`,
+        };
+        if (internalSecret) {
+          welcomeHeaders["x-internal-secret"] = internalSecret;
+        }
 
-      const welcomeResponse = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
-        method: "POST",
-        headers: welcomeHeaders,
-        body: JSON.stringify({
-          name: name || email.split("@")[0],
-          email,
-          password,
-          loginUrl: "https://www.jordanacantarelli.com.br/membros",
-        }),
-      });
+        const welcomeResponse = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
+          method: "POST",
+          headers: welcomeHeaders,
+          body: JSON.stringify({
+            name: name || email.split("@")[0],
+            email,
+            actionLink,
+            loginUrl: "https://www.jordanacantarelli.com.br/membros",
+          }),
+        });
 
-      if (welcomeResponse.ok) {
-        emailSent = true;
-        console.log(`Welcome email sent successfully to ${email}`);
-      } else {
-        const errorData = await welcomeResponse.text();
-        console.error(`Failed to send welcome email: ${errorData}`);
+        emailSent = welcomeResponse.ok;
+        if (!welcomeResponse.ok) {
+          console.error("Failed to send welcome email", welcomeResponse.status);
+        }
+      } catch (emailError) {
+        const message = emailError instanceof Error ? emailError.message : "unknown";
+        console.error("Error sending welcome email", message);
       }
-    } catch (emailError) {
-      console.error("Error sending welcome email:", emailError);
     }
 
     return new Response(

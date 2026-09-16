@@ -8,13 +8,15 @@ import { toast } from "@/hooks/use-toast";
 import { useProgress } from "@/hooks/useProgress";
 import { VideoPlayer } from "@/components/member/VideoPlayer";
 import { MarkdownContent } from "@/components/member/MarkdownPreview";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
+import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 
 export default function ReadingView() {
   const { slug, cardId } = useParams<{ slug: string; cardId: string }>();
   const navigate = useNavigate();
 
   // Fetch card
-  const { data: card, isLoading } = useQuery({
+  const { data: card, isLoading, isError, refetch } = useQuery({
     queryKey: ["module-card", cardId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -70,6 +72,16 @@ export default function ReadingView() {
     }
   };
 
+  if (isError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetch();
+        }}
+      />
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -86,11 +98,16 @@ export default function ReadingView() {
 
   if (!card) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Conteúdo não encontrado</p>
-        <Button variant="ghost" className="mt-4" onClick={() => navigate(-1)}>
-          Voltar
-        </Button>
+      <div className="space-y-4">
+        <MemberEmptyState
+          title="Conteúdo não encontrado"
+          body="Esta leitura não está disponível para a sua conta."
+        />
+        <div className="text-center">
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            Voltar
+          </Button>
+        </div>
       </div>
     );
   }
@@ -158,16 +175,16 @@ export default function ReadingView() {
                   </div>
                   <span className="font-medium text-sm">{pdf.title}</span>
                 </div>
-                <a 
-                  href={pdf.file_url} 
-                  target="_blank" 
+                <SignedFileLink
+                  href={pdf.file_url}
+                  target="_blank"
                   rel="noopener noreferrer"
                 >
                   <Button variant="outline" size="sm">
                     <Download className="w-4 h-4 mr-2" />
                     Baixar
                   </Button>
-                </a>
+                </SignedFileLink>
               </div>
             ))}
           </div>

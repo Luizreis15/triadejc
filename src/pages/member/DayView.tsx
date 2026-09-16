@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { useModuleDays, type ModuleDay } from "@/hooks/useModuleDays";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
+import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 import { useState, useEffect } from "react";
 
 export default function DayView() {
@@ -18,7 +20,7 @@ export default function DayView() {
   const { user } = useAuth();
 
   // Fetch module
-  const { data: module } = useQuery({
+  const { data: module, isLoading: moduleLoading, isError: moduleError, refetch: refetchModule } = useQuery({
     queryKey: ["module", slug],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,7 +34,7 @@ export default function DayView() {
     enabled: !!slug,
   });
 
-  const { days, isDayCompleted, isDayUnlocked, saveExercises, markDayComplete, useDayExercises } = useModuleDays(module?.id);
+  const { days, isLoading: daysLoading, isDayCompleted, isDayUnlocked, saveExercises, markDayComplete, useDayExercises } = useModuleDays(module?.id);
 
   // Current day
   const day = days.find(d => d.id === dayId);
@@ -157,12 +159,47 @@ export default function DayView() {
     }
   };
 
-  if (!day) {
+  if (moduleError) {
+    return (
+      <MemberErrorState
+        onRetry={() => {
+          void refetchModule();
+        }}
+      />
+    );
+  }
+
+  if (moduleLoading || daysLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-32" />
         <Skeleton className="aspect-video w-full rounded-2xl" />
         <Skeleton className="h-48 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (!module) {
+    return (
+      <MemberEmptyState
+        title="Módulo indisponível"
+        body="Este módulo não está disponível para a sua conta."
+      />
+    );
+  }
+
+  if (!day) {
+    return (
+      <div className="space-y-4">
+        <MemberEmptyState
+          title="Dia não encontrado"
+          body="Este dia da jornada não existe ou ainda não foi publicado."
+        />
+        <div className="text-center">
+          <Link to={`/membros/app/modulos/${slug}`}>
+            <Button variant="ghost">Voltar ao módulo</Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -303,7 +340,7 @@ export default function DayView() {
 
       {/* PDF */}
       {day.pdf_url && (
-        <a
+        <SignedFileLink
           href={day.pdf_url}
           target="_blank"
           rel="noopener noreferrer"
@@ -313,7 +350,7 @@ export default function DayView() {
             <FileDown className="w-5 h-5 text-red-600" />
           </div>
           <span className="flex-1 text-sm font-medium">Baixar PDF original</span>
-        </a>
+        </SignedFileLink>
       )}
 
       {/* Action Buttons */}

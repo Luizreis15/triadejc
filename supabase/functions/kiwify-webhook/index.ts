@@ -1,13 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { verifyHmacSha256 } from "../_shared/crypto.ts";
+import { ensureUser } from "../_shared/users.ts";
+import { resolveProductId } from "../_shared/products.ts";
+import { grantEntitlementAndTransaction } from "../_shared/entitlements.ts";
+import { enqueueEmail } from "../_shared/outbox.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const KIWIFY_WEBHOOK_TOKEN = Deno.env.get("KIWIFY_WEBHOOK_TOKEN");
 const INTERNAL_FUNCTION_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
-
-const DEFAULT_PRODUCT_SLUG = "jornada_unica";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,7 +17,7 @@ const corsHeaders = {
 };
 
 // Kiwify webhook payload structure
-interface KiwifyWebhookPayload {
+export interface KiwifyWebhookPayload {
   order_id: string;
   order_status: string;
   webhook_event_type?: string;
@@ -36,10 +38,9 @@ interface KiwifyWebhookPayload {
     id: string;
     status: string;
   };
-  // Best-effort locations for the charged amount across Kiwify event types.
   charge_amount?: number;
   amount?: number;
-  Commissions?: { charge_amount?: number | string; currency?: string };
+  Commissions?: { charge_amount?: number };
 }
 
 const VALID_EVENTS = [
@@ -51,24 +52,10 @@ const VALID_EVENTS = [
   "subscription_reactivated",
 ];
 
-// Paginates through auth.admin.listUsers() — never trust page 1 alone.
-async function findUserIdByEmail(admin: SupabaseClient, email: string): Promise<string | null> {
-  const perPage = 1000;
-  const target = email.toLowerCase();
-  for (let page = 1; page <= 50; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
-    if (error) throw error;
-    const match = data.users.find((u) => u.email?.toLowerCase() === target);
-    if (match) return match.id;
-    if (data.users.length < perPage) return null;
-  }
-  return null;
-}
-
 // Reserves (or finds) the webhook_events row for this event, atomically enough
 // to survive retries: a UNIQUE(provider, event_id) collision on insert is
 // treated as "someone already has this", not an error.
-async function claimWebhookEvent(
+export async function claimWebhookEvent(
   admin: SupabaseClient,
   eventId: string,
   eventType: string,
@@ -108,31 +95,7 @@ async function claimWebhookEvent(
   return { rowId: inserted.id, alreadyProcessed: false };
 }
 
-// Unknown/missing Kiwify SKU falls back to the single default product.
-async function resolveProductId(admin: SupabaseClient, kiwifyProductId: string | undefined): Promise<string> {
-  if (kiwifyProductId) {
-    const { data } = await admin
-      .from("products")
-      .select("id")
-      .eq("kiwify_product_id", kiwifyProductId)
-      .maybeSingle();
-    if (data) return data.id;
-  }
-
-  const { data: fallback, error } = await admin
-    .from("products")
-    .select("id")
-    .eq("slug", DEFAULT_PRODUCT_SLUG)
-    .single();
-
-  if (error || !fallback) {
-    throw new Error(`default product '${DEFAULT_PRODUCT_SLUG}' not found`);
-  }
-  return fallback.id;
-}
-
-function extractAmount(payload: KiwifyWebhookPayload): number {
-  // Kiwify documents Commissions.charge_amount in cents (e.g. 12424 = R$124.24).
+export function extractAmount(payload: KiwifyWebhookPayload): number {
   const fromCommissions = payload.Commissions?.charge_amount;
   if (fromCommissions != null) {
     const parsed = typeof fromCommissions === "number" ? fromCommissions : Number(fromCommissions);
@@ -143,7 +106,22 @@ function extractAmount(payload: KiwifyWebhookPayload): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-const handler = async (req: Request): Promise<Response> => {
+// Best-effort: wakes the consumer up for near-real-time delivery. The
+// outbox row already persisted is the actual durability guarantee — if this
+// call fails or times out, the row stays 'pending' for the next drain.
+function triggerWelcomeDrain(): void {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+  };
+  if (INTERNAL_FUNCTION_SECRET) headers["x-internal-secret"] = INTERNAL_FUNCTION_SECRET;
+
+  fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, { method: "POST", headers }).catch((err) => {
+    console.error("kiwify-webhook: welcome drain trigger failed", err instanceof Error ? err.message : err);
+  });
+}
+
+export const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -200,6 +178,13 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    if (!payload.order_id) {
+      return new Response(
+        JSON.stringify({ error: "order_id is required" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
@@ -207,12 +192,6 @@ const handler = async (req: Request): Promise<Response> => {
     // Idempotency: persisted BEFORE any processing. A replay that already
     // reached 'processed' short-circuits here — no reprocessing, no re-grant,
     // no welcome resend.
-    if (!payload.order_id) {
-      return new Response(
-        JSON.stringify({ error: "order_id is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
-    }
     const eventId = `${payload.order_id}:${eventType}`;
     const { rowId: webhookEventId, alreadyProcessed } = await claimWebhookEvent(
       supabaseAdmin,
@@ -228,79 +207,49 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const existingUserId = await findUserIdByEmail(supabaseAdmin, customerEmail);
+    // kiwify-webhook only orchestrates from here — identity, welcome enqueue
+    // and the grant each live in _shared.
+    const { userId, isNewUser, actionLink } = await ensureUser(
+      supabaseAdmin,
+      customerEmail,
+      customerName,
+      "https://www.jordanacantarelli.com.br/membros/reset-password",
+    );
 
-    let userId: string;
-    let isNewUser = false;
-    let actionLink: string | undefined;
-
-    if (existingUserId) {
-      userId = existingUserId;
-    } else {
-      // Creates the user and returns a one-time action_link — no password ever set or transmitted.
-      const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-        type: "invite",
-        email: customerEmail,
-        options: {
-          data: { name: customerName },
-          redirectTo: "https://www.jordanacantarelli.com.br/membros/reset-password",
-        },
-      });
-
-      if (error || !data?.user) {
-        console.error("kiwify-webhook: failed to create user", error?.message);
-        await supabaseAdmin.from("webhook_events").update({ status: "failed" }).eq("id", webhookEventId);
-        return new Response(
-          JSON.stringify({ error: "Failed to create user" }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
-        );
-      }
-
-      userId = data.user.id;
-      isNewUser = true;
-      actionLink = data.properties?.action_link;
-
-      const { error: profileError } = await supabaseAdmin
-        .from("profiles")
-        .upsert({ id: userId, email: customerEmail, name: customerName }, { onConflict: "id" });
-
-      if (profileError) {
-        console.error("kiwify-webhook: profile upsert failed", profileError.message);
+    // Enqueued BEFORE the grant attempt below: a later 500 from the grant
+    // step can no longer lose the welcome email — the row is already durable.
+    if (isNewUser && actionLink) {
+      try {
+        await enqueueEmail(supabaseAdmin, {
+          kind: "welcome",
+          recipientEmail: customerEmail,
+          idempotencyKey: `welcome:${userId}`,
+          payload: {
+            name: customerName || customerEmail.split("@")[0],
+            actionLink,
+            loginUrl: "https://www.jordanacantarelli.com.br/membros",
+          },
+        });
+        triggerWelcomeDrain();
+      } catch (outboxError) {
+        const message = outboxError instanceof Error ? outboxError.message : "unknown error";
+        console.error("kiwify-webhook: welcome enqueue failed", message);
       }
     }
 
-    // Grant: entitlement + transaction. Any failure here marks the event
-    // 'failed' (not 'processed') and returns 500, so Kiwify's retry will
-    // pick it back up — it will not re-create the user or resend welcome
-    // since findUserIdByEmail will find them next time.
     try {
       const productId = await resolveProductId(supabaseAdmin, payload.Product?.product_id);
 
-      const { error: entitlementError } = await supabaseAdmin
-        .from("entitlements")
-        .upsert(
-          { user_id: userId, product_id: productId, status: "active", source: "kiwify", external_id: payload.order_id },
-          { onConflict: "user_id,product_id" },
-        );
-      if (entitlementError) throw entitlementError;
-
-      const { error: transactionError } = await supabaseAdmin
-        .from("transactions")
-        .upsert(
-          {
-            provider: "kiwify",
-            external_id: payload.order_id,
-            user_id: userId,
-            product_id: productId,
-            amount: extractAmount(payload),
-            currency: payload.Commissions?.currency || "BRL",
-            status: "paid",
-            type: payload.Subscription ? "subscription" : "purchase",
-            description: payload.Product?.product_name,
-          },
-          { onConflict: "provider,external_id" },
-        );
-      if (transactionError) throw transactionError;
+      await grantEntitlementAndTransaction(supabaseAdmin, {
+        userId,
+        productId,
+        source: "kiwify",
+        externalId: payload.order_id,
+        amount: extractAmount(payload),
+        currency: "BRL",
+        type: payload.Subscription ? "subscription" : "purchase",
+        description: payload.Product?.product_name,
+      });
 
       await supabaseAdmin
         .from("webhook_events")
@@ -316,37 +265,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Welcome email only fires for a brand-new account — a replayed webhook
-    // for an existing customer (e.g. subscription_renewed) never resends it.
-    if (isNewUser && actionLink) {
-      const welcomeHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      };
-      if (INTERNAL_FUNCTION_SECRET) {
-        welcomeHeaders["x-internal-secret"] = INTERNAL_FUNCTION_SECRET;
-      }
-
-      const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, {
-        method: "POST",
-        headers: welcomeHeaders,
-        body: JSON.stringify({
-          name: customerName || customerEmail.split("@")[0],
-          email: customerEmail,
-          actionLink,
-          loginUrl: "https://www.jordanacantarelli.com.br/membros",
-        }),
-      });
-
-      if (!emailResponse.ok) {
-        console.error("kiwify-webhook: welcome email request failed", emailResponse.status);
-      }
-    }
-
     return new Response(
       JSON.stringify({
         success: true,
-        message: isNewUser ? "User created and invite sent" : "User already exists, no email sent",
+        message: isNewUser ? "User created, entitlement granted, invite enqueued" : "Entitlement granted",
         userId,
         isNewUser,
         source: "kiwify",
@@ -363,4 +285,8 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+// Guarded so importing this module for tests doesn't start a real listener —
+// Supabase's runtime executes this file directly, where import.meta.main is true.
+if (import.meta.main) {
+  serve(handler);
+}

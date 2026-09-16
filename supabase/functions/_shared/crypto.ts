@@ -2,7 +2,7 @@
 // Uses crypto.subtle.verify (not a manual digest + string compare) so the
 // comparison itself is constant-time — no hand-rolled timing-safe-equal needed.
 
-function hexToBytes(hex: string): Uint8Array | null {
+function hexToBytes(hex: string): Uint8Array<ArrayBuffer> | null {
   const clean = hex.trim().toLowerCase();
   if (clean.length === 0 || clean.length % 2 !== 0 || !/^[0-9a-f]+$/.test(clean)) {
     return null;

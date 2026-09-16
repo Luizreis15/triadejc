@@ -37,14 +37,15 @@ import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
 
 export function UsersAdmin() {
+  const { user: adminUser } = useAuth();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserName, setNewUserName] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
   const [makeAdmin, setMakeAdmin] = useState(false);
   const [isResendDialogOpen, setIsResendDialogOpen] = useState(false);
   const [resendUser, setResendUser] = useState<{ id: string; name: string; email: string } | null>(null);
@@ -120,6 +121,7 @@ export function UsersAdmin() {
 
   const toggleEntitlement = useMutation({
     mutationFn: async ({ userId, granted }: { userId: string; granted: boolean }) => {
+      if (!adminUser?.id) throw new Error("Admin session required");
       const productId = await getDefaultProductId();
       const { error } = await supabase.from("entitlements").upsert(
         {
@@ -131,6 +133,15 @@ export function UsersAdmin() {
         { onConflict: "user_id,product_id" },
       );
       if (error) throw error;
+
+      const { error: auditError } = await supabase.from("audit_log").insert({
+        actor_id: adminUser.id,
+        action: granted ? "entitlement.grant" : "entitlement.revoke",
+        entity_type: "entitlement",
+        entity_id: userId,
+        metadata: { product_id: productId, status: granted ? "active" : "revoked" },
+      });
+      if (auditError) throw auditError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
@@ -142,12 +153,11 @@ export function UsersAdmin() {
   });
 
   const createUser = useMutation({
-    mutationFn: async ({ email, name, password, makeAdmin }: { email: string; name: string; password: string; makeAdmin: boolean }) => {
+    mutationFn: async ({ email, name, makeAdmin }: { email: string; name: string; makeAdmin: boolean }) => {
       const { data, error } = await supabase.functions.invoke("create-admin-user", {
         body: { 
           email, 
           name,
-          password,
           makeAdmin,
         },
       });
@@ -161,7 +171,6 @@ export function UsersAdmin() {
       setIsCreateDialogOpen(false);
       setNewUserEmail("");
       setNewUserName("");
-      setNewUserPassword("");
       setMakeAdmin(false);
       refetch();
     },
@@ -247,7 +256,7 @@ export function UsersAdmin() {
             <DialogHeader>
               <DialogTitle>Criar Novo Usuário</DialogTitle>
               <DialogDescription>
-                Crie um novo usuário com acesso ao sistema.
+                A pessoa recebe um e-mail para criar a própria senha. Nenhuma senha é definida aqui.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -270,16 +279,6 @@ export function UsersAdmin() {
                   onChange={(e) => setNewUserEmail(e.target.value)}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={newUserPassword}
-                  onChange={(e) => setNewUserPassword(e.target.value)}
-                />
-              </div>
               <div className="flex items-center space-x-2 pt-2">
                 <Switch
                   id="makeAdmin"
@@ -299,7 +298,6 @@ export function UsersAdmin() {
                   setIsCreateDialogOpen(false);
                   setNewUserEmail("");
                   setNewUserName("");
-                  setNewUserPassword("");
                   setMakeAdmin(false);
                 }}
               >
@@ -309,10 +307,9 @@ export function UsersAdmin() {
                 onClick={() => createUser.mutate({ 
                   email: newUserEmail, 
                   name: newUserName,
-                  password: newUserPassword,
                   makeAdmin 
                 })}
-                disabled={!newUserEmail || !newUserPassword || newUserPassword.length < 6 || createUser.isPending}
+                disabled={!newUserEmail || createUser.isPending}
               >
                 {createUser.isPending ? "Criando..." : "Criar Usuário"}
               </Button>

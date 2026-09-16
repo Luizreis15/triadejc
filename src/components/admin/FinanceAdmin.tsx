@@ -57,6 +57,7 @@ import {
 
 const statusColors: Record<string, string> = {
   completed: "bg-green-500/10 text-green-500",
+  paid: "bg-green-500/10 text-green-500",
   pending: "bg-yellow-500/10 text-yellow-500",
   failed: "bg-red-500/10 text-red-500",
   refunded: "bg-gray-500/10 text-gray-500",
@@ -64,9 +65,14 @@ const statusColors: Record<string, string> = {
 
 const typeLabels: Record<string, string> = {
   purchase: "Compra",
+  subscription: "Assinatura",
   renewal: "Renovação",
   refund: "Reembolso",
 };
+
+function isCountedRevenue(transaction: { status: string | null; type: string }) {
+  return (transaction.status === "paid" || transaction.status === "completed") && transaction.type !== "refund";
+}
 
 export function FinanceAdmin() {
   const [search, setSearch] = useState("");
@@ -108,7 +114,7 @@ export function FinanceAdmin() {
 
   // Calculate metrics
   const totalRevenue = transactions
-    ?.filter(t => t.status === "completed" && t.type !== "refund")
+    ?.filter(isCountedRevenue)
     .reduce((acc, t) => acc + Number(t.amount), 0) || 0;
 
   const thisMonthStart = startOfMonth(new Date());
@@ -116,8 +122,7 @@ export function FinanceAdmin() {
   const thisMonthRevenue = transactions
     ?.filter(t => {
       const date = new Date(t.created_at);
-      return t.status === "completed" && 
-             t.type !== "refund" &&
+      return isCountedRevenue(t) &&
              date >= thisMonthStart && 
              date <= thisMonthEnd;
     })
@@ -128,8 +133,7 @@ export function FinanceAdmin() {
   const lastMonthRevenue = transactions
     ?.filter(t => {
       const date = new Date(t.created_at);
-      return t.status === "completed" && 
-             t.type !== "refund" &&
+      return isCountedRevenue(t) &&
              date >= lastMonthStart && 
              date <= lastMonthEnd;
     })
@@ -148,8 +152,7 @@ export function FinanceAdmin() {
     const revenue = transactions
       ?.filter(t => {
         const date = new Date(t.created_at);
-        return t.status === "completed" && 
-               t.type !== "refund" &&
+        return isCountedRevenue(t) &&
                date >= monthStart && 
                date <= monthEnd;
       })
@@ -476,6 +479,7 @@ export function FinanceAdmin() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="paid">Pago (Kiwify)</SelectItem>
                   <SelectItem value="completed">Concluído</SelectItem>
                   <SelectItem value="pending">Pendente</SelectItem>
                   <SelectItem value="failed">Falhou</SelectItem>
@@ -506,6 +510,7 @@ export function FinanceAdmin() {
                     <TableHead>Tipo</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Método</TableHead>
+                    <TableHead>Origem</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -538,6 +543,10 @@ export function FinanceAdmin() {
                         </TableCell>
                         <TableCell className="capitalize">
                           {transaction.payment_method || "-"}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {transaction.provider || "manual"}
+                          {transaction.external_id ? ` · ${transaction.external_id.slice(0, 8)}` : ""}
                         </TableCell>
                         <TableCell>
                           <Badge className={statusColors[transaction.status] || ""}>
