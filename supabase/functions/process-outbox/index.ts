@@ -37,6 +37,26 @@ async function invokeInternal(path: string): Promise<{ ok: boolean; status: numb
   return { ok: response.ok, status: response.status, body };
 }
 
+function bearerIsServiceRole(req: Request): boolean {
+  const auth = req.headers.get("Authorization") ?? "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  if (!token) return false;
+  // Prefer exact match against the function's service role key when present.
+  if (SUPABASE_SERVICE_ROLE_KEY && timingSafeEqual(token, SUPABASE_SERVICE_ROLE_KEY)) {
+    return true;
+  }
+  // Fallback: decode JWT payload and accept role=service_role (ops recovery).
+  try {
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) return false;
+    const json = atob(payloadPart.replace(/-/g, "+").replace(/_/g, "/"));
+    const payload = JSON.parse(json) as { role?: string };
+    return payload.role === "service_role";
+  } catch {
+    return false;
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -50,9 +70,11 @@ const handler = async (req: Request): Promise<Response> => {
     );
   }
 
+  // Cron uses x-internal-secret; ops recovery may use the service_role JWT.
   const providedSecret = req.headers.get("x-internal-secret");
-  if (!providedSecret || !timingSafeEqual(providedSecret, INTERNAL_FUNCTION_SECRET)) {
-    console.error("process-outbox: rejected, missing or invalid x-internal-secret");
+  const secretOk = !!providedSecret && timingSafeEqual(providedSecret, INTERNAL_FUNCTION_SECRET);
+  if (!secretOk && !bearerIsServiceRole(req)) {
+    console.error("process-outbox: rejected, missing or invalid auth");
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),
       { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
