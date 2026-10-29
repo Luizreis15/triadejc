@@ -108,17 +108,32 @@ export function extractAmount(payload: KiwifyWebhookPayload): number {
 
 // Best-effort: wakes the consumer up for near-real-time delivery. The
 // outbox row already persisted is the actual durability guarantee — if this
-// call fails or times out, the row stays 'pending' for the next drain.
-function triggerWelcomeDrain(): void {
+// call fails or times out, the row stays 'queued' for process-outbox / cron.
+async function triggerWelcomeDrain(): Promise<void> {
+  if (!INTERNAL_FUNCTION_SECRET) {
+    console.error("kiwify-webhook: INTERNAL_FUNCTION_SECRET missing — cannot drain welcome outbox");
+    return;
+  }
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+    "x-internal-secret": INTERNAL_FUNCTION_SECRET,
   };
-  if (INTERNAL_FUNCTION_SECRET) headers["x-internal-secret"] = INTERNAL_FUNCTION_SECRET;
 
-  fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, { method: "POST", headers }).catch((err) => {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, {
+      method: "POST",
+      headers,
+      body: "{}",
+    });
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.error("kiwify-webhook: welcome drain rejected", response.status, detail.slice(0, 200));
+    }
+  } catch (err) {
     console.error("kiwify-webhook: welcome drain trigger failed", err instanceof Error ? err.message : err);
-  });
+  }
 }
 
 export const handler = async (req: Request): Promise<Response> => {
@@ -217,32 +232,64 @@ export const handler = async (req: Request): Promise<Response> => {
 
     // kiwify-webhook only orchestrates from here — identity, welcome enqueue
     // and the grant each live in _shared.
+    const redirectTo = "https://www.jordanacantarelli.com.br/membros/reset-password";
     const { userId, isNewUser, actionLink } = await ensureUser(
       supabaseAdmin,
       customerEmail,
       customerName,
-      "https://www.jordanacantarelli.com.br/membros/reset-password",
+      redirectTo,
     );
 
-    // Enqueued BEFORE the grant attempt below: a later 500 from the grant
-    // step can no longer lose the welcome email — the row is already durable.
-    if (isNewUser && actionLink) {
-      try {
-        await enqueueEmail(supabaseAdmin, {
-          kind: "welcome",
-          recipientEmail: customerEmail,
-          idempotencyKey: `welcome:${userId}`,
-          payload: {
-            name: customerName || customerEmail.split("@")[0],
-            actionLink,
-            loginUrl: "https://www.jordanacantarelli.com.br/membros",
-          },
+    // Access email: invite for new users, recovery for existing ones that
+    // never got a welcome row (repurchase / test rebuy / user created before
+    // a successful webhook). Idempotency key welcome:<userId> dedupes replays.
+    const welcomeKey = `welcome:${userId}`;
+    const { data: existingWelcome } = await supabaseAdmin
+      .from("email_outbox")
+      .select("id, status")
+      .eq("idempotency_key", welcomeKey)
+      .maybeSingle();
+
+    if (!existingWelcome) {
+      let accessLink = actionLink;
+      if (!accessLink) {
+        const { data: recovery, error: recoveryError } = await supabaseAdmin.auth.admin.generateLink({
+          type: "recovery",
+          email: customerEmail,
+          options: { redirectTo },
         });
-        triggerWelcomeDrain();
-      } catch (outboxError) {
-        const message = outboxError instanceof Error ? outboxError.message : "unknown error";
-        console.error("kiwify-webhook: welcome enqueue failed", message);
+        if (recoveryError) {
+          console.error("kiwify-webhook: recovery link failed", recoveryError.message);
+        } else {
+          accessLink = recovery?.properties?.action_link;
+        }
       }
+
+      // Enqueued BEFORE the grant attempt below: a later 500 from the grant
+      // step can no longer lose the welcome email — the row is already durable.
+      if (accessLink) {
+        try {
+          await enqueueEmail(supabaseAdmin, {
+            kind: "welcome",
+            recipientEmail: customerEmail,
+            idempotencyKey: welcomeKey,
+            payload: {
+              name: customerName || customerEmail.split("@")[0],
+              actionLink: accessLink,
+              loginUrl: "https://www.jordanacantarelli.com.br/membros",
+            },
+          });
+          await triggerWelcomeDrain();
+        } catch (outboxError) {
+          const message = outboxError instanceof Error ? outboxError.message : "unknown error";
+          console.error("kiwify-webhook: welcome enqueue failed", message);
+        }
+      } else {
+        console.error("kiwify-webhook: no access link — welcome email skipped", `isNewUser=${isNewUser}`);
+      }
+    } else if (existingWelcome.status === "queued") {
+      // Row durable but never drained (drain 401 / missing cron) — wake consumer.
+      await triggerWelcomeDrain();
     }
 
     try {
@@ -276,7 +323,9 @@ export const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: isNewUser ? "User created, entitlement granted, invite enqueued" : "Entitlement granted",
+        message: isNewUser
+          ? "User created, entitlement granted, invite enqueued"
+          : "Entitlement granted, access email ensured",
         userId,
         isNewUser,
         source: "kiwify",
