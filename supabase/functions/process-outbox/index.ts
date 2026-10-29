@@ -37,27 +37,19 @@ async function invokeInternal(path: string): Promise<{ ok: boolean; status: numb
   return { ok: response.ok, status: response.status, body };
 }
 
-function bearerIsServiceRole(req: Request): boolean {
+// Ops recovery path: exact match against the real service_role key only.
+// Do NOT decode-and-trust an unverified JWT payload here — a bearer token's
+// claims (e.g. `role: "service_role"`) are base64, not a signature; anyone
+// can mint one. Exact comparison against the actual secret is the only safe
+// way to accept "this caller has the service_role key".
+export function bearerIsServiceRole(req: Request): boolean {
   const auth = req.headers.get("Authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  if (!token) return false;
-  // Prefer exact match against the function's service role key when present.
-  if (SUPABASE_SERVICE_ROLE_KEY && timingSafeEqual(token, SUPABASE_SERVICE_ROLE_KEY)) {
-    return true;
-  }
-  // Fallback: decode JWT payload and accept role=service_role (ops recovery).
-  try {
-    const payloadPart = token.split(".")[1];
-    if (!payloadPart) return false;
-    const json = atob(payloadPart.replace(/-/g, "+").replace(/_/g, "/"));
-    const payload = JSON.parse(json) as { role?: string };
-    return payload.role === "service_role";
-  } catch {
-    return false;
-  }
+  if (!token || !SUPABASE_SERVICE_ROLE_KEY) return false;
+  return timingSafeEqual(token, SUPABASE_SERVICE_ROLE_KEY);
 }
 
-const handler = async (req: Request): Promise<Response> => {
+export const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -113,4 +105,6 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+if (import.meta.main) {
+  serve(handler);
+}
