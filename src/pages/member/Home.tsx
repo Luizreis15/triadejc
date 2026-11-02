@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Heart, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useEntitledCatalog } from "@/hooks/useEntitledCatalog";
+import { useReadingResume } from "@/hooks/useReadingResume";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar, ModuleCard, CalmModal } from "@/components/member";
 import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
@@ -26,26 +28,16 @@ const itemVariants = {
 export default function Home() {
   const { user } = useAuth();
   const [calmModalOpen, setCalmModalOpen] = useState(false);
-
-  const { data: modules = [], isLoading: modulesLoading, isError: modulesError, refetch: refetchModules } = useQuery({
-    queryKey: ["modules"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("modules").select("*").order("order_index");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: progress = [] } = useQuery({
-    queryKey: ["progress", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data, error } = await supabase.from("progress").select("*").eq("user_id", user.id);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const {
+    catalogs,
+    completedModules,
+    totalModules,
+    overallProgress,
+    getModuleProgress,
+    isLoading: modulesLoading,
+    isError: modulesError,
+    refetch: refetchModules,
+  } = useEntitledCatalog();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -58,21 +50,17 @@ export default function Home() {
     enabled: !!user?.id,
   });
 
-  const totalModules = modules.length;
-  const completedModules = progress.filter(p => p.completed).length;
-  const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
-
-  const getModuleProgress = (moduleId: string) => {
-    const moduleProgress = progress.find(p => p.module_id === moduleId);
-    if (!moduleProgress) return { progress: 0, status: "not_started" as const };
-    if (moduleProgress.completed) return { progress: 100, status: "completed" as const };
-    return { progress: moduleProgress.last_seen_card_index || 0, status: "in_progress" as const };
-  };
-
-  const currentModule = modules.find(m => {
-    const p = getModuleProgress(m.id);
-    return p.status === "in_progress";
-  }) || modules[0];
+  const welcomeTitle =
+    catalogs.length === 1 ? `Bem-vinda à ${catalogs[0].product.name}` : "Bem-vinda";
+  const currentModule = catalogs.length === 1 ? catalogs[0].current : undefined;
+  const resume = useReadingResume();
+  const resumeOwned = resume
+    ? catalogs.some((catalog) => catalog.modules.some((module) => module.slug === resume.moduleSlug))
+    : false;
+  const resumeModule = resumeOwned
+    ? catalogs.flatMap((catalog) => catalog.modules).find((module) => module.slug === resume?.moduleSlug)
+    : undefined;
+  const resumeProgress = resumeModule ? getModuleProgress(resumeModule.id).progress : Math.round((resume?.scrollRatio ?? 0) * 100);
 
   if (modulesLoading) {
     return (
@@ -110,7 +98,7 @@ export default function Home() {
       {/* Welcome Text */}
       <motion.section className="text-center space-y-3" variants={itemVariants}>
         <h1 className="font-serif text-2xl font-semibold text-foreground">
-          Bem-vinda à Jornada Única
+          {welcomeTitle}
         </h1>
         <p className="text-muted-foreground leading-relaxed">
           {profile?.name ? `${profile.name}, e` : "E"}ste é seu refúgio. 
@@ -119,44 +107,95 @@ export default function Home() {
         </p>
       </motion.section>
 
-      {/* Modules Preview */}
-      <motion.section className="space-y-4" variants={itemVariants}>
-        <h2 className="font-serif text-lg font-semibold text-foreground">Jornada Diária</h2>
-        <div className="space-y-3">
-          {modules.length === 0 ? (
-            <MemberEmptyState
-              title="Jornada ainda sem módulos"
-              body="Os módulos ainda não aparecem nesta conta. Se você já comprou, fale com o suporte."
-            />
-          ) : (
-            modules.slice(0, 3).map((module, i) => {
-              const { progress: moduleProgress, status } = getModuleProgress(module.id);
-              return (
-                <motion.div
-                  key={module.id}
-                  initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                  transition={{ delay: 0.3 + i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <ModuleCard
-                    title={module.title}
-                    subtitle={module.description || ""}
-                    slug={module.slug}
-                    progress={moduleProgress}
-                    status={status}
-                    orderIndex={module.order_index}
-                  />
-                </motion.div>
-              );
-            })
-          )}
-        </div>
-        {modules.length > 3 && (
-          <Link to="/membros/app/modulos">
-            <Button variant="ghost" className="w-full text-muted-foreground">Ver todos os módulos</Button>
+      {(resumeOwned && resume) || currentModule ? (
+        <motion.section variants={itemVariants}>
+          <Link
+            to={
+              resumeOwned && resume
+                ? `/membros/app/modulos/${resume.moduleSlug}?ler=${resume.cardId}`
+                : `/membros/app/modulos/${currentModule?.slug ?? ""}`
+            }
+            className="member-module-card block rounded-2xl border border-primary/30 p-5"
+          >
+            <p className="text-[11px] uppercase tracking-[0.16em] text-primary">Continue de onde parou</p>
+            <h2 className="mt-1 font-serif text-xl font-semibold text-foreground">
+              {resumeOwned && resume ? resume.cardTitle : currentModule?.title}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {resumeOwned && resume ? resume.moduleTitle : "Sua próxima etapa"}
+            </p>
+            <div className="mt-4">
+              <ProgressBar value={resumeOwned ? resumeProgress : overallProgress} size="md" />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">{resumeOwned ? resumeProgress : overallProgress}% desta jornada</p>
           </Link>
-        )}
-      </motion.section>
+        </motion.section>
+      ) : null}
+
+      {catalogs.length === 0 ? (
+        <motion.section variants={itemVariants}>
+          <MemberEmptyState
+            title="Nenhum produto nesta conta"
+            body="O acesso ainda não aparece aqui. Se você já comprou, fale com o suporte."
+          />
+        </motion.section>
+      ) : (
+        catalogs.map((catalog) => (
+          <motion.section key={catalog.product.id} className="space-y-4" variants={itemVariants}>
+            <div className="flex items-end justify-between gap-3">
+              <h2 className="font-serif text-lg font-semibold text-foreground">
+                {catalogs.length === 1 ? "Jornada Diária" : catalog.product.name}
+              </h2>
+              {catalogs.length > 1 && (
+                <span className="text-sm font-serif text-primary">{catalog.percent}%</span>
+              )}
+            </div>
+            <div className="space-y-3">
+              {catalog.modules.length === 0 ? (
+                <MemberEmptyState
+                  title="Produto ainda sem módulos"
+                  body={`${catalog.product.name} já está na sua conta. O conteúdo aparece aqui quando for publicado.`}
+                />
+              ) : (
+                catalog.modules.slice(0, 3).map((module, i) => {
+                  const { progress: moduleProgress, status } = getModuleProgress(module.id);
+                  return (
+                    <motion.div
+                      key={module.id}
+                      initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
+                      animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                      transition={{ delay: 0.3 + i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <ModuleCard
+                        title={module.title}
+                        subtitle={module.description || ""}
+                        slug={module.slug}
+                        progress={moduleProgress}
+                        status={status}
+                        orderIndex={module.order_index}
+                        enterIndex={i}
+                      />
+                    </motion.div>
+                  );
+                })
+              )}
+            </div>
+            {catalog.modules.length > 3 && (
+              <Link to="/membros/app/modulos">
+                <Button variant="ghost" className="w-full text-muted-foreground">Ver todos os módulos</Button>
+              </Link>
+            )}
+            {catalogs.length > 1 && catalog.current && (
+              <Link to={`/membros/app/modulos/${catalog.current.slug}`}>
+                <Button className="w-full h-12 rounded-xl text-base font-medium gap-2">
+                  Continuar {catalog.product.name}
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            )}
+          </motion.section>
+        ))
+      )}
 
       {/* Products Showcase Card */}
       <motion.div variants={itemVariants}>
@@ -181,30 +220,30 @@ export default function Home() {
         </Link>
       </motion.div>
 
-      {/* Overall Progress */}
-      <motion.section 
-        className="bg-card rounded-2xl p-5 shadow-sm border border-border/50"
-        variants={itemVariants}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-foreground">Sua jornada</span>
-          <motion.span 
-            className="text-2xl font-serif font-semibold text-primary"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.5 }}
-          >
-            {overallProgress}%
-          </motion.span>
-        </div>
-        <ProgressBar value={overallProgress} size="lg" />
-        <p className="text-xs text-muted-foreground mt-2">
-          {completedModules} de {totalModules} módulos concluídos
-        </p>
-      </motion.section>
+      {catalogs.length === 1 && (
+        <motion.section
+          className="bg-card rounded-2xl p-5 shadow-sm border border-border/50"
+          variants={itemVariants}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-foreground">Sua jornada</span>
+            <motion.span
+              className="text-2xl font-serif font-semibold text-primary"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.5 }}
+            >
+              {overallProgress}%
+            </motion.span>
+          </div>
+          <ProgressBar value={overallProgress} size="lg" />
+          <p className="text-xs text-muted-foreground mt-2">
+            {completedModules} de {totalModules} módulos concluídos
+          </p>
+        </motion.section>
+      )}
 
-      {/* Continue Button */}
-      {currentModule && (
+      {catalogs.length === 1 && currentModule && (
         <motion.div variants={itemVariants}>
           <Link to={`/membros/app/modulos/${currentModule.slug}`}>
             <Button className="w-full h-14 rounded-xl text-base font-medium gap-2">

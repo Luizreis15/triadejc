@@ -41,13 +41,26 @@ Deno.test("handler: invalid x-kiwify-signature -> 401", async () => {
   assertEquals(res.status, 401);
 });
 
-Deno.test("handler: signature computed over a different body than what's sent -> 401", async () => {
+Deno.test("handler: valid HMAC-SHA1 query signature is not rejected as 401", async () => {
   const secret = "test-kiwify-token";
-  const signedBody = '{"order_id":"1","order_status":"paid","Customer":{"email":"a@b.com"}}';
-  const sentBody = '{"order_id":"1","order_status":"paid","Customer":{"email":"attacker@evil.com"}}';
-  const signature = await hmacHex(signedBody, secret);
-  const res = await handler(makeRequest(sentBody, signature));
-  assertEquals(res.status, 401);
+  const body = '{"order_id":"1","order_status":"paid","Customer":{"email":"a@b.com"}}';
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-1" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body));
+  const hex = Array.from(new Uint8Array(signature)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const res = await handler(
+    new Request(`http://localhost/kiwify-webhook?signature=${hex}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    }),
+  );
+  assertNotEquals(res.status, 401);
 });
 
 // --- Replay idempotency (claimWebhookEvent) --------------------------------

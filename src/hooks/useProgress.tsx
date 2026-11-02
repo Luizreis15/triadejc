@@ -121,9 +121,12 @@ export function useProgress(moduleId?: string) {
             completed_at: isModuleComplete ? new Date().toISOString() : null,
           });
       }
+
+      return { moduleComplete: Boolean(isModuleComplete) };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["card-completions"] });
+      queryClient.invalidateQueries({ queryKey: ["member-card-completions"] });
       queryClient.invalidateQueries({ queryKey: ["module-progress"] });
       queryClient.invalidateQueries({ queryKey: ["progress"] });
       queryClient.invalidateQueries({ queryKey: ["all-progress"] });

@@ -1,6 +1,7 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Play, BookOpen, PenLine, FileDown, CheckCircle2, Circle, Heart, Sparkles, Lock, Calendar, ChevronDown } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Play, BookOpen, PenLine, CheckCircle2, Circle, Heart, Sparkles, Lock, Calendar, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { VideoPlayer, ProgressBar } from "@/components/member";
@@ -10,10 +11,9 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
 import { useModuleDays } from "@/hooks/useModuleDays";
-import { SignedFileLink } from "@/components/member/SignedFileLink";
 import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
+import { ReadingOverlay } from "@/components/member/ReadingOverlay";
 import { toast } from "@/hooks/use-toast";
-import { useRef } from "react";
 import { useQuery as useRQQuery } from "@tanstack/react-query";
 import ProductDetail from "./ProductDetail";
 
@@ -34,7 +34,7 @@ interface ModuleCard {
 
 export default function ModuleDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // Refs for scroll
   const introRef = useRef<HTMLDivElement>(null);
@@ -42,8 +42,17 @@ export default function ModuleDetail() {
   const selahRef = useRef<HTMLDivElement>(null);
   const closureRef = useRef<HTMLDivElement>(null);
   const activityRef = useRef<HTMLDivElement>(null);
-  const pdfsRef = useRef<HTMLDivElement>(null);
   const journeyRef = useRef<HTMLDivElement>(null);
+  const [readingCardId, setReadingCardId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const cardId = searchParams.get("ler");
+    if (!cardId) return;
+    setReadingCardId(cardId);
+    const next = new URLSearchParams(searchParams);
+    next.delete("ler");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   // Fetch module
   const { data: module, isLoading: moduleLoading, isError: moduleError, refetch: refetchModule } = useQuery({
@@ -86,22 +95,6 @@ export default function ModuleDetail() {
         .order("order_index");
       if (error) throw error;
       return data as ModuleCard[];
-    },
-    enabled: !!module?.id,
-  });
-
-  // Fetch module PDFs
-  const { data: pdfs = [] } = useQuery({
-    queryKey: ["module-pdfs", module?.id],
-    queryFn: async () => {
-      if (!module?.id) return [];
-      const { data, error } = await supabase
-        .from("module_pdfs")
-        .select("*")
-        .eq("module_id", module.id)
-        .order("order_index");
-      if (error) throw error;
-      return data;
     },
     enabled: !!module?.id,
   });
@@ -261,15 +254,6 @@ export default function ModuleDetail() {
             onClick={() => scrollToSection(activityRef)}
           />
         )}
-        {pdfs.length > 0 && (
-          <QuickActionButton
-            icon={FileDown}
-            label="PDFs"
-            color="bg-orange-100 text-orange-700"
-            count={pdfs.length}
-            onClick={() => scrollToSection(pdfsRef)}
-          />
-        )}
       </section>
 
       {/* SEÇÃO 1 — Começar por aqui (intro) — logo após os botões */}
@@ -277,12 +261,11 @@ export default function ModuleDetail() {
         <div ref={introRef}>
           <ContentSection title="Começar por aqui" icon={<Sparkles className="w-5 h-5 text-primary" />}>
             {introCards.map((card) => (
-              <ContentCard 
-                key={card.id} 
-                card={card} 
-                moduleSlug={slug!}
+              <ContentCard
+                key={card.id}
+                card={card}
                 isCompleted={isCardCompleted(card.id)}
-                onComplete={() => handleCompleteCard(card.id)}
+                onRead={() => setReadingCardId(card.id)}
                 isIntro
               />
             ))}
@@ -463,12 +446,11 @@ export default function ModuleDetail() {
         <div ref={readingRef}>
           <ContentSection title="Leituras Principais" icon={<BookOpen className="w-5 h-5 text-primary" />}>
             {readingCards.map((card) => (
-              <ContentCard 
-                key={card.id} 
-                card={card} 
-                moduleSlug={slug!}
+              <ContentCard
+                key={card.id}
+                card={card}
                 isCompleted={isCardCompleted(card.id)}
-                onComplete={() => handleCompleteCard(card.id)}
+                onRead={() => setReadingCardId(card.id)}
               />
             ))}
           </ContentSection>
@@ -487,11 +469,12 @@ export default function ModuleDetail() {
               Selah é uma pausa para integrar. Não é leitura, é reflexão guiada.
             </p>
             {selahCards.map((card) => (
-              <SelahCard 
-                key={card.id} 
-                card={card} 
+              <SelahCard
+                key={card.id}
+                card={card}
                 moduleSlug={slug!}
                 isCompleted={isCardCompleted(card.id)}
+                onRead={() => setReadingCardId(card.id)}
                 onComplete={() => handleCompleteCard(card.id)}
               />
             ))}
@@ -508,12 +491,11 @@ export default function ModuleDetail() {
             className="bg-gradient-to-br from-amber-50/50 to-orange-50/50 -mx-4 px-4 py-6 rounded-2xl"
           >
             {closureCards.map((card) => (
-              <ClosureCard 
-                key={card.id} 
-                card={card} 
-                moduleSlug={slug!}
+              <ClosureCard
+                key={card.id}
+                card={card}
                 isCompleted={isCardCompleted(card.id)}
-                onComplete={() => handleCompleteCard(card.id)}
+                onRead={() => setReadingCardId(card.id)}
               />
             ))}
           </ContentSection>
@@ -537,40 +519,21 @@ export default function ModuleDetail() {
         </div>
       )}
 
-      {/* SEÇÃO 6 — PDFs do Módulo */}
-      {pdfs.length > 0 && (
-        <div ref={pdfsRef}>
-          <ContentSection title="Materiais para Download" icon={<FileDown className="w-5 h-5 text-orange-600" />}>
-            <p className="text-sm text-muted-foreground mb-3">
-              PDFs são materiais de apoio. Use após as leituras.
-            </p>
-            <div className="space-y-2">
-              {pdfs.map((pdf) => (
-                <SignedFileLink
-                  key={pdf.id}
-                  href={pdf.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50 hover:border-orange-300 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                    <FileDown className="w-5 h-5 text-red-600" />
-                  </div>
-                  <span className="flex-1 text-sm font-medium">{pdf.title}</span>
-                </SignedFileLink>
-              ))}
-            </div>
-          </ContentSection>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {cards.length === 0 && pdfs.length === 0 && moduleDays.length === 0 && (
+      {cards.length === 0 && moduleDays.length === 0 && (
         <MemberEmptyState
           title="Conteúdo em preparação"
           body="O conteúdo deste módulo ainda não foi publicado. Volte em breve."
         />
       )}
+
+      <ReadingOverlay
+        cardId={readingCardId}
+        moduleSlug={slug}
+        open={readingCardId !== null}
+        onOpenChange={(open) => {
+          if (!open) setReadingCardId(null);
+        }}
+      />
     </div>
   );
 }
@@ -630,17 +593,15 @@ function ContentSection({
 }
 
 // Content Card Component
-function ContentCard({ 
-  card, 
-  moduleSlug, 
+function ContentCard({
+  card,
   isCompleted,
-  onComplete,
+  onRead,
   isIntro
-}: { 
-  card: ModuleCard; 
-  moduleSlug: string;
+}: {
+  card: ModuleCard;
   isCompleted?: boolean;
-  onComplete?: () => void;
+  onRead: () => void;
   isIntro?: boolean;
 }) {
   return (
@@ -670,34 +631,37 @@ function ContentCard({
             {isCompleted ? "Concluído" : isIntro ? "Comece por aqui" : "~5 min de leitura"}
           </p>
         </div>
-        <Link 
-          to={`/membros/app/modulos/${moduleSlug}/leitura/${card.id}`}
+        <button
+          type="button"
+          onClick={onRead}
           className={cn(
-            "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors",
-            isCompleted 
+            "member-read-cta px-3 py-1.5 text-xs font-medium rounded-lg",
+            isCompleted
               ? "bg-muted text-muted-foreground hover:bg-muted/80"
-              : isIntro 
-                ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+              : isIntro
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-primary/10 text-primary hover:bg-primary/20"
           )}
         >
           {isCompleted ? "Reler" : "Ler"}
-        </Link>
+        </button>
       </div>
     </div>
   );
 }
 
 // Selah Card Component  
-function SelahCard({ 
-  card, 
+function SelahCard({
+  card,
   moduleSlug,
   isCompleted,
-  onComplete 
-}: { 
-  card: ModuleCard; 
+  onRead,
+  onComplete
+}: {
+  card: ModuleCard;
   moduleSlug: string;
   isCompleted?: boolean;
+  onRead: () => void;
   onComplete?: () => void;
 }) {
   return (
@@ -725,12 +689,16 @@ function SelahCard({
         <MarkdownPreview content={card.content_md} lineClamp={3} />
       )}
       <div className="flex gap-2">
-        <Link to={`/membros/app/modulos/${moduleSlug}/leitura/${card.id}`} className="flex-1">
-          <Button variant="outline" size="sm" className="w-full border-purple-200 hover:bg-purple-50">
-            <BookOpen className="w-4 h-4 mr-2" />
-            Ver reflexão
-          </Button>
-        </Link>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="member-read-cta flex-1 border-purple-200 hover:bg-purple-50"
+          onClick={onRead}
+        >
+          <BookOpen className="w-4 h-4 mr-2" />
+          Ver reflexão
+        </Button>
         <Link to={`/membros/app/caderno?module=${moduleSlug}`}>
           <Button variant="outline" size="sm" className="border-purple-200 hover:bg-purple-50">
             <PenLine className="w-4 h-4" />
@@ -748,16 +716,14 @@ function SelahCard({
 }
 
 // Closure Card Component
-function ClosureCard({ 
-  card, 
-  moduleSlug,
+function ClosureCard({
+  card,
   isCompleted,
-  onComplete 
-}: { 
-  card: ModuleCard; 
-  moduleSlug: string;
+  onRead
+}: {
+  card: ModuleCard;
   isCompleted?: boolean;
-  onComplete?: () => void;
+  onRead: () => void;
 }) {
   return (
     <div className={cn(
@@ -783,19 +749,16 @@ function ClosureCard({
       )}
       
       <div className="flex gap-2 pl-7">
-        <Link to={`/membros/app/modulos/${moduleSlug}/leitura/${card.id}`} className="flex-1">
-          <Button 
-            variant={isCompleted ? "outline" : "default"} 
-            size="sm" 
-            className={cn(
-              "w-full",
-              !isCompleted && "bg-amber-600 hover:bg-amber-700"
-            )}
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            {isCompleted ? "Reler" : "Ler encerramento"}
-          </Button>
-        </Link>
+        <Button
+          type="button"
+          variant={isCompleted ? "outline" : "default"}
+          size="sm"
+          className={cn("member-read-cta w-full", !isCompleted && "bg-amber-600 hover:bg-amber-700")}
+          onClick={onRead}
+        >
+          <BookOpen className="w-4 h-4 mr-2" />
+          {isCompleted ? "Reler" : "Ler encerramento"}
+        </Button>
       </div>
 
       {!isCompleted && (

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import { CheckCircle2, Lock, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProgressBar } from "./ProgressBar";
@@ -11,19 +12,21 @@ interface ModuleCardProps {
   status: "not_started" | "in_progress" | "completed" | "locked";
   coverImage?: string;
   orderIndex: number;
+  enterIndex?: number;
 }
 
-export function ModuleCard({ 
-  title, 
-  subtitle, 
-  slug, 
-  progress, 
+export function ModuleCard({
+  title,
+  subtitle,
+  slug,
+  progress,
   status,
-  coverImage,
-  orderIndex
+  orderIndex,
+  enterIndex = 0,
 }: ModuleCardProps) {
+  const reduce = useReducedMotion();
   const isLocked = status === "locked";
-  
+
   const statusConfig = {
     not_started: { label: "Começar", color: "text-muted-foreground" },
     in_progress: { label: "Continuar", color: "text-primary" },
@@ -34,60 +37,59 @@ export function ModuleCard({
   const { label, color } = statusConfig[status];
 
   const content = (
-    <div className={cn(
-      "group relative bg-card rounded-2xl p-4 shadow-sm border border-border/50 transition-all duration-300",
-      !isLocked && "hover:shadow-md hover:border-primary/20 active:scale-[0.98]",
-      isLocked && "opacity-60"
-    )}>
+    <motion.div
+      className={cn(
+        "member-module-card group relative rounded-2xl border border-border/60 p-4",
+        !isLocked && "transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.99]",
+        isLocked && "opacity-60",
+      )}
+      initial={reduce ? false : { opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: reduce ? 0 : Math.min(enterIndex, 10) * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="flex gap-4">
-        {/* Module number or image */}
         <div className={cn(
-          "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-          status === "completed" 
-            ? "bg-green-100 text-green-600" 
+          "flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-colors",
+          status === "completed"
+            ? "bg-green-100 text-green-700"
             : status === "in_progress"
-            ? "bg-primary/10 text-primary"
-            : "bg-muted text-muted-foreground"
+              ? "bg-primary/15 text-primary"
+              : "bg-muted text-muted-foreground",
         )}>
           {status === "completed" ? (
-            <CheckCircle2 className="w-6 h-6" />
+            <CheckCircle2 className="h-6 w-6" />
           ) : isLocked ? (
-            <Lock className="w-5 h-5" />
+            <Lock className="h-5 w-5" />
           ) : (
-            <span className="text-xl font-serif font-semibold">{orderIndex}</span>
+            <span className="font-serif text-xl font-semibold">{orderIndex}</span>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-serif text-lg font-semibold text-foreground leading-tight mb-1">
-            {title}
-          </h3>
-          <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
-            {subtitle}
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-start justify-between gap-2">
+            <h3 className="font-serif text-lg font-semibold leading-tight text-foreground">
+              {title}
+            </h3>
+            {!isLocked && (
+              <span className={cn("shrink-0 text-xs font-medium", color)}>{progress}%</span>
+            )}
+          </div>
+          <p className="mb-2 line-clamp-1 text-sm text-muted-foreground">
+            {subtitle || label}
           </p>
-          
-          {!isLocked && (
-            <div className="flex items-center gap-3">
-              <ProgressBar value={progress} size="sm" className="flex-1" />
-              <span className="text-xs text-muted-foreground shrink-0">{progress}%</span>
-            </div>
-          )}
+          {!isLocked && <ProgressBar value={progress} size="sm" />}
         </div>
 
-        {/* Arrow */}
         {!isLocked && (
           <div className="flex items-center">
-            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-primary" />
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 
-  if (isLocked) {
-    return content;
-  }
+  if (isLocked) return content;
 
   return (
     <Link to={`/membros/app/modulos/${slug}`}>
