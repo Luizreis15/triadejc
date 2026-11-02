@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { User, LogOut, Mail, Calendar, BookOpen, PenLine, ExternalLink, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useEntitledCatalog } from "@/hooks/useEntitledCatalog";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/member";
 import { MemberErrorState } from "@/components/member/MemberState";
@@ -29,33 +30,15 @@ export default function Profile() {
     enabled: !!user?.id,
   });
 
-  // Fetch modules for progress
-  const { data: modules = [] } = useQuery({
-    queryKey: ["modules"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("modules")
-        .select("*")
-        .order("order_index");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Fetch progress
-  const { data: progress = [] } = useQuery({
-    queryKey: ["progress", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data, error } = await supabase
-        .from("progress")
-        .select("*")
-        .eq("user_id", user.id);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const {
+    catalogs,
+    completedModules,
+    totalModules,
+    overallProgress,
+    isLoading: catalogLoading,
+    isError: catalogError,
+    refetch: refetchCatalog,
+  } = useEntitledCatalog();
 
   // Fetch notebook entries count
   const { data: entriesCount = 0 } = useQuery({
@@ -72,11 +55,6 @@ export default function Profile() {
     enabled: !!user?.id,
   });
 
-  // Calculate progress
-  const totalModules = modules.length;
-  const completedModules = progress.filter(p => p.completed).length;
-  const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
-
   const handleLogout = async () => {
     await signOut();
     toast({ title: "Até logo! 👋" });
@@ -90,17 +68,18 @@ export default function Profile() {
       })
     : null;
 
-  if (profileError) {
+  if (profileError || catalogError) {
     return (
       <MemberErrorState
         onRetry={() => {
-          void refetchProfile();
+          if (profileError) void refetchProfile();
+          if (catalogError) void refetchCatalog();
         }}
       />
     );
   }
 
-  if (profileLoading) {
+  if (profileLoading || catalogLoading) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col items-center gap-4">
@@ -134,17 +113,37 @@ export default function Profile() {
         )}
       </section>
 
-      {/* Progress Card */}
-      <section className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-        <h2 className="font-serif font-semibold text-foreground mb-4">Minha Jornada</h2>
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-muted-foreground">Progresso geral</span>
-          <span className="text-xl font-serif font-semibold text-primary">{overallProgress}%</span>
-        </div>
-        <ProgressBar value={overallProgress} size="lg" />
-        <p className="text-xs text-muted-foreground mt-2">
-          {completedModules} de {totalModules} módulos concluídos
-        </p>
+      <section className="space-y-3">
+        <h2 className="font-serif font-semibold text-foreground">Minha Jornada</h2>
+        {catalogs.length === 0 ? (
+          <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+            <p className="text-sm text-muted-foreground">Nenhum produto ativo nesta conta.</p>
+          </div>
+        ) : catalogs.length === 1 ? (
+          <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-muted-foreground">{catalogs[0].product.name}</span>
+              <span className="text-xl font-serif font-semibold text-primary">{overallProgress}%</span>
+            </div>
+            <ProgressBar value={overallProgress} size="lg" />
+            <p className="text-xs text-muted-foreground mt-2">
+              {completedModules} de {totalModules} módulos concluídos
+            </p>
+          </div>
+        ) : (
+          catalogs.map((catalog) => (
+            <div key={catalog.product.id} className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">{catalog.product.name}</span>
+                <span className="text-xl font-serif font-semibold text-primary">{catalog.percent}%</span>
+              </div>
+              <ProgressBar value={catalog.percent} size="lg" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {catalog.completed} de {catalog.total} módulos concluídos
+              </p>
+            </div>
+          ))
+        )}
       </section>
 
       {/* Stats */}
