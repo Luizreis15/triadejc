@@ -57,26 +57,12 @@ export function useModuleDays(moduleId?: string) {
     enabled: !!user?.id,
   });
 
-  // Fetch ALL days globally to check cross-module unlock
-  const { data: allDays = [] } = useQuery({
-    queryKey: ["all-module-days"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("module_days")
-        .select("id, day_number")
-        .order("day_number");
-      if (error) throw error;
-      return data as { id: string; day_number: number }[];
-    },
-  });
-
+  // Unlock stays inside this module. Day numbers repeat across tracks,
+  // so a global day_number lookup would lock one trail behind another.
   const isDayUnlocked = (dayIndex: number) => {
-    const day = days[dayIndex];
-    if (!day) return false;
-    if (day.day_number === 1) return true;
-    // Find the global previous day (day_number - 1)
-    const prevGlobalDay = allDays.find(d => d.day_number === day.day_number - 1);
-    return prevGlobalDay ? allCompletedDayIds.includes(prevGlobalDay.id) : false;
+    if (dayIndex <= 0) return true;
+    const previous = days[dayIndex - 1];
+    return previous ? allCompletedDayIds.includes(previous.id) : false;
   };
 
   // Save exercise answers

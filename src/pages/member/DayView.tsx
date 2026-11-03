@@ -13,6 +13,8 @@ import { toast } from "@/hooks/use-toast";
 import { SignedFileLink } from "@/components/member/SignedFileLink";
 import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 import { useState, useEffect } from "react";
+import { CONFISSOES_SLUG } from "@/lib/confissoesCurriculum";
+import { findTrackLesson, nextTrackLesson, trackFor } from "@/lib/trackCurriculum";
 
 export default function DayView() {
   const { slug, dayId } = useParams<{ slug: string; dayId: string }>();
@@ -47,7 +49,8 @@ export default function DayView() {
   const [q2, setQ2] = useState("");
   const [q3, setQ3] = useState("");
   const [saving, setSaving] = useState(false);
-  const isSelah = day?.day_number === 16;
+  const track = trackFor(slug);
+  const isSelah = slug === CONFISSOES_SLUG && day?.day_number === 16;
   const queryClient = useQueryClient();
 
   // Favorite confession
@@ -142,10 +145,20 @@ export default function DayView() {
       });
     }
      try {
-      await markDayComplete.mutateAsync({ dayId: day.id, moduleSlug: slug });
-      toast({ title: "Dia concluído! ✨", description: "Parabéns por mais um dia de jornada." });
-      // If Day 30, redirect to completion page
-      if (day.day_number === 30) {
+      const lessonDays = track ? findTrackLesson(track.curriculum, day.day_number) : null;
+      const ids = lessonDays
+        ? lessonDays.lesson.dayNumbers
+            .map((number) => days.find((item) => item.day_number === number)?.id)
+            .filter((id): id is string => Boolean(id))
+        : [day.id];
+      for (const id of ids) {
+        await markDayComplete.mutateAsync({ dayId: id, moduleSlug: slug });
+      }
+      toast({
+        title: lessonDays ? "Aula concluída! ✨" : "Dia concluído! ✨",
+        description: lessonDays ? "Parabéns por mais um passo." : "Parabéns por mais um dia de jornada.",
+      });
+      if (slug === CONFISSOES_SLUG && day.day_number === 30) {
         setTimeout(() => navigate("/membros/app/conclusao"), 1500);
       }
     } catch {
@@ -154,7 +167,16 @@ export default function DayView() {
   };
 
   const handleNext = () => {
-    if (nextDay && slug) {
+    if (!slug || !day) return;
+    if (track) {
+      const following = nextTrackLesson(track.curriculum, day.day_number);
+      const target = following
+        ? days.find((item) => item.day_number === following.lesson.dayNumbers[0])
+        : null;
+      if (target) navigate(`/membros/app/modulos/${slug}/dia/${target.id}`);
+      return;
+    }
+    if (nextDay) {
       navigate(`/membros/app/modulos/${slug}/dia/${nextDay.id}`);
     }
   };
@@ -205,6 +227,15 @@ export default function DayView() {
   }
 
   const totalDays = days.length;
+  const placement = track ? findTrackLesson(track.curriculum, day.day_number) : null;
+  const lessonDays = placement
+    ? placement.lesson.dayNumbers
+        .map((number) => days.find((item) => item.day_number === number))
+        .filter((item): item is ModuleDay => Boolean(item))
+    : [day];
+  const pdfDay = placement?.lesson.pdf ? lessonDays[0] : placement ? null : day;
+  const pdfHref = pdfDay?.pdf_url ?? null;
+  const hasNextLesson = track && placement ? Boolean(nextTrackLesson(track.curriculum, day.day_number)) : Boolean(nextDay);
 
   return (
     <div className="space-y-6 pb-8">
@@ -219,11 +250,11 @@ export default function DayView() {
 
       {/* Selá Checkpoint Banner */}
       {isSelah && (
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-4 text-center space-y-1">
-          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-center space-y-1">
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
             ✦ Checkpoint
           </span>
-          <p className="text-sm text-purple-800 font-medium">
+          <p className="text-sm text-foreground font-medium">
             Pausa do meio da jornada — revise e consolide antes de avançar.
           </p>
         </div>
@@ -237,9 +268,9 @@ export default function DayView() {
       {/* Day Header */}
       <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Dia {day.day_number}
+          {placement ? `Módulo ${placement.module.index} · ${placement.module.title}` : `Dia ${day.day_number}`}
         </p>
-        <h1 className="font-serif text-2xl font-semibold text-foreground">{day.title}</h1>
+        <h1 className="font-serif text-2xl font-semibold text-foreground">{placement ? placement.lesson.title : day.title}</h1>
         {isCompleted && (
           <div className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -248,55 +279,62 @@ export default function DayView() {
         )}
       </div>
 
-      {/* Message */}
-      <section className="bg-card rounded-2xl border border-border/50 p-5 space-y-0">
-        {day.message_text.split("\n").map((line, i) => (
-          <p key={i} className={cn(
-            "text-foreground leading-relaxed",
-            line.trim() === "" ? "h-4" : ""
-          )}>
-            {line}
-          </p>
-        ))}
-      </section>
-
-      {/* Verse */}
-      {day.verse_reference && (
-        <section className="bg-primary/5 border border-primary/20 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-primary" />
-            <span className="font-serif font-semibold text-primary">{day.verse_reference}</span>
+      {lessonDays.map((part) => (
+        <section key={part.id} className="space-y-4">
+          {lessonDays.length > 1 && (
+            <h2 className="font-serif text-lg font-semibold text-foreground">{part.title}</h2>
+          )}
+          <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-0">
+            {part.message_text.split("\n").map((line, i) => (
+              <p key={i} className={cn(
+                "text-foreground leading-relaxed",
+                line.trim() === "" ? "h-4" : ""
+              )}>
+                {line}
+              </p>
+            ))}
           </div>
+          {part.verse_reference && (
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <span className="font-serif font-semibold text-primary">{part.verse_reference}</span>
+              </div>
+            </div>
+          )}
+          {part.confession_text && part.id !== day.id && (
+            <p className="font-serif italic text-foreground leading-relaxed">“{part.confession_text}”</p>
+          )}
         </section>
-      )}
+      ))}
 
       {/* Confession */}
       {day.confession_text && (
-        <section className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 space-y-2">
+        <section className="bg-primary/5 border border-primary/20 rounded-2xl p-5 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-600" />
-              <h2 className="font-serif font-semibold text-amber-900">Confissão de Fé</h2>
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h2 className="font-serif font-semibold text-foreground">{track?.declarationLabel ?? "Confissão de Fé"}</h2>
             </div>
             <button
               onClick={() => toggleFavorite.mutate()}
-              className="p-1.5 rounded-full hover:bg-amber-100 transition-colors"
+              className="p-1.5 rounded-full hover:bg-primary/10 transition-colors"
               aria-label={isFavorited ? "Remover dos favoritos" : "Favoritar confissão"}
             >
-              <Heart className={cn("w-5 h-5 transition-colors", isFavorited ? "fill-red-500 text-red-500" : "text-amber-400")} />
+              <Heart className={cn("w-5 h-5 transition-colors", isFavorited ? "fill-primary text-primary" : "text-primary/40")} />
             </button>
           </div>
-          <p className="text-amber-800 italic leading-relaxed font-serif">
+          <p className="text-foreground italic leading-relaxed font-serif">
             "{day.confession_text}"
           </p>
         </section>
       )}
 
       {/* Exercises */}
-      {(day.exercise_q1 || day.exercise_q2 || (day as any).exercise_q3) && (
+      {(day.exercise_q1 || day.exercise_q2 || day.exercise_q3) && (
         <section className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
           <div className="flex items-center gap-2">
-            <PenLine className="w-5 h-5 text-green-600" />
+            <PenLine className="w-5 h-5 text-primary" />
             <h2 className="font-serif font-semibold text-foreground">Escreva:</h2>
           </div>
 
@@ -324,9 +362,9 @@ export default function DayView() {
             </div>
           )}
 
-          {(day as any).exercise_q3 && (
+          {day.exercise_q3 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">{(day as any).exercise_q3}</p>
+              <p className="text-sm font-medium text-foreground">{day.exercise_q3}</p>
               <Textarea
                 value={q3}
                 onChange={(e) => setQ3(e.target.value)}
@@ -339,17 +377,17 @@ export default function DayView() {
       )}
 
       {/* PDF */}
-      {day.pdf_url && (
+      {pdfHref && (
         <SignedFileLink
-          href={day.pdf_url}
+          href={pdfHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 hover:border-orange-300 transition-colors"
+          className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 hover:border-primary/40 transition-colors"
         >
-          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-            <FileDown className="w-5 h-5 text-red-600" />
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <FileDown className="w-5 h-5 text-primary" />
           </div>
-          <span className="flex-1 text-sm font-medium">Baixar PDF original</span>
+          <span className="flex-1 text-sm font-medium">{placement ? "Baixar o PDF desta aula" : "Baixar o PDF deste dia"}</span>
         </SignedFileLink>
       )}
 
@@ -373,25 +411,25 @@ export default function DayView() {
             className="w-full bg-primary hover:bg-primary/90"
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
-            {isSelah ? "Concluir Selá e avançar" : "Concluir dia"}
+            {isSelah ? "Concluir Selá e avançar" : placement ? "Concluir aula" : "Concluir dia"}
           </Button>
         )}
 
-        {nextDay && (
+        {hasNextLesson && (
           <Button
             variant={isCompleted ? "default" : "outline"}
             onClick={handleNext}
             className={cn("w-full", isCompleted && "bg-primary hover:bg-primary/90")}
           >
-            Próximo dia
+            {placement ? "Próxima aula" : "Próximo dia"}
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         )}
 
-        {!nextDay && isCompleted && (
+        {!hasNextLesson && isCompleted && (
           <div className="text-center py-4 bg-green-50 rounded-xl border border-green-200">
             <p className="font-serif font-semibold text-green-800">🎉 Módulo concluído!</p>
-            <p className="text-sm text-green-700 mt-1">Parabéns por completar todos os dias.</p>
+            <p className="text-sm text-green-700 mt-1">{placement ? "Parabéns por completar todas as aulas." : "Parabéns por completar todos os dias."}</p>
           </div>
         )}
       </div>

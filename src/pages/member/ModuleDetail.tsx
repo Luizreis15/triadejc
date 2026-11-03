@@ -16,6 +16,7 @@ import { ReadingOverlay } from "@/components/member/ReadingOverlay";
 import { toast } from "@/hooks/use-toast";
 import { useQuery as useRQQuery } from "@tanstack/react-query";
 import ProductDetail from "./ProductDetail";
+import { trackFor } from "@/lib/trackCurriculum";
 
 // Define the card type with section
 interface ModuleCard {
@@ -84,7 +85,7 @@ export default function ModuleDetail() {
   });
 
   // Fetch module cards
-  const { data: cards = [] } = useQuery({
+  const { data: cards = [], isLoading: cardsLoading } = useQuery({
     queryKey: ["module-cards", module?.id],
     queryFn: async () => {
       if (!module?.id) return [];
@@ -176,8 +177,19 @@ export default function ModuleDetail() {
     );
   }
 
-  // If chapter-based product, delegate to ProductDetail
-  if (hasChapters) {
+  // Capítulos antigos só cobrem o módulo enquanto não há cards.
+  // Respira Alma passou a ter module_cards; a leitura é o card, não o ProductDetail.
+  if (hasChapters && cardsLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="aspect-video w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (hasChapters && cards.length === 0) {
     return <ProductDetail module={module} />;
   }
 
@@ -233,8 +245,8 @@ export default function ModuleDetail() {
         {moduleDays.length > 0 && (
           <QuickActionButton
             icon={Calendar}
-            label="Jornada Diária"
-            color="bg-purple-100 text-purple-700"
+            label={trackFor(slug) ? "Módulos" : "Jornada Diária"}
+            color="bg-primary/10 text-primary"
             onClick={() => scrollToSection(journeyRef)}
           />
         )}
@@ -276,7 +288,22 @@ export default function ModuleDetail() {
       {/* JORNADA DIÁRIA — Sub-módulos colapsáveis */}
       {moduleDays.length > 0 && (() => {
         // Group days into sub-modules by ranges
-        const subModules = [
+        const lessonMeta = new Map<string, { title: string; dayIds: string[] }>();
+        const track = trackFor(slug);
+        const subModules = track
+          ? track.curriculum.map((mod) => {
+              const days = mod.lessons.flatMap((lesson) => {
+                const related = lesson.dayNumbers
+                  .map((number) => moduleDays.find((day) => day.day_number === number))
+                  .filter((day): day is NonNullable<typeof day> => Boolean(day));
+                const primary = related[0];
+                if (!primary) return [];
+                lessonMeta.set(primary.id, { title: lesson.title, dayIds: related.map((day) => day.id) });
+                return [primary];
+              });
+              return { title: mod.title, subtitle: `${days.length} aulas`, days, isSelah: false };
+            }).filter((group) => group.days.length > 0)
+          : [
           { title: "Presença, Entrega e Direção", subtitle: "Dias 1–5", days: moduleDays.filter(d => d.day_number >= 1 && d.day_number <= 5), isSelah: false },
           { title: "Presença que Ilumina", subtitle: "Dias 6–10 · Luz & Influência", days: moduleDays.filter(d => d.day_number >= 6 && d.day_number <= 10), isSelah: false },
           { title: "Vitória & Propósito", subtitle: "Dias 11–15 · Coragem para Continuar", days: moduleDays.filter(d => d.day_number >= 11 && d.day_number <= 15), isSelah: false },
@@ -305,23 +332,23 @@ export default function ModuleDetail() {
                         "flex items-center justify-between p-4 rounded-2xl border transition-colors",
                         completed
                           ? "bg-green-50/50 border-green-200 hover:border-green-300"
-                          : "bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 hover:border-purple-300"
+                          : "bg-primary/5 border-primary/20 hover:border-primary/40"
                       )}
                     >
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "w-12 h-12 rounded-xl flex items-center justify-center text-lg",
-                          completed ? "bg-green-100 text-green-700" : "bg-purple-100 text-purple-700"
+                          completed ? "bg-green-100 text-green-700" : "bg-primary/10 text-primary"
                         )}>
                           {completed ? <CheckCircle2 className="w-6 h-6" /> : "✦"}
                         </div>
                         <div className="text-left">
                           <div className="flex items-center gap-2">
-                            <h2 className={cn("font-serif text-lg font-semibold", completed ? "text-muted-foreground" : "text-purple-800")}>
+                            <h2 className={cn("font-serif text-lg font-semibold", completed ? "text-muted-foreground" : "text-foreground")}>
                               {group.title}
                             </h2>
                             {!completed && (
-                              <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded">
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                                 Checkpoint
                               </span>
                             )}
@@ -367,7 +394,10 @@ export default function ModuleDetail() {
                         <div className="text-left">
                           <h2 className="font-serif text-lg font-semibold text-foreground">{group.title}</h2>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {group.days.filter(d => isDayCompleted(d.id)).length} de {group.days.length} dias concluídos
+                            {group.days.filter((d) => {
+                              const ids = lessonMeta.get(d.id)?.dayIds ?? [d.id];
+                              return ids.every((id) => isDayCompleted(id));
+                            }).length} de {group.days.length} {track ? "aulas" : "dias concluídos"}
                           </p>
                         </div>
                       </div>
@@ -377,9 +407,12 @@ export default function ModuleDetail() {
                   <CollapsibleContent>
                     <div className="space-y-2 mt-3 pl-2">
                       {group.days.map((day) => {
-                        const completed = isDayCompleted(day.id);
+                        const relatedIds = lessonMeta.get(day.id)?.dayIds ?? [day.id];
+                        const completed = relatedIds.every((id) => isDayCompleted(id));
                         const globalIndex = moduleDays.findIndex(d => d.id === day.id);
                         const unlocked = isDayUnlocked(globalIndex);
+                        const lessonTitle = lessonMeta.get(day.id)?.title ?? day.title;
+                        const lessonPosition = group.days.findIndex((item) => item.id === day.id) + 1;
                         return (
                           <div key={day.id} className="flex items-center gap-3">
                             <div className="flex flex-col items-center">
@@ -391,7 +424,7 @@ export default function ModuleDetail() {
                                     ? "bg-primary/10 text-primary"
                                     : "bg-muted text-muted-foreground"
                               )}>
-                                {completed ? <CheckCircle2 className="w-4 h-4" /> : day.day_in_module}
+                                {completed ? <CheckCircle2 className="w-4 h-4" /> : track ? lessonPosition : day.day_in_module}
                               </div>
                               {group.days.indexOf(day) < group.days.length - 1 && (
                                 <div className={cn(
@@ -414,19 +447,21 @@ export default function ModuleDetail() {
                                   "font-medium text-sm",
                                   completed ? "text-muted-foreground" : "text-foreground"
                                 )}>
-                                  {day.title}
+                                  {lessonTitle}
                                 </h3>
                                 <p className="text-xs text-muted-foreground mt-0.5">
-                                  Dia {day.day_number} · {completed ? "Concluído" : "Disponível"}
+                                  {track
+                                    ? `Aula ${lessonPosition}${completed ? " · Concluída" : ""}`
+                                    : `Dia ${day.day_number} · ${completed ? "Concluído" : "Disponível"}`}
                                 </p>
                               </Link>
                             ) : (
                               <div className="flex-1 p-3 rounded-xl border bg-muted/30 border-border/30 opacity-60">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="font-medium text-sm text-muted-foreground">{day.title}</h3>
+                                  <h3 className="font-medium text-sm text-muted-foreground">{lessonTitle}</h3>
                                   <Lock className="w-3.5 h-3.5 text-muted-foreground" />
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-0.5">Conclua o dia anterior para avançar</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{track ? "Conclua a aula anterior para avançar" : "Conclua o dia anterior para avançar"}</p>
                               </div>
                             )}
                           </div>
