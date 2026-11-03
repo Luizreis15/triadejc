@@ -23,3 +23,9 @@ verify_jwt = false
 
 [functions.process-outbox]
 verify_jwt = false
+
+[functions.whatsapp-admin]
+verify_jwt = true
+
+[functions.send-welcome-whatsapp]
+verify_jwt = false

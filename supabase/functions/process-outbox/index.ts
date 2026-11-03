@@ -84,11 +84,17 @@ export const handler = async (req: Request): Promise<Response> => {
       console.error("process-outbox: abandoned-cart drain failed", abandoned.status, abandoned.body);
     }
 
+    const whatsapp = await invokeInternal("send-welcome-whatsapp");
+    if (!whatsapp.ok) {
+      console.error("process-outbox: whatsapp drain failed", whatsapp.status);
+    }
+
     return new Response(
       JSON.stringify({
         success: welcome.ok && abandoned.ok,
         welcome,
         abandoned,
+        whatsapp,
       }),
       {
         status: welcome.ok && abandoned.ok ? 200 : 502,
