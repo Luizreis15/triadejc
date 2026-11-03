@@ -5,6 +5,8 @@ import { ensureUser } from "../_shared/users.ts";
 import { resolveProductId } from "../_shared/products.ts";
 import { grantEntitlementAndTransaction } from "../_shared/entitlements.ts";
 import { enqueueEmail } from "../_shared/outbox.ts";
+import { normalizeBrazilPhone } from "../_shared/phone.ts";
+import { enqueueWelcomeWhatsApp } from "../_shared/whatsappOutbox.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -131,6 +133,15 @@ async function triggerWelcomeDrain(): Promise<void> {
       const detail = await response.text().catch(() => "");
       console.error("kiwify-webhook: welcome drain rejected", response.status, detail.slice(0, 200));
     }
+    const whatsapp = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome-whatsapp`, {
+      method: "POST",
+      headers,
+      body: "{}",
+    });
+    if (!whatsapp.ok) {
+      console.error("kiwify-webhook: whatsapp drain rejected", whatsapp.status);
+    }
+    await whatsapp.text().catch(() => "");
   } catch (err) {
     console.error("kiwify-webhook: welcome drain trigger failed", err instanceof Error ? err.message : err);
   }
@@ -279,6 +290,23 @@ export const handler = async (req: Request): Promise<Response> => {
               loginUrl: "https://www.jordanacantarelli.com.br/membros",
             },
           });
+          const buyerPhone = normalizeBrazilPhone(payload.Customer?.mobile);
+          if (buyerPhone) {
+            try {
+              await enqueueWelcomeWhatsApp(supabaseAdmin, {
+                phone: buyerPhone,
+                userId,
+                name: customerName || customerEmail.split("@")[0],
+                email: customerEmail,
+                actionLink: accessLink,
+              });
+            } catch (whatsappError) {
+              const message = whatsappError instanceof Error ? whatsappError.message : "unknown error";
+              console.error("kiwify-webhook: whatsapp enqueue failed", message);
+            }
+          } else {
+            console.error("kiwify-webhook: whatsapp skipped, buyer phone missing or unusable");
+          }
           await triggerWelcomeDrain();
         } catch (outboxError) {
           const message = outboxError instanceof Error ? outboxError.message : "unknown error";

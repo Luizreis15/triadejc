@@ -11,6 +11,7 @@ import { LibraryAdmin } from "@/components/admin/LibraryAdmin";
 import { AdminSettingsContent } from "@/components/admin/AdminSettingsContent";
 import { FinanceAdmin } from "@/components/admin/FinanceAdmin";
 import { EmailAdmin } from "@/components/admin/EmailAdmin";
+import { WhatsAppAdmin } from "@/components/admin/WhatsAppAdmin";
 import { ModulePdfsAdmin } from "@/components/admin/ModulePdfsAdmin";
 import { AbandonedCartDashboard } from "@/components/admin/AbandonedCartDashboard";
 import { ProductsAdmin } from "@/components/admin/ProductsAdmin";
@@ -38,6 +39,9 @@ export default function Admin() {
         </TabsContent>
         <TabsContent value="email" className="mt-0">
           <EmailAdmin />
+        </TabsContent>
+        <TabsContent value="whatsapp" className="mt-0">
+          <WhatsAppAdmin />
         </TabsContent>
         <TabsContent value="abandoned-cart" className="mt-0">
           <AbandonedCartDashboard />

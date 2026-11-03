@@ -16,6 +16,7 @@ import {
   Settings,
   DollarSign,
   Mail,
+  MessageCircle,
   FileDown,
   ShoppingCart,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const navItems = [
   { value: "leads", label: "Leads", icon: UserPlus },
   { value: "finance", label: "Financeiro", icon: DollarSign },
   { value: "email", label: "Email Mkt", icon: Mail },
+  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
   { value: "abandoned-cart", label: "Carrinho", icon: ShoppingCart },
   { value: "modules", label: "Módulos", icon: BookOpen },
   { value: "cards", label: "Cards", icon: Layers },
