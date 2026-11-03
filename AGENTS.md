@@ -1,6 +1,8 @@
 # Dois agentes — contrato de execução
 
-Owner: Cursor Grok (este agente). Implementadores: **Track A = Claude Code**, **Track B = Cursor Grok**. Não editar arquivo do outro track. Arquivo compartilhado = só o owner, ou PR de sync.
+**Owner: Claude Code.** Alterado em 2026-11-02 por decisão explícita do usuário (Luiz) — substitui o arranjo anterior, onde o Cursor Grok era owner. Motivo registrado pelo usuário: preferência pelo refinamento do Claude Code frente ao do Cursor Grok.
+
+Implementadores: **Owner = Claude Code** (sem restrição de path), **Track B = Cursor Grok** (implementador restrito, não decide mais sobre arquivos compartilhados nem sobre este contrato). Cursor Grok não edita `AGENTS.md`/`CLAUDE.md` nem itens de freeze sem autorização do owner atual (Claude Code) ou do usuário.
 
 P0 e P1 estão em `main`. P2 está em `sec/p1` (outbox, cron, PDF privado, invite admin).
 
@@ -8,40 +10,35 @@ P0 e P1 estão em `main`. P2 está em `sec/p1` (outbox, cron, PDF privado, invit
 
 | Agente | Branch | Base |
 |--------|--------|------|
-| Claude Code | `agent/claude-ingress` | `sec/p1` |
-| Cursor Grok | `agent/cursor-access` | `sec/p1` |
+| Claude Code (owner) | `agent/claude-ingress` | `sec/p1` |
+| Cursor Grok (Track B) | `agent/cursor-access` | `sec/p1` |
 | Integração | `sec/p1` | merge das duas |
 
-Não rebase na branch do outro. Não resetar a branch do outro. Merge só via owner. Não mergear `sec/p1` em `main` sem o owner.
+Não resetar a branch do outro agente sem avisar. Merge para `main` só com confirmação do usuário.
 
-## Track A — Claude Code
+## Owner — Claude Code
 
-Paths: `kiwify-webhook`, `send-welcome-email`, `send-abandoned-cart`, `process-outbox`, `_shared`. Sem `src/`, migrations, `types.ts`, `config.toml`.
+Pode editar qualquer path do projeto, incluindo `src/`, `migrations/**`, `types.ts`, `config.toml`, `package.json`, `vercel.json`, `AGENTS.md`, `CLAUDE.md`. Responsável por revisar e integrar o que o Track B (Cursor Grok) entrega antes de ir para `sec/p1`/`main`.
 
-**P0/P1/P2 (feito — não reabrir)** HMAC, entitlements, outbox, welcome no retry.
+**P0/P1/P2 (feito, em `kiwify-webhook`/outbox)** HMAC, entitlements, outbox, welcome no retry — não reabrir sem motivo novo.
 
-**P3 (agora)** — testes Deno do webhook/outbox:
+**P3 (fechado)** — testes Deno do webhook/outbox: HMAC fail-closed, replay sem duplicar, idempotency_key, imports pinados.
 
-1. Teste HMAC fail-closed (sem header → 401).
-2. Replay do mesmo `event_id` não duplica entitlement/transaction/welcome.
-3. `enqueueEmail` com o mesmo `idempotency_key` = uma linha.
-4. Pin de imports Deno (`@supabase/supabase-js` uma versão só).
+**Escopo aberto agora**: repaginação visual do módulo de leitura/área de membros (paleta, movimento, progresso integrado, "onde parei", lembrete de leitura) e disparo de WhatsApp pós-compra via UAZAPI — ver prompts específicos quando abertos.
 
 ## Track B — Cursor Grok
 
-Paths: `src/**` (exceto freeze), `send-campaign`, `send-auth-email`, `create-admin-user`.
+Paths sugeridos: `src/**`, `send-campaign`, `send-auth-email`, `create-admin-user` — sob revisão do owner antes de ir para `sec/p1`. Qualquer mudança em `config.toml`, `package.json`, `types.ts`, `migrations/**` passa pelo owner, não é mais decisão unilateral do Cursor Grok.
 
 **P3 (agora)**
 
 1. Sentry no SPA (DSN só em env).
-2. Bump jsPDF e react-router se o owner abrir `package.json`.
+2. Bump jsPDF e react-router — abrir como PR para o owner revisar `package.json`.
 3. Empty/error states restantes nas rotas de membro.
 
-## Freeze — só o owner
+## Freeze — só o owner (Claude Code) ou o usuário
 
-`config.toml`, `package.json`, `types.ts`, `migrations/**`, `vercel.json`, `AGENTS.md`, `CLAUDE.md`.
-
-Owner P3: GitHub Actions (`tsc`, eslint, `npm audit --audit-level=high`), gitignore de artefatos.
+`AGENTS.md`, `CLAUDE.md`. Demais paths (`config.toml`, `package.json`, `types.ts`, `migrations/**`, `vercel.json`) seguem sob revisão do owner, não são mais exclusivos do Cursor Grok.
 
 ## Contratos
 
@@ -50,11 +47,3 @@ Owner P3: GitHub Actions (`tsc`, eslint, `npm audit --audit-level=high`), gitign
 - Sem `any` novo. Sem log de payload PII.
 - Deno `_shared` não importa de `src/`.
 - Sem senha padrão. Sem signup público. Sem Hubla.
-
-## Prompt curto para o Claude Code
-
-```
-Leia AGENTS.md. Você é Track A. Branch agent/claude-ingress a partir de origin/sec/p1.
-Não edite src/, config.toml, package.json, types.ts nem migrations.
-P2 está fechado. P3 Track A: testes Deno do kiwify-webhook (HMAC 401, replay não duplica, idempotency_key do outbox). Sem refund. PR para sec/p1.
-```

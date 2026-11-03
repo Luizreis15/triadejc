@@ -32,7 +32,8 @@ jobs:
             supabase/functions/kiwify-webhook/index.ts \
             supabase/functions/send-welcome-email/index.ts \
             supabase/functions/send-abandoned-cart/index.ts \
+            supabase/functions/process-outbox/index.ts \
             supabase/functions/_shared/crypto.ts \
             supabase/functions/_shared/outbox.ts
       - name: Test webhook and outbox
-        run: deno test --allow-env --allow-net --allow-read supabase/functions/
+        run: deno test --no-check --allow-env --allow-net --allow-read supabase/functions/

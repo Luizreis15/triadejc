@@ -308,6 +308,121 @@
   animation: pulse-soft 2s ease-in-out infinite;
 }
 
+/* Área de membros: terracota viva sobre o nude da Jordana.
+   O site público continua na paleta :root. */
+.member-shell {
+  --background: 32 48% 94%;
+  --foreground: 18 38% 16%;
+  --card: 36 62% 97%;
+  --card-foreground: 18 38% 16%;
+  --popover: 36 62% 97%;
+  --popover-foreground: 18 38% 16%;
+  --primary: 14 76% 46%;
+  --primary-foreground: 36 70% 98%;
+  --secondary: 8 42% 74%;
+  --secondary-foreground: 18 38% 16%;
+  --muted: 28 30% 88%;
+  --muted-foreground: 18 16% 34%;
+  --accent: 16 68% 32%;
+  --accent-foreground: 36 70% 98%;
+  --border: 24 26% 80%;
+  --input: 24 26% 80%;
+  --ring: 14 76% 46%;
+  --gradient-primary: linear-gradient(135deg, hsl(14 76% 46%), hsl(22 80% 56%));
+  --gradient-warm: linear-gradient(160deg, hsl(32 55% 96%), hsl(14 70% 88%));
+  --gradient-card: linear-gradient(180deg, hsl(36 70% 98%), hsl(28 42% 93%));
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(ellipse 90% 50% at 0% -10%, hsl(14 76% 46% / 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 40% at 100% 0%, hsl(36 80% 74% / 0.45), transparent 50%);
+}
+
+.member-shell.member-dark {
+  --background: 18 22% 9%;
+  --foreground: 32 36% 92%;
+  --card: 18 18% 13%;
+  --card-foreground: 32 36% 92%;
+  --popover: 18 18% 13%;
+  --popover-foreground: 32 36% 92%;
+  --primary: 16 78% 64%;
+  --primary-foreground: 18 30% 10%;
+  --secondary: 16 22% 22%;
+  --secondary-foreground: 32 36% 92%;
+  --muted: 18 14% 18%;
+  --muted-foreground: 28 16% 72%;
+  --accent: 16 50% 42%;
+  --accent-foreground: 32 36% 96%;
+  --border: 18 14% 22%;
+  --input: 18 14% 22%;
+  --ring: 16 78% 64%;
+  --gradient-primary: linear-gradient(135deg, hsl(16 78% 64%), hsl(28 70% 58%));
+  --gradient-card: linear-gradient(180deg, hsl(18 18% 16%), hsl(18 22% 11%));
+  color-scheme: dark;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 0% 0%, hsl(16 78% 64% / 0.18), transparent 50%),
+    radial-gradient(ellipse 60% 30% at 100% 0%, hsl(28 40% 30% / 0.35), transparent 46%);
+}
+
+.member-module-card {
+  background-image:
+    radial-gradient(120% 90% at 100% 0%, hsl(var(--primary) / 0.14), transparent 52%),
+    linear-gradient(180deg, hsl(var(--card)), hsl(28 36% 94%));
+  box-shadow: 0 10px 28px -18px hsl(14 50% 28% / 0.45);
+}
+
+.member-shell.member-dark .member-module-card {
+  background-image:
+    radial-gradient(120% 90% at 100% 0%, hsl(var(--primary) / 0.22), transparent 55%),
+    linear-gradient(180deg, hsl(18 16% 16%), hsl(18 20% 11%));
+  box-shadow: 0 16px 32px -20px hsl(0 0% 0% / 0.7);
+}
+
+.member-read-cta {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.member-read-cta:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.16);
+}
+
+.member-read-cta:active {
+  transform: scale(0.98);
+}
+
+.member-reading-prose {
+  font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+}
+
+.member-reading-prose p + p {
+  margin-top: 1em;
+}
+
+@keyframes member-confetti-fall {
+  0% { transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--cx), 70vh, 0) rotate(240deg); opacity: 0; }
+}
+
+.member-confetti-piece {
+  position: absolute;
+  top: 8%;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  animation: member-confetti-fall 1.1s ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .member-confetti-piece,
+  .member-read-cta {
+    animation: none;
+    transition: none;
+  }
+}
+
 /* Stagger animation delays */
 .stagger-1 { animation-delay: 0.1s; }
 .stagger-2 { animation-delay: 0.2s; }

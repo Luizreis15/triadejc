@@ -981,6 +981,52 @@ export type Database = {
           },
         ]
       }
+      reading_positions: {
+        Row: {
+          card_id: string
+          module_id: string
+          scroll_ratio: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          module_id: string
+          scroll_ratio: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          module_id?: string
+          scroll_ratio?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_positions_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "module_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_positions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_positions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
