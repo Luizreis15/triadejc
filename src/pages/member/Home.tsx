@@ -1,14 +1,13 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowRight, Heart, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntitledCatalog } from "@/hooks/useEntitledCatalog";
 import { useReadingResume } from "@/hooks/useReadingResume";
 import { Button } from "@/components/ui/button";
-import { VideoPlayer, ProgressBar, ModuleCard, CalmModal } from "@/components/member";
+import { VideoPlayer, ProgressBar, ModuleCard } from "@/components/member";
 import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -27,7 +26,6 @@ const itemVariants = {
 
 export default function Home() {
   const { user } = useAuth();
-  const [calmModalOpen, setCalmModalOpen] = useState(false);
   const {
     catalogs,
     completedModules,
@@ -253,22 +251,6 @@ export default function Home() {
           </Link>
         </motion.div>
       )}
-
-      {/* Calm Button */}
-      <motion.button
-        onClick={() => setCalmModalOpen(true)}
-        className="fixed bottom-24 right-4 z-40 flex items-center gap-2 px-4 py-3 bg-accent text-accent-foreground rounded-full shadow-lg"
-        initial={{ opacity: 0, scale: 0, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.8 }}
-        whileHover={{ scale: 1.08, boxShadow: "0 12px 30px -8px hsl(16 81% 23% / 0.3)" }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <Heart className="w-5 h-5" />
-        <span className="text-sm font-medium">Preciso de calma</span>
-      </motion.button>
-
-      <CalmModal open={calmModalOpen} onOpenChange={setCalmModalOpen} />
     </motion.div>
   );
 }
