@@ -84,7 +84,7 @@ export default function ModuleDetail() {
   });
 
   // Fetch module cards
-  const { data: cards = [] } = useQuery({
+  const { data: cards = [], isLoading: cardsLoading } = useQuery({
     queryKey: ["module-cards", module?.id],
     queryFn: async () => {
       if (!module?.id) return [];
@@ -176,8 +176,19 @@ export default function ModuleDetail() {
     );
   }
 
-  // If chapter-based product, delegate to ProductDetail
-  if (hasChapters) {
+  // Capítulos antigos só cobrem o módulo enquanto não há cards.
+  // Respira Alma passou a ter module_cards; a leitura é o card, não o ProductDetail.
+  if (hasChapters && cardsLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="aspect-video w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (hasChapters && cards.length === 0) {
     return <ProductDetail module={module} />;
   }
 
