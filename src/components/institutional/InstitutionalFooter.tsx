@@ -29,7 +29,6 @@ export function InstitutionalFooter() {
               <p className="font-['Poppins'] text-sm font-semibold mb-1">Navegação</p>
               <Link to="/" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Início</Link>
               <Link to="/jornadas" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Jornadas</Link>
-              <Link to="/revoluz" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Método Revoluz</Link>
               <Link to="/contato" className="font-['Poppins'] text-sm opacity-70 hover:opacity-100 transition-opacity">Contato</Link>
             </div>
           </StaggerItem>

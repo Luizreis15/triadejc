@@ -31,30 +31,6 @@ const jornadas = [
   },
 ];
 
-const outros = [
-  {
-    title: "Método Revoluz",
-    desc: "Programa de transformação que une princípios cristãos, inteligência emocional e reprogramação mental para restaurar sua identidade e propósito.",
-    cta: "Conhecer o Método Revoluz",
-    href: "/revoluz",
-    external: false,
-  },
-  {
-    title: "Mentoria DSL",
-    desc: "Mentoria em grupo, ao vivo, com direcionamento espiritual e emocional para destravar bloqueios e viver com clareza, equilíbrio e propósito.",
-    cta: "Entrar na lista de espera",
-    href: "/contato#lista-espera",
-    external: false,
-  },
-  {
-    title: "Revoluz Experience",
-    desc: "Imersão presencial de um dia para viver, sentir e aplicar o Método Revoluz com intensidade e resultados imediatos.",
-    cta: "Entrar na lista de espera",
-    href: "/contato#lista-espera",
-    external: false,
-  },
-];
-
 export default function JornadasPage() {
   return (
     <div className="sales-page">
@@ -78,7 +54,7 @@ export default function JornadasPage() {
 
           {/* Main grid */}
           <div id="jornadas-catalogo" className="scroll-mt-20">
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {jornadas.map((j) => (
               <StaggerItem key={j.title}>
                 <div className="card-cream p-6 h-full flex flex-col">
@@ -99,34 +75,6 @@ export default function JornadasPage() {
           </StaggerContainer>
           </div>
 
-          {/* Outros */}
-          <ScrollReveal>
-            <h2 id="outros-produtos" className="font-['Playfair_Display'] text-2xl font-semibold text-foreground text-center mb-2 scroll-mt-20">
-              Outros Produtos
-            </h2>
-            <p className="font-['Poppins'] text-sm text-muted-foreground text-center mb-8 max-w-xl mx-auto">
-              Mentoria e Experience abrem turmas por períodos. Entre na lista para ser avisada.
-            </p>
-          </ScrollReveal>
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {outros.map((p) => (
-              <StaggerItem key={p.title}>
-                <div className="card-cream p-6 h-full flex flex-col">
-                  <h3 className="font-['Playfair_Display'] text-lg font-semibold text-foreground mb-2">{p.title}</h3>
-                  <p className="font-['Poppins'] text-sm text-muted-foreground flex-1 mb-4">{p.desc}</p>
-                  {p.external ? (
-                    <a href={p.href} target="_blank" rel="noopener noreferrer" className="btn-orange py-3 px-5 text-xs w-full">
-                      {p.cta} <ArrowRight className="w-4 h-4" />
-                    </a>
-                  ) : (
-                    <Link to={p.href} className="inline-flex items-center justify-center gap-2 py-3 px-5 text-xs font-['Poppins'] font-semibold border-2 border-foreground/20 rounded-xl text-foreground hover:bg-foreground/5 transition-colors w-full">
-                      {p.cta} <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  )}
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
         </div>
       </main>
       <InstitutionalFooter />

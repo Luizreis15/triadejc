@@ -4,11 +4,12 @@ import { StaggerContainer, StaggerItem } from "@/components/sales/StaggerContain
 import { TextReveal } from "@/components/sales/TextReveal";
 import { BackToTopButton } from "@/components/institutional/BackToTopButton";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, BookOpen, Heart, Mic, Instagram, Youtube, Globe, MessageCircle } from "lucide-react";
+import { ArrowRight, Heart, Mic, Instagram, Youtube, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import heroImg from "@/assets/jordana-hero.jpg";
 import aboutImg from "@/assets/jordana-about.jpg";
+import logoJornadaUnica from "@/assets/logo-jornada-unica.png";
 
 const ease21st = [0.22, 1, 0.36, 1] as const;
 
@@ -23,43 +24,23 @@ interface LinkCard {
   variant: LinkVariant;
 }
 
+const JORNADA_UNICA_HREF = "/jornada";
+
 const linkCards: LinkCard[] = [
   {
-    title: "Sessão Individual",
-    description: "Atendimento personalizado com Jordana.",
+    title: "Terapia Individual",
+    description: "Atendimento online e personalizado com Jordana.",
     href: "https://api.whatsapp.com/send?phone=5511988396576&text=Ol%C3%A1%2C%20gostaria%20de%20saber%20como%20funciona%20para%20marcar%20Terapia%20com%20a%20Jordana%3F",
     external: true,
     icon: Heart,
-    variant: "gold",
-  },
-  {
-    title: "Jornadas",
-    description: "Conteúdos e trilhas para sua transformação.",
-    href: "/jornadas",
-    icon: BookOpen,
-    variant: "gold",
-  },
-  {
-    title: "Método REVOLUZ",
-    description: "Organize o que está por dentro e viva com propósito.",
-    href: "/revoluz",
-    icon: Sparkles,
-    variant: "orange",
-  },
-  {
-    title: "Enviar convite",
-    description: "Pregações, palestras e eventos.",
-    href: "https://wa.link/z8p2f9",
-    external: true,
-    icon: Mic,
     variant: "outline",
   },
   {
-    title: "Instagram",
-    description: "@jordanacantarelli",
-    href: "https://instagram.com/jordanacantarelli",
+    title: "Agendas e Palestras",
+    description: "Convites para pregações, palestras e eventos.",
+    href: "https://wa.link/z8p2f9",
     external: true,
-    icon: Instagram,
+    icon: Mic,
     variant: "outline",
   },
   {
@@ -70,15 +51,74 @@ const linkCards: LinkCard[] = [
     icon: Youtube,
     variant: "outline",
   },
-  {
-    title: "Site oficial",
-    description: "jordanacantarelli.com.br",
-    href: "https://jordanacantarelli.com.br/",
-    external: true,
-    icon: Globe,
-    variant: "outline",
-  },
 ];
+
+function JornadaUnicaFeatured() {
+  return (
+    <StaggerItem>
+      <Link to={JORNADA_UNICA_HREF} className="block" aria-label="Conhecer a Jornada Única">
+        <motion.div
+          className="relative overflow-hidden rounded-2xl p-6 text-center"
+          style={{
+            background: "linear-gradient(160deg, hsl(var(--sp-cream)) 0%, hsl(var(--sp-paper)) 100%)",
+            boxShadow: "0 18px 40px -14px hsl(var(--sp-rose) / 0.45)",
+            border: "2px solid hsl(var(--sp-rose)/0.7)",
+          }}
+          whileHover={{ y: -4, scale: 1.015 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.3, ease: ease21st }}
+        >
+          {/* brilho suave de fundo */}
+          <motion.div
+            aria-hidden
+            className="absolute -top-16 -right-16 w-48 h-48 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, hsl(var(--sp-rose)/0.25) 0%, transparent 70%)" }}
+            animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          <span
+            className="relative inline-flex items-center gap-1.5 body-inter text-[10px] font-semibold tracking-widest uppercase py-1.5 px-3 rounded-full mb-4"
+            style={{ background: "hsl(var(--sp-rose))", color: "white" }}
+          >
+            <Sparkles className="w-3 h-3" />
+            Comece por aqui
+          </span>
+
+          <img
+            src={logoJornadaUnica}
+            alt="Jornada Única"
+            className="relative mx-auto h-24 w-auto object-contain mb-2 mix-blend-multiply"
+          />
+
+          <h2 className="sr-only">
+            Jornada Única
+          </h2>
+          <p className="relative body-inter text-sm leading-relaxed mb-4" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
+            3 sessões de jornada guiada para organizar o que está por dentro e viver sua fé com calma e presença.
+          </p>
+
+          <div className="relative flex flex-wrap justify-center gap-2 mb-5">
+            {["3 sessões guiadas", "Acesso imediato", "7 dias de garantia"].map((item) => (
+              <span
+                key={item}
+                className="body-inter text-[11px] py-1 px-2.5 rounded-full border"
+                style={{ borderColor: "hsl(var(--sp-petrol-primary)/0.25)", color: "hsl(var(--sp-petrol-primary))" }}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <span className="relative btn-gold w-full justify-center inline-flex py-4 text-sm">
+            Quero começar minha jornada
+            <ArrowRight className="w-5 h-5" />
+          </span>
+        </motion.div>
+      </Link>
+    </StaggerItem>
+  );
+}
 
 const floatingTags = ["Fé", "Autoconhecimento", "Inteligência Emocional", "Reprogramação"];
 
@@ -86,7 +126,7 @@ const stats = [
   { value: "+ 10 anos", label: "Experiência clínica" },
   { value: "Pastora", label: "Lagoinha Morumbi" },
   { value: "Psicanalista", label: "Terapeuta cristã" },
-  { value: "REVOLUZ", label: "Método autoral" },
+  { value: "Jornada Única", label: "Experiência guiada" },
 ];
 
 function LinkCardItem({ card, index }: { card: LinkCard; index: number }) {
@@ -287,6 +327,7 @@ export default function LinksPage() {
           </ScrollReveal>
 
           <StaggerContainer className="space-y-3" staggerDelay={0.08}>
+            <JornadaUnicaFeatured />
             {linkCards.map((card, i) => (
               <LinkCardItem key={card.title} card={card} index={i} />
             ))}
@@ -316,7 +357,7 @@ export default function LinksPage() {
                   Jordana Cantarelli
                 </h3>
                 <p className="body-inter text-xs" style={{ color: "hsl(var(--sp-cream)/0.8)" }}>
-                  Pastora · Fundadora do Método REVOLUZ
+                  Pastora · Psicanalista · Terapeuta cristã
                 </p>
               </div>
             </motion.div>
@@ -405,7 +446,6 @@ export default function LinksPage() {
           <div className="flex justify-center gap-4 mb-3 body-inter text-xs" style={{ color: "hsl(var(--sp-cream)/0.8)" }}>
             <Link to="/">Início</Link>
             <Link to="/jornadas">Jornadas</Link>
-            <Link to="/revoluz">Revoluz</Link>
             <Link to="/contato">Contato</Link>
           </div>
           <p className="body-inter text-[11px]" style={{ color: "hsl(var(--sp-cream)/0.6)" }}>

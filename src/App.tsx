@@ -12,7 +12,6 @@ import { MemberErrorState } from "@/components/member/MemberState";
 // Public pages
 import SalesPage from "./pages/SalesPage";
 import SalesPageJunica from "./pages/SalesPageJunica";
-import SalesPageRevoluz from "./pages/SalesPageRevoluz";
 import HomePage from "./pages/HomePage";
 import JornadasPage from "./pages/JornadasPage";
 import ContatoPage from "./pages/ContatoPage";
@@ -62,8 +61,8 @@ const App = () => (
             {/* Public routes */}
             <Route path="/jornada" element={<SalesPage />} />
             <Route path="/junica" element={<SalesPageJunica />} />
-            <Route path="/revoluz" element={<SalesPageRevoluz />} />
-            <Route path="/metodo-revoluz" element={<SalesPageRevoluz />} />
+            <Route path="/revoluz" element={<Navigate to="/jornada" replace />} />
+            <Route path="/metodo-revoluz" element={<Navigate to="/jornada" replace />} />
             <Route path="/jornadas" element={<JornadasPage />} />
             <Route path="/contato" element={<ContatoPage />} />
             <Route path="/links" element={<LinksPage />} />

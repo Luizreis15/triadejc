@@ -144,12 +144,6 @@ function JornadasSection() {
     { title: "Cadeias Invisíveis", desc: "Jornada de rompimento de padrões emocionais, cura de traumas e transformação interior.", icon: BookOpen },
     { title: "Confissões de Fé", desc: "30 dias para reprogramar sua mente com a Palavra e redescobrir sua identidade em Deus.", icon: Sparkles },
   ];
-  const outros = [
-    { title: "Método Revoluz", desc: "Programa de transformação que une princípios cristãos, inteligência emocional e reprogramação mental para restaurar sua identidade e propósito.", cta: "Conhecer o Método Revoluz", href: "/revoluz", external: false },
-    { title: "Mentoria DSL", desc: "Mentoria em grupo, ao vivo, com direcionamento espiritual e emocional para destravar bloqueios e viver com clareza, equilíbrio e propósito.", cta: "Entrar na lista de espera", href: "/contato#lista-espera", external: false },
-    { title: "Revoluz Experience", desc: "Imersão presencial de um dia para viver, sentir e aplicar o Método Revoluz com intensidade e resultados imediatos.", cta: "Entrar na lista de espera", href: "/contato#lista-espera", external: false },
-  ];
-
   return (
     <section id="jornadas" className="py-16 px-6 md:px-8 bg-background scroll-mt-20">
       <div className="max-w-[1200px] mx-auto">
@@ -179,34 +173,12 @@ function JornadasSection() {
           ))}
         </StaggerContainer>
 
-        <div className="text-center mb-10">
+        <div className="text-center">
           <Link to="/jornadas" className="btn-gold py-4 px-8 text-sm">
             Conhecer as Jornadas <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
-        <ScrollReveal>
-          <h3 id="produtos" className="font-['Playfair_Display'] text-xl font-semibold text-foreground text-center mb-6 scroll-mt-20">Outros Produtos</h3>
-        </ScrollReveal>
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {outros.map((p) => (
-            <StaggerItem key={p.title}>
-              <div className="card-cream p-6 h-full flex flex-col">
-                <h3 className="font-['Playfair_Display'] text-lg font-semibold text-foreground mb-2">{p.title}</h3>
-                <p className="font-['Poppins'] text-sm text-muted-foreground flex-1 mb-4">{p.desc}</p>
-                {p.external ? (
-                  <a href={p.href} target="_blank" rel="noopener noreferrer" className="btn-orange py-3 px-5 text-xs w-full">
-                    {p.cta} <ArrowRight className="w-4 h-4" />
-                  </a>
-                ) : (
-                  <Link to={p.href} className="inline-flex items-center justify-center gap-2 py-3 px-5 text-xs font-['Poppins'] font-semibold border-2 border-foreground/20 rounded-xl text-foreground hover:bg-foreground/5 transition-colors w-full">
-                    {p.cta} <ArrowRight className="w-4 h-4" />
-                  </Link>
-                )}
-              </div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
       </div>
     </section>
   );

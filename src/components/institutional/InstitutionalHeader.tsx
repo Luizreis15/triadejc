@@ -8,7 +8,6 @@ const WHATSAPP_URL = "https://wa.link/0fz5bp";
 const navItems = [
   { label: "Início", href: "/" },
   { label: "Jornadas", href: "/jornadas" },
-  { label: "Revoluz", href: "/revoluz" },
   { label: "Contato", href: "/contato" },
   { label: "Enviar convite", href: "/contato#convites" },
 ];
