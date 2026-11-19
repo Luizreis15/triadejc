@@ -28,7 +28,7 @@ import AdminProfile from "./pages/AdminProfile";
 
 // Member pages
 import { AppLayout } from "@/components/member/AppLayout";
-import { Home, Modules, ModuleDetail, DayView, ReadingView, Notebook, Library, Profile, JourneyCompletion, ProductsShowcase } from "./pages/member";
+import { Home, Modules, ModuleDetail, DayView, ReadingView, Notebook, Library, Profile, JourneyCompletion } from "./pages/member";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -83,7 +83,7 @@ const App = () => (
             <Route path="/membros/app/biblioteca" element={<ProtectedRoute><AppLayout><Library /></AppLayout></ProtectedRoute>} />
             <Route path="/membros/app/perfil" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
             <Route path="/membros/app/conclusao" element={<ProtectedRoute><AppLayout><JourneyCompletion /></AppLayout></ProtectedRoute>} />
-            <Route path="/membros/app/conheca" element={<ProtectedRoute><AppLayout><ProductsShowcase /></AppLayout></ProtectedRoute>} />
+            <Route path="/membros/app/conheca" element={<Navigate to="/membros/app" replace />} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

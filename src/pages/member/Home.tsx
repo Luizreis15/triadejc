@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntitledCatalog } from "@/hooks/useEntitledCatalog";
@@ -194,29 +194,6 @@ export default function Home() {
           </motion.section>
         ))
       )}
-
-      {/* Products Showcase Card */}
-      <motion.div variants={itemVariants}>
-        <Link to="/membros/app/conheca">
-          <motion.div 
-            className="bg-gradient-to-r from-secondary/20 to-accent/10 rounded-2xl p-5 border border-secondary/30 shadow-sm"
-            whileHover={{ scale: 1.02, boxShadow: "0 8px 30px -8px hsl(212 30% 21% / 0.12)" }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center shrink-0">
-                <Sparkles className="w-6 h-6 text-secondary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-serif text-base font-semibold text-foreground">Conheça todos os produtos</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Método REVOLUZ, Mentoria DSL e mais</p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground shrink-0" />
-            </div>
-          </motion.div>
-        </Link>
-      </motion.div>
 
       {catalogs.length === 1 && (
         <motion.section
