@@ -88,18 +88,15 @@ function JornadaUnicaFeatured() {
           <img
             src={logoJornadaUnica}
             alt="Jornada Única"
-            className="relative mx-auto h-24 w-auto object-contain mb-2 mix-blend-multiply"
+            className="relative mx-auto h-24 w-auto object-contain mb-4 mix-blend-multiply"
           />
 
           <h2 className="sr-only">
             Jornada Única
           </h2>
-          <p className="relative body-inter text-sm leading-relaxed mb-4" style={{ color: "hsl(var(--sp-text-dark)/0.8)" }}>
-            3 sessões de jornada guiada para organizar o que está por dentro e viver sua fé com calma e presença.
-          </p>
 
           <div className="relative flex flex-wrap justify-center gap-2 mb-5">
-            {["3 sessões guiadas", "Acesso imediato", "7 dias de garantia"].map((item) => (
+            {["Acesso imediato", "7 dias de garantia"].map((item) => (
               <span
                 key={item}
                 className="body-inter text-[11px] py-1 px-2.5 rounded-full border"
