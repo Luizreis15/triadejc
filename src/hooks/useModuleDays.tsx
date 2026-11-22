@@ -9,6 +9,8 @@ export interface ModuleDay {
   day_in_module: number;
   title: string;
   verse_reference: string | null;
+  /** Versículo por extenso, na NVI. Vazio enquanto não for preenchido. */
+  verse_text: string | null;
   message_text: string;
   confession_text: string | null;
   exercise_q1: string | null;
