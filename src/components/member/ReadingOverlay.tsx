@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { CheckCircle2, Minus, PenLine, Plus, X } from "lucide-react";
@@ -15,6 +14,7 @@ import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberSt
 import { useMemberTheme } from "@/components/member/MemberTheme";
 import { CelebrateBurst } from "@/components/member/CelebrateBurst";
 import { fetchRemoteCardScroll, loadCardScroll, saveReadingPlace, syncReadingPosition } from "@/lib/readingPlace";
+import { ReadingReflection } from "@/components/member/ReadingReflection";
 import { cn } from "@/lib/utils";
 
 const SIZE_KEY = "ju.reading.size";
@@ -244,21 +244,29 @@ export function ReadingSession({ cardId, moduleSlug, onClose }: ReadingSessionPr
               </p>
             )}
           </article>
+          {card.content_md && (
+            <ReadingReflection
+              cardId={cardId}
+              cardTitle={card.title}
+              moduleSlug={moduleSlug}
+              content={card.content_md}
+            />
+          )}
         </div>
       </div>
 
       <footer className="shrink-0 border-t border-border/60 bg-background/95 px-4 py-4 backdrop-blur-lg">
         <div className="mx-auto flex max-w-lg gap-3">
-          <Link
-            to={`/membros/app/caderno?module=${moduleSlug ?? ""}`}
-            className="flex-1"
-            onClick={closeAndSave}
+          <Button
+            variant="outline"
+            className="h-12 flex-1"
+            onClick={() => {
+              document.getElementById("reading-reflection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
           >
-            <Button variant="outline" className="h-12 w-full">
-              <PenLine className="mr-2 h-4 w-4" />
-              Registrar no Caderno
-            </Button>
-          </Link>
+            <PenLine className="mr-2 h-4 w-4" />
+            Escrever reflexão
+          </Button>
           {isCompleted ? (
             <Button variant="secondary" className="h-12 flex-1" disabled>
               <CheckCircle2 className="mr-2 h-4 w-4" />

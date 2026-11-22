@@ -19,30 +19,10 @@ export interface ModuleDay {
   created_at: string;
 }
 
-export function useModuleDays(moduleId?: string) {
+/** Ids dos dias que a aluna já concluiu, em todas as trilhas. */
+export function useDayCompletions(): string[] {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  // Fetch days for a module
-  const { data: days = [], isLoading: daysLoading } = useQuery({
-    queryKey: ["module-days", moduleId],
-    queryFn: async () => {
-      if (!moduleId) return [];
-      const { data, error } = await supabase
-        .from("module_days")
-        .select("*")
-        .eq("module_id", moduleId)
-        .order("day_in_module");
-      if (error) throw error;
-      return data as ModuleDay[];
-    },
-    enabled: !!moduleId,
-  });
-
-  const isDayCompleted = (dayId: string) => allCompletedDayIds.includes(dayId);
-
-  // Fetch ALL completions globally (not just this module)
-  const { data: allCompletedDayIds = [] } = useQuery({
+  const { data = [] } = useQuery({
     queryKey: ["all-day-completions", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -56,6 +36,32 @@ export function useModuleDays(moduleId?: string) {
     },
     enabled: !!user?.id,
   });
+  return data;
+}
+
+export function useModuleDays(moduleId?: string) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Fetch days for a module
+  const { data: days = [], isLoading: daysLoading } = useQuery({
+    queryKey: ["module-days", moduleId],
+    queryFn: async () => {
+      if (!moduleId) return [];
+      const { data, error } = await supabase
+        .from("module_days")
+        .select("*")
+        .eq("module_id", moduleId)
+        .order("day_number");
+      if (error) throw error;
+      return data as ModuleDay[];
+    },
+    enabled: !!moduleId,
+  });
+
+  const allCompletedDayIds = useDayCompletions();
+
+  const isDayCompleted = (dayId: string) => allCompletedDayIds.includes(dayId);
 
   // Unlock stays inside this module. Day numbers repeat across tracks,
   // so a global day_number lookup would lock one trail behind another.
@@ -82,21 +88,23 @@ export function useModuleDays(moduleId?: string) {
       }
       
       // Upsert: check if entry exists
-      const { data: existing } = await supabase
+      const { data: existing, error: lookupError } = await supabase
         .from("notebook_entries")
         .select("id")
         .eq("user_id", user.id)
         .eq("section", "day_exercise")
         .eq("title", dayId)
         .maybeSingle();
+      if (lookupError) throw lookupError;
 
       if (existing) {
-        await supabase
+        const { error } = await supabase
           .from("notebook_entries")
           .update({ content_md: content, updated_at: new Date().toISOString() })
           .eq("id", existing.id);
+        if (error) throw error;
       } else {
-        await supabase
+        const { error } = await supabase
           .from("notebook_entries")
           .insert({
             user_id: user.id,
@@ -105,10 +113,12 @@ export function useModuleDays(moduleId?: string) {
             module_slug: moduleSlug,
             content_md: content,
           });
+        if (error) throw error;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["day-exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["notebook-entries"] });
     },
   });
 
@@ -118,16 +128,17 @@ export function useModuleDays(moduleId?: string) {
       if (!user?.id) throw new Error("Not authenticated");
       
       // Check if already completed
-      const { data: existing } = await supabase
+      const { data: existing, error: lookupError } = await supabase
         .from("notebook_entries")
         .select("id")
         .eq("user_id", user.id)
         .eq("section", "day_complete")
         .eq("title", dayId)
         .maybeSingle();
+      if (lookupError) throw lookupError;
 
       if (!existing) {
-        await supabase
+        const { error } = await supabase
           .from("notebook_entries")
           .insert({
             user_id: user.id,
@@ -136,6 +147,7 @@ export function useModuleDays(moduleId?: string) {
             module_slug: moduleSlug,
             content_md: "Dia concluído",
           });
+        if (error) throw error;
       }
     },
     onSuccess: () => {

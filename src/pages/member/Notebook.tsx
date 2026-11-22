@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Save, FileDown, Clock, Smile, Meh, Frown, Heart, Sparkles, Loader2 } from "lucide-react";
@@ -18,6 +18,7 @@ import { DevotionalDayView } from "@/components/member/DevotionalDayView";
 import { ProgressDashboard } from "@/components/member/ProgressDashboard";
 import { exportNotebookToPdf } from "@/lib/exportNotebookPdf";
 import { MemberErrorState } from "@/components/member/MemberState";
+import { useProgress } from "@/hooks/useProgress";
 
 const moodOptions = [
   { value: 1, icon: Frown, label: "Difícil", color: "text-red-500" },
@@ -34,7 +35,12 @@ export default function Notebook() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  const defaultTab = searchParams.get("tab") || "checkin";
+  // ?tab=exercises abre direto na aba; ?exercicio=1 abre o exercício daquela posição.
+  const TABS = ["checkin", "exercises", "devotional", "history"];
+  const requestedTab = searchParams.get("tab") ?? (searchParams.get("type") === "exercise" ? "exercises" : "");
+  const [tab, setTab] = useState(TABS.includes(requestedTab) ? requestedTab : "checkin");
+  const requestedExercise = Number(searchParams.get("exercicio"));
+  const openedFromLink = useRef(false);
   
   // Selected items for detail views
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -72,7 +78,10 @@ export default function Notebook() {
     queryKey: ["checkin-today", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const today = new Date().toISOString().split("T")[0];
+      // Meia-noite no horário da aluna, não em UTC: à noite o dia já teria virado.
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const today = start.toISOString();
       const { data, error } = await supabase
         .from("notebook_entries")
         .select("*")
@@ -140,14 +149,16 @@ export default function Notebook() {
   // Save check-in mutation
   const saveCheckin = useMutation({
     mutationFn: async () => {
-      if (!user?.id || !mood) return;
+      if (!user?.id || !mood) throw new Error("Check-in incompleto");
       const content = JSON.stringify({ mood, feeling, thought, need });
-      await supabase.from("notebook_entries").insert({
+      const { error } = await supabase.from("notebook_entries").insert({
         user_id: user.id,
         section: "checkin",
         title: `Check-in do dia`,
         content_md: content,
       });
+      // Sem isto a tela dizia "salvo" mesmo quando o banco recusava o registro.
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notebook-entries"] });
@@ -159,11 +170,54 @@ export default function Notebook() {
       setNeed("");
     },
     onError: () => {
-      toast({ title: "Erro ao salvar", description: "Tente novamente.", variant: "destructive" });
+      toast({
+        title: "Não foi possível salvar",
+        description: "O que você escreveu continua na tela. Tente de novo em alguns instantes.",
+        variant: "destructive",
+      });
     },
   });
 
   const checkins = entries.filter(e => e.section === "checkin");
+  const streak = checkinStreak(checkins.map((entry) => entry.created_at));
+  // Marcações internas de aula concluída não são registros da aluna.
+  const historyEntries = entries.filter((entry) => entry.section !== "day_complete");
+
+  const { data: lessonTitles = {} } = useQuery({
+    queryKey: ["notebook-lesson-titles", user?.id],
+    enabled: !!user?.id && entries.some((entry) => entry.section === "day_exercise"),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("module_days").select("id, title");
+      if (error) throw error;
+      return Object.fromEntries((data ?? []).map((day) => [day.id, day.title])) as Record<string, string>;
+    },
+  });
+
+  // A atividade do módulo só conta como feita quando o exercício é salvo aqui.
+  const { data: activityCard } = useQuery({
+    queryKey: ["module-activity-card", MODULE_SLUG],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("module_cards")
+        .select("id, module_id, modules!inner(slug)")
+        .eq("modules.slug", MODULE_SLUG)
+        .eq("section", "activity")
+        .order("order_index")
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const { markCardComplete } = useProgress(activityCard?.module_id);
+
+  useEffect(() => {
+    if (openedFromLink.current || !requestedExercise || exercises.length === 0) return;
+    openedFromLink.current = true;
+    const target = exercises.find((exercise) => exercise.order_index === requestedExercise);
+    if (target) setSelectedExercise(target);
+  }, [requestedExercise, exercises]);
 
   // Handle exercise save
   const handleSaveExercise = async (content: string) => {
@@ -173,6 +227,12 @@ export default function Notebook() {
       title: selectedExercise.title,
       content,
     });
+    if (selectedExercise.order_index === 1 && activityCard) {
+      // Falha aqui não desfaz o exercício, que já está salvo.
+      await markCardComplete
+        .mutateAsync({ cardId: activityCard.id, moduleId: activityCard.module_id })
+        .catch(() => undefined);
+    }
   };
 
   // Handle devotional save
@@ -248,11 +308,11 @@ export default function Notebook() {
         devotionalCompleted={devotionalCompleted}
         devotionalTotal={devotionalTotal}
         checkinsCount={checkins.length}
-        streak={0}
+        streak={streak}
       />
 
       {/* Tabs */}
-      <Tabs defaultValue={defaultTab} className="w-full">
+      <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="w-full grid grid-cols-4 h-12 mb-6">
           <TabsTrigger value="checkin" className="text-xs">Check-in</TabsTrigger>
           <TabsTrigger value="exercises" className="text-xs">Exercícios</TabsTrigger>
@@ -262,6 +322,9 @@ export default function Notebook() {
 
         {/* Check-in Tab */}
         <TabsContent value="checkin" className="space-y-6">
+          <TabHint>
+            Um registro rápido de como você chega hoje. Faça uma vez por dia, antes ou depois da leitura.
+          </TabHint>
           {todayCheckin ? (
             <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-6 text-center">
               <Heart className="w-12 h-12 mx-auto text-green-600 mb-3" />
@@ -312,7 +375,11 @@ export default function Notebook() {
         </TabsContent>
 
         {/* Exercises Tab */}
-        <TabsContent value="exercises">
+        <TabsContent value="exercises" className="space-y-4">
+          <TabHint>
+            Dez exercícios escritos do módulo Cadeias Invisíveis. Faça na ordem, um por vez, depois das leituras do módulo.
+            O primeiro é a Atividade do Módulo.
+          </TabHint>
           <ExerciseList
             exercises={exercises}
             isCompleted={isExerciseCompleted}
@@ -323,7 +390,10 @@ export default function Notebook() {
         </TabsContent>
 
         {/* Devotional Tab */}
-        <TabsContent value="devotional">
+        <TabsContent value="devotional" className="space-y-4">
+          <TabHint>
+            Sete dias de Palavra, reflexão e oração. Um dia por vez: o seguinte abre quando você completa o anterior.
+          </TabHint>
           <DevotionalTimeline
             days={devotionalDays}
             isDayCompleted={isDayCompleted}
@@ -336,7 +406,8 @@ export default function Notebook() {
 
         {/* History Tab */}
         <TabsContent value="history" className="space-y-4">
-          {entries.length === 0 ? (
+          <TabHint>Tudo o que você já registrou, do mais recente para o mais antigo.</TabHint>
+          {historyEntries.length === 0 ? (
             <div className="bg-muted/30 rounded-2xl p-6 text-center">
               <Clock className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground">Seu histórico aparecerá aqui conforme você fizer registros.</p>
@@ -350,7 +421,9 @@ export default function Notebook() {
                 </Button>
               </div>
               <div className="space-y-3">
-                {entries.map((entry) => <EntryCard key={entry.id} entry={entry} />)}
+                {historyEntries.map((entry) => (
+                  <EntryCard key={entry.id} entry={entry} lessonTitle={lessonTitles[entry.title ?? ""]} />
+                ))}
               </div>
             </>
           )}
@@ -360,16 +433,37 @@ export default function Notebook() {
   );
 }
 
-function EntryCard({ entry }: { entry: any }) {
+function TabHint({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm leading-relaxed text-muted-foreground">{children}</p>;
+}
+
+/** Dias seguidos com check-in, contando a partir de hoje (ou de ontem, se hoje ainda não foi feito). */
+function checkinStreak(dates: string[]): number {
+  const dayKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  const days = new Set(dates.map((iso) => dayKey(new Date(iso))));
+  const cursor = new Date();
+  if (!days.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let count = 0;
+  while (days.has(dayKey(cursor))) {
+    count += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return count;
+}
+
+type NotebookEntry = { id: string; created_at: string; section: string; title: string | null };
+
+function EntryCard({ entry, lessonTitle }: { entry: NotebookEntry; lessonTitle?: string }) {
   const date = new Date(entry.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
-  const sectionLabels: Record<string, string> = { checkin: "Check-in", exercise: "Exercício", devotional: "Devocional", summary: "Resumo" };
+  const sectionLabels: Record<string, string> = { checkin: "Check-in", exercise: "Exercício", devotional: "Devocional", summary: "Resumo", day_exercise: "Aula", reading_reflection: "Reflexão" };
+  const title = entry.section === "day_exercise" ? lessonTitle ?? "Respostas da aula" : entry.title;
   return (
     <div className="bg-card rounded-xl p-4 border border-border/50">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs text-muted-foreground">{date}</span>
         <span className="text-xs bg-muted px-2 py-1 rounded-full">{sectionLabels[entry.section] || entry.section}</span>
       </div>
-      {entry.title && <h3 className="font-medium text-foreground">{entry.title}</h3>}
+      {title && <h3 className="font-medium text-foreground">{title}</h3>}
     </div>
   );
 }

@@ -78,7 +78,7 @@ export function ProgressDashboard({
             {checkinsCount}
           </span>
           <span className="text-sm text-muted-foreground mb-1">
-            registros
+            {checkinsCount === 1 ? "registro" : "registros"}
           </span>
         </div>
       </div>
@@ -97,7 +97,7 @@ export function ProgressDashboard({
             {streak}
           </span>
           <span className="text-sm text-muted-foreground mb-1">
-            dias
+            {streak === 1 ? "dia" : "dias"}
           </span>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/member";
 import { MemberErrorState } from "@/components/member/MemberState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
+import { supportWhatsAppUrl } from "@/lib/support";
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -48,7 +49,8 @@ export default function Profile() {
       const { count, error } = await supabase
         .from("notebook_entries")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .neq("section", "day_complete");
       if (error) throw error;
       return count || 0;
     },
@@ -167,7 +169,7 @@ export default function Profile() {
         <h2 className="font-serif font-semibold text-foreground">Atalhos</h2>
         
         <a
-          href="https://wa.me/5500000000000"
+          href={supportWhatsAppUrl ?? "/contato"}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 hover:border-primary/30 transition-colors"
@@ -177,7 +179,9 @@ export default function Profile() {
           </div>
           <div className="flex-1">
             <h3 className="font-medium text-foreground">Suporte</h3>
-            <p className="text-xs text-muted-foreground">Precisa de ajuda? Fale conosco</p>
+            <p className="text-xs text-muted-foreground">
+              {supportWhatsAppUrl ? "Precisa de ajuda? Fale conosco pelo WhatsApp" : "Precisa de ajuda? Fale conosco"}
+            </p>
           </div>
           <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </a>
