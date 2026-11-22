@@ -16,7 +16,8 @@ import { ReadingOverlay } from "@/components/member/ReadingOverlay";
 import { toast } from "@/hooks/use-toast";
 import { useQuery as useRQQuery } from "@tanstack/react-query";
 import ProductDetail from "./ProductDetail";
-import { trackFor } from "@/lib/trackCurriculum";
+import { trackFor, trackLessonUnits, isLessonUnlocked } from "@/lib/trackCurriculum";
+import { countModuleSteps } from "@/lib/moduleProgress";
 
 // Define the card type with section
 interface ModuleCard {
@@ -107,9 +108,17 @@ export default function ModuleDetail() {
   const { days: moduleDays, isDayCompleted, isDayUnlocked } = useModuleDays(module?.id);
 
   // Calculate progress based on actual completions
-  const totalCards = cards.length;
-  const completedCards = cards.filter(c => isCardCompleted(c.id)).length;
-  const progressPercent = totalCards > 0 ? Math.round((completedCards / totalCards) * 100) : 0;
+  // Leituras e aulas contam juntas: um módulo de aulas não fecha só com a abertura lida.
+  const steps = countModuleSteps({
+    slug,
+    cardIds: cards.map((card) => card.id),
+    days: moduleDays,
+    isCardDone: isCardCompleted,
+    isDayDone: isDayCompleted,
+  });
+  const totalCards = steps.total;
+  const completedCards = steps.done;
+  const progressPercent = steps.percent;
 
   // Group cards by SECTION (not type)
   const introCards = cards.filter(c => c.section === "intro");
@@ -245,7 +254,7 @@ export default function ModuleDetail() {
         {moduleDays.length > 0 && (
           <QuickActionButton
             icon={Calendar}
-            label={trackFor(slug) ? "Módulos" : "Jornada Diária"}
+            label={trackFor(slug) ? "Temas e aulas" : "Jornada Diária"}
             color="bg-primary/10 text-primary"
             onClick={() => scrollToSection(journeyRef)}
           />
@@ -253,7 +262,7 @@ export default function ModuleDetail() {
         {selahCards.length > 0 && (
           <QuickActionButton
             icon={Heart}
-            label="Momentos Selah"
+            label="Momentos Selá"
             color="bg-purple-100 text-purple-700"
             onClick={() => scrollToSection(selahRef)}
           />
@@ -290,17 +299,21 @@ export default function ModuleDetail() {
         // Group days into sub-modules by ranges
         const lessonMeta = new Map<string, { title: string; dayIds: string[] }>();
         const track = trackFor(slug);
+        const units = track ? trackLessonUnits(track.curriculum, moduleDays) : [];
+        const unitIndexByDay = new Map<string, number>();
+        units.forEach((unit, index) => {
+          unitIndexByDay.set(unit.days[0].id, index);
+          lessonMeta.set(unit.days[0].id, { title: unit.lesson.title, dayIds: unit.days.map((day) => day.id) });
+        });
+        // Nas trilhas a liberação segue a ordem das aulas; fora delas, a ordem dos dias.
+        const isUnlocked = (dayId: string) => {
+          const unitIndex = unitIndexByDay.get(dayId);
+          if (unitIndex !== undefined) return isLessonUnlocked(units, unitIndex, isDayCompleted);
+          return isDayUnlocked(moduleDays.findIndex((d) => d.id === dayId));
+        };
         const subModules = track
           ? track.curriculum.map((mod) => {
-              const days = mod.lessons.flatMap((lesson) => {
-                const related = lesson.dayNumbers
-                  .map((number) => moduleDays.find((day) => day.day_number === number))
-                  .filter((day): day is NonNullable<typeof day> => Boolean(day));
-                const primary = related[0];
-                if (!primary) return [];
-                lessonMeta.set(primary.id, { title: lesson.title, dayIds: related.map((day) => day.id) });
-                return [primary];
-              });
+              const days = units.filter((unit) => unit.module.index === mod.index).map((unit) => unit.days[0]);
               return { title: mod.title, subtitle: `${days.length} aulas`, days, isSelah: false };
             }).filter((group) => group.days.length > 0)
           : [
@@ -320,8 +333,7 @@ export default function ModuleDetail() {
               if (group.isSelah && group.days.length === 1) {
                 const selahDay = group.days[0];
                 const completed = isDayCompleted(selahDay.id);
-                const globalIndex = moduleDays.findIndex(d => d.id === selahDay.id);
-                const unlocked = isDayUnlocked(globalIndex);
+                const unlocked = isUnlocked(selahDay.id);
 
                 if (unlocked) {
                   return (
@@ -409,8 +421,7 @@ export default function ModuleDetail() {
                       {group.days.map((day) => {
                         const relatedIds = lessonMeta.get(day.id)?.dayIds ?? [day.id];
                         const completed = relatedIds.every((id) => isDayCompleted(id));
-                        const globalIndex = moduleDays.findIndex(d => d.id === day.id);
-                        const unlocked = isDayUnlocked(globalIndex);
+                        const unlocked = isUnlocked(day.id);
                         const lessonTitle = lessonMeta.get(day.id)?.title ?? day.title;
                         const lessonPosition = group.days.findIndex((item) => item.id === day.id) + 1;
                         return (
@@ -492,16 +503,16 @@ export default function ModuleDetail() {
         </div>
       )}
 
-      {/* SEÇÃO 3 — Momentos Selah */}
+      {/* SEÇÃO 3 — Momentos Selá */}
       {selahCards.length > 0 && (
         <div ref={selahRef}>
           <ContentSection 
-            title="Momentos Selah" 
+            title="Momentos Selá" 
             icon={<Heart className="w-5 h-5 text-purple-600" />}
             className="bg-purple-50/50 -mx-4 px-4 py-6 rounded-2xl"
           >
             <p className="text-sm text-muted-foreground mb-4">
-              Selah é uma pausa para integrar. Não é leitura, é reflexão guiada.
+              Selá é uma pausa para integrar. Não é leitura, é reflexão guiada.
             </p>
             {selahCards.map((card) => (
               <SelahCard
@@ -547,7 +558,6 @@ export default function ModuleDetail() {
                 card={card} 
                 moduleSlug={slug!}
                 isCompleted={isCardCompleted(card.id)}
-                onComplete={() => handleCompleteCard(card.id)}
               />
             ))}
           </ContentSection>
@@ -734,11 +744,6 @@ function SelahCard({
           <BookOpen className="w-4 h-4 mr-2" />
           Ver reflexão
         </Button>
-        <Link to={`/membros/app/caderno?module=${moduleSlug}`}>
-          <Button variant="outline" size="sm" className="border-purple-200 hover:bg-purple-50">
-            <PenLine className="w-4 h-4" />
-          </Button>
-        </Link>
         {!isCompleted && (
           <Button size="sm" variant="ghost" onClick={onComplete} className="text-purple-600 hover:bg-purple-100">
             <Circle className="w-4 h-4 mr-1" />
@@ -810,12 +815,10 @@ function ActivityCard({
   card, 
   moduleSlug,
   isCompleted,
-  onComplete 
 }: { 
   card: ModuleCard; 
   moduleSlug: string;
   isCompleted?: boolean;
-  onComplete?: () => void;
 }) {
   return (
     <div className={cn(
@@ -841,7 +844,7 @@ function ActivityCard({
       )}
       
       <div className="flex gap-2">
-        <Link to={card.cta_url || `/membros/app/caderno?module=${moduleSlug}&type=exercise`} className="flex-1">
+        <Link to={`/membros/app/caderno?tab=exercises&module=${moduleSlug}&exercicio=1`} className="flex-1">
           <Button 
             variant={isCompleted ? "outline" : "default"} 
             className={cn(
@@ -850,16 +853,15 @@ function ActivityCard({
             )}
           >
             <PenLine className="w-4 h-4 mr-2" />
-            {card.cta_label || (isCompleted ? "Ver no Caderno" : "Abrir no Caderno")}
+            {isCompleted ? "Ver no Caderno" : "Fazer no Caderno"}
           </Button>
         </Link>
-        {!isCompleted && (
-          <Button variant="ghost" onClick={onComplete} className="text-green-600 hover:bg-green-100">
-            <Circle className="w-4 h-4 mr-1" />
-            Concluir
-          </Button>
-        )}
       </div>
+      {!isCompleted && (
+        <p className="text-xs text-muted-foreground">
+          Esta atividade fica concluída quando você salva o exercício no Caderno.
+        </p>
+      )}
     </div>
   );
 }

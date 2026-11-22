@@ -13,7 +13,7 @@ interface MarkdownPreviewProps {
 export function MarkdownPreview({ content, className, lineClamp = 3 }: MarkdownPreviewProps) {
   // Strip markdown syntax for preview (simpler display)
   const stripMarkdown = (text: string): string => {
-    return text
+    return normalizeBreaks(text)
       // Remove headers
       .replace(/^#{1,6}\s+/gm, '')
       // Remove bold/italic
@@ -125,11 +125,16 @@ interface MarkdownContentProps {
   className?: string;
 }
 
+/** Alguns textos foram gravados com "\\n" escrito em vez da quebra de linha. */
+export function normalizeBreaks(text: string): string {
+  return text.replace(/\\r?\\n|\\n/g, "\n");
+}
+
 export function MarkdownContent({ content, className }: MarkdownContentProps) {
   return (
     <div className={cn("max-w-none", className)}>
       <ReactMarkdown components={markdownComponents}>
-        {content}
+        {normalizeBreaks(content)}
       </ReactMarkdown>
     </div>
   );

@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "./useAuth";
+import { useDayCompletions } from "./useModuleDays";
+import { countModuleSteps } from "@/lib/moduleProgress";
 
 export type CatalogModule = Tables<"modules">;
 export type ModuleStatus = "not_started" | "in_progress" | "completed";
@@ -100,12 +102,30 @@ export function useEntitledCatalog() {
       if (moduleIds.length === 0) return [];
       const { data, error } = await supabase
         .from("module_cards")
-        .select("id, module_id")
-        .in("module_id", moduleIds);
+        .select("id, module_id, title, order_index")
+        .in("module_id", moduleIds)
+        .order("order_index");
       if (error) throw error;
       return data ?? [];
     },
   });
+
+  const daysQuery = useQuery({
+    queryKey: ["member-day-counts", moduleIds],
+    enabled: !!user?.id && modulesQuery.isSuccess,
+    queryFn: async () => {
+      if (moduleIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from("module_days")
+        .select("id, module_id, day_number")
+        .in("module_id", moduleIds)
+        .order("day_number");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const completedDayIds = new Set(useDayCompletions());
 
   const completionsQuery = useQuery({
     queryKey: ["member-card-completions", user?.id],
@@ -128,19 +148,35 @@ export function useEntitledCatalog() {
     cardsByModule.set(card.module_id, list);
   }
 
-  const getModuleProgress = (moduleId: string): { progress: number; status: ModuleStatus } => {
+  const allModules = modulesQuery.data ?? [];
+
+  // O percentual sai sempre da contagem real de leituras e aulas. O campo
+  // progress.completed ficou marcado por engano em módulos de aulas e não decide mais nada.
+  const getModuleProgress = (moduleId: string): { progress: number; status: ModuleStatus; done: number; total: number } => {
     const moduleProgress = progress.find((item) => item.module_id === moduleId);
-    const cardIds = cardsByModule.get(moduleId) ?? [];
-    const done = cardIds.filter((id) => completedCardIds.has(id)).length;
-    if (moduleProgress?.completed || (cardIds.length > 0 && done >= cardIds.length)) {
-      return { progress: 100, status: "completed" };
-    }
-    if (cardIds.length > 0 && done > 0) {
-      return { progress: Math.round((done / cardIds.length) * 100), status: "in_progress" };
-    }
-    if (moduleProgress) return { progress: 0, status: "in_progress" };
-    return { progress: 0, status: "not_started" };
+    const steps = countModuleSteps({
+      slug: allModules.find((module) => module.id === moduleId)?.slug,
+      cardIds: cardsByModule.get(moduleId) ?? [],
+      days: (daysQuery.data ?? []).filter((day) => day.module_id === moduleId),
+      isCardDone: (id) => completedCardIds.has(id),
+      isDayDone: (id) => completedDayIds.has(id),
+    });
+    const base = { done: steps.done, total: steps.total };
+    if (steps.total > 0 && steps.done >= steps.total) return { ...base, progress: 100, status: "completed" };
+    if (steps.done > 0) return { ...base, progress: steps.percent, status: "in_progress" };
+    if (moduleProgress) return { ...base, progress: 0, status: "in_progress" };
+    return { ...base, progress: 0, status: "not_started" };
   };
+
+  /** Próxima leitura ainda não concluída de um módulo, na ordem em que aparece. */
+  const nextUnreadCard = (moduleId: string, afterCardId?: string) => {
+    const cards = (cardsQuery.data ?? []).filter((card) => card.module_id === moduleId);
+    const start = afterCardId ? cards.findIndex((card) => card.id === afterCardId) + 1 : 0;
+    const ordered = [...cards.slice(start), ...cards.slice(0, start)];
+    return ordered.find((card) => !completedCardIds.has(card.id)) ?? null;
+  };
+
+  const isCardDone = (cardId: string) => completedCardIds.has(cardId);
 
   const lastProgressAt = progress.reduce<string | null>((latest, row) => {
     if (!row.updated_at) return latest;
@@ -179,20 +215,23 @@ export function useEntitledCatalog() {
     totalModules,
     overallProgress: totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0,
     getModuleProgress,
+    nextUnreadCard,
+    isCardDone,
     lastProgressAt,
     isLoading:
       productsQuery.isPending ||
       progressQuery.isPending ||
       completionsQuery.isPending ||
       (productsQuery.isSuccess && modulesQuery.isPending) ||
-      (modulesQuery.isSuccess && cardsQuery.isPending),
-    isError: productsQuery.isError || modulesQuery.isError || progressQuery.isError || cardsQuery.isError || completionsQuery.isError,
+      (modulesQuery.isSuccess && (cardsQuery.isPending || daysQuery.isPending)),
+    isError: productsQuery.isError || modulesQuery.isError || progressQuery.isError || cardsQuery.isError || daysQuery.isError || completionsQuery.isError,
     refetch: () =>
       Promise.all([
         productsQuery.refetch(),
         modulesQuery.refetch(),
         progressQuery.refetch(),
         cardsQuery.refetch(),
+        daysQuery.refetch(),
         completionsQuery.refetch(),
       ]),
   };

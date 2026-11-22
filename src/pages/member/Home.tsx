@@ -32,6 +32,8 @@ export default function Home() {
     totalModules,
     overallProgress,
     getModuleProgress,
+    nextUnreadCard,
+    isCardDone,
     isLoading: modulesLoading,
     isError: modulesError,
     refetch: refetchModules,
@@ -59,6 +61,11 @@ export default function Home() {
     ? catalogs.flatMap((catalog) => catalog.modules).find((module) => module.slug === resume?.moduleSlug)
     : undefined;
   const resumeProgress = resumeModule ? getModuleProgress(resumeModule.id).progress : Math.round((resume?.scrollRatio ?? 0) * 100);
+  // Leitura já concluída não é "onde parei": o cartão aponta para a próxima que falta.
+  const resumeDone = Boolean(resume && resumeOwned && isCardDone(resume.cardId));
+  const nextCard = resumeDone && resumeModule ? nextUnreadCard(resumeModule.id, resume?.cardId) : null;
+  const resumeCardId = nextCard?.id ?? (resumeDone ? null : resume?.cardId ?? null);
+  const resumeCardTitle = nextCard?.title ?? (resumeDone ? resumeModule?.title : resume?.cardTitle);
 
   if (modulesLoading) {
     return (
@@ -110,14 +117,16 @@ export default function Home() {
           <Link
             to={
               resumeOwned && resume
-                ? `/membros/app/modulos/${resume.moduleSlug}?ler=${resume.cardId}`
+                ? resumeCardId
+                  ? `/membros/app/modulos/${resume.moduleSlug}?ler=${resumeCardId}`
+                  : `/membros/app/modulos/${resume.moduleSlug}`
                 : `/membros/app/modulos/${currentModule?.slug ?? ""}`
             }
             className="member-module-card block rounded-2xl border border-primary/30 p-5"
           >
             <p className="text-[11px] uppercase tracking-[0.16em] text-primary">Continue de onde parou</p>
             <h2 className="mt-1 font-serif text-xl font-semibold text-foreground">
-              {resumeOwned && resume ? resume.cardTitle : currentModule?.title}
+              {resumeOwned && resume ? resumeCardTitle : currentModule?.title}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {resumeOwned && resume ? resume.moduleTitle : "Sua próxima etapa"}
@@ -125,7 +134,9 @@ export default function Home() {
             <div className="mt-4">
               <ProgressBar value={resumeOwned ? resumeProgress : overallProgress} size="md" />
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">{resumeOwned ? resumeProgress : overallProgress}% desta jornada</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {resumeOwned ? `${resumeProgress}% deste módulo` : `${overallProgress}% desta jornada`}
+            </p>
           </Link>
         </motion.section>
       ) : null}

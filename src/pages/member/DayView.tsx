@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, BookOpen, Sparkles, PenLine, Save, CheckCircle2, ChevronRight, FileDown, Heart } from "lucide-react";
+import { ArrowLeft, BookOpen, Sparkles, PenLine, Save, CheckCircle2, ChevronRight, FileDown, Heart, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +14,7 @@ import { SignedFileLink } from "@/components/member/SignedFileLink";
 import { MemberEmptyState, MemberErrorState } from "@/components/member/MemberState";
 import { useState, useEffect } from "react";
 import { CONFISSOES_SLUG } from "@/lib/confissoesCurriculum";
-import { findTrackLesson, nextTrackLesson, trackFor } from "@/lib/trackCurriculum";
+import { findTrackLesson, nextTrackLesson, trackFor, trackLessonUnits, isLessonUnlocked } from "@/lib/trackCurriculum";
 
 export default function DayView() {
   const { slug, dayId } = useParams<{ slug: string; dayId: string }>();
@@ -127,24 +127,31 @@ export default function DayView() {
       });
       toast({ title: "Respostas salvas! 💾" });
     } catch {
-      toast({ title: "Erro ao salvar", variant: "destructive" });
+      toast({
+        title: "Não foi possível salvar",
+        description: "Suas respostas continuam na tela. Tente de novo em alguns instantes.",
+        variant: "destructive",
+      });
     }
     setSaving(false);
   };
 
+  const [completing, setCompleting] = useState(false);
+
   const handleComplete = async () => {
-    if (!day || !slug) return;
-    // Save exercises first
-    if (q1 || q2 || q3) {
-      await saveExercises.mutateAsync({
-        dayId: day.id,
-        moduleSlug: slug,
-        q1Answer: q1,
-        q2Answer: q2,
-        q3Answer: q3 || undefined,
-      });
-    }
-     try {
+    if (!day || !slug || completing) return;
+    setCompleting(true);
+    try {
+      // As respostas vão junto: concluir não pode apagar o que a aluna escreveu.
+      if (q1 || q2 || q3) {
+        await saveExercises.mutateAsync({
+          dayId: day.id,
+          moduleSlug: slug,
+          q1Answer: q1,
+          q2Answer: q2,
+          q3Answer: q3 || undefined,
+        });
+      }
       const lessonDays = track ? findTrackLesson(track.curriculum, day.day_number) : null;
       const ids = lessonDays
         ? lessonDays.lesson.dayNumbers
@@ -162,7 +169,13 @@ export default function DayView() {
         setTimeout(() => navigate("/membros/app/conclusao"), 1500);
       }
     } catch {
-      toast({ title: "Erro ao concluir", variant: "destructive" });
+      toast({
+        title: "Não foi possível concluir",
+        description: "Suas respostas continuam na tela. Tente de novo em alguns instantes.",
+        variant: "destructive",
+      });
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -236,6 +249,35 @@ export default function DayView() {
   const pdfDay = placement?.lesson.pdf ? lessonDays[0] : placement ? null : day;
   const pdfHref = pdfDay?.pdf_url ?? null;
   const hasNextLesson = track && placement ? Boolean(nextTrackLesson(track.curriculum, day.day_number)) : Boolean(nextDay);
+  const hasQuestions = Boolean(day.exercise_q1 || day.exercise_q2 || day.exercise_q3);
+
+  // A trava vale também para quem chega pelo link direto, não só na lista.
+  const units = track ? trackLessonUnits(track.curriculum, days) : [];
+  const unitIndex = units.findIndex((unit) => unit.days.some((item) => item.id === day.id));
+  const unlocked = track && unitIndex >= 0
+    ? isLessonUnlocked(units, unitIndex, isDayCompleted)
+    : isDayUnlocked(dayIndex);
+
+  if (!unlocked) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-border/50 bg-card p-6 text-center space-y-2">
+          <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
+          <h1 className="font-serif text-lg font-semibold text-foreground">
+            {placement ? "Esta aula ainda não abriu" : "Este dia ainda não abriu"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {placement ? "Conclua a aula anterior para avançar." : "Conclua o dia anterior para avançar."}
+          </p>
+        </div>
+        <div className="text-center">
+          <Link to={`/membros/app/modulos/${slug}`}>
+            <Button variant="ghost">Voltar ao módulo</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-8">
@@ -268,7 +310,7 @@ export default function DayView() {
       {/* Day Header */}
       <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {placement ? `Módulo ${placement.module.index} · ${placement.module.title}` : `Dia ${day.day_number}`}
+          {placement ? `Tema ${placement.module.index} · ${placement.module.title}` : `Dia ${day.day_number}`}
         </p>
         <h1 className="font-serif text-2xl font-semibold text-foreground">{placement ? placement.lesson.title : day.title}</h1>
         {isCompleted && (
@@ -393,11 +435,11 @@ export default function DayView() {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3 pt-2">
-        {(q1 || q2 || q3) && (
+        {hasQuestions && (
           <Button
             variant="outline"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !(q1 || q2 || q3)}
             className="w-full"
           >
             <Save className="w-4 h-4 mr-2" />
@@ -408,14 +450,15 @@ export default function DayView() {
         {!isCompleted && (
           <Button
             onClick={handleComplete}
+            disabled={completing}
             className="w-full bg-primary hover:bg-primary/90"
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
-            {isSelah ? "Concluir Selá e avançar" : placement ? "Concluir aula" : "Concluir dia"}
+            {completing ? "Concluindo..." : isSelah ? "Concluir Selá e avançar" : placement ? "Concluir aula" : "Concluir dia"}
           </Button>
         )}
 
-        {hasNextLesson && (
+        {hasNextLesson && (isCompleted || !track) && (
           <Button
             variant={isCompleted ? "default" : "outline"}
             onClick={handleNext}

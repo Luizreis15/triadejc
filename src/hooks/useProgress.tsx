@@ -98,7 +98,15 @@ export function useProgress(moduleId?: string) {
         .eq("user_id", user.id)
         .eq("module_cards.module_id", moduleId);
 
-      const isModuleComplete = totalCards && completedCards && completedCards >= totalCards;
+      // Módulo com aulas não fecha só pelas leituras: a conclusão dele sai da contagem de aulas.
+      const { count: totalDays } = await supabase
+        .from("module_days")
+        .select("id", { count: "exact", head: true })
+        .eq("module_id", moduleId);
+
+      const isModuleComplete = Boolean(
+        !totalDays && totalCards && completedCards && completedCards >= totalCards,
+      );
 
       if (existing) {
         await supabase
@@ -172,6 +180,7 @@ export function useProgress(moduleId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["card-completions"] });
+      queryClient.invalidateQueries({ queryKey: ["member-card-completions"] });
       queryClient.invalidateQueries({ queryKey: ["module-progress"] });
       queryClient.invalidateQueries({ queryKey: ["progress"] });
       queryClient.invalidateQueries({ queryKey: ["all-progress"] });
