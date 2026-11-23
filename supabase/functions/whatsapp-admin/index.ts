@@ -197,5 +197,113 @@ Deno.serve(async (req) => {
     return json(cors, 200, { ok: true });
   }
 
+  if (action === "resend_access") {
+    const userId = typeof body.user_id === "string" ? body.user_id.trim() : "";
+    if (!userId) return json(cors, 400, { error: "Informe a aluna" });
+    const rawPhone = typeof body.phone === "string" ? body.phone.trim() : "";
+    const typedPhone = rawPhone ? normalizeBrazilPhone(rawPhone) : null;
+    if (rawPhone && !typedPhone) return json(cors, 400, { error: "Informe o celular com DDD" });
+
+    const { data: profile } = await admin.from("profiles").select("email, name").eq("id", userId).maybeSingle();
+    const email = typeof profile?.email === "string" ? profile.email.trim() : "";
+    if (!email) return json(cors, 404, { error: "Aluna sem e-mail cadastrado" });
+    const name = (typeof profile?.name === "string" && profile.name.trim()) || email.split("@")[0];
+
+    // Um link só, usado no e-mail e no WhatsApp: gerar dois invalidaria o primeiro.
+    const { data: recovery, error: linkError } = await admin.auth.admin.generateLink({
+      type: "recovery",
+      email,
+      options: { redirectTo: "https://www.jordanacantarelli.com.br/membros/reset-password" },
+    });
+    const actionLink = recovery?.properties?.action_link;
+    if (linkError || !actionLink) {
+      console.error("whatsapp-admin: recovery link failed", linkError?.message ?? "no link");
+      return json(cors, 502, { error: "Não foi possível gerar o link de acesso" });
+    }
+
+    // O link novo invalida o antigo: mensagem parada na fila não pode sair com ele.
+    await admin.from("whatsapp_outbox").update({
+      status: "skipped",
+      last_error: "Substituída por reenvio de acesso",
+    }).eq("status", "queued").eq("payload->>email", email);
+
+    let emailSent = false;
+    const internalSecret = Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "";
+    if (internalSecret) {
+      try {
+        const response = await fetch(`${Deno.env.get("SUPABASE_URL")!}/functions/v1/send-welcome-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!}`,
+            "x-internal-secret": internalSecret,
+          },
+          body: JSON.stringify({ name, email, actionLink, loginUrl: "https://www.jordanacantarelli.com.br/membros" }),
+        });
+        emailSent = response.ok;
+        await response.text().catch(() => "");
+        if (!response.ok) console.error("whatsapp-admin: resend email rejected", response.status);
+      } catch (error) {
+        console.error("whatsapp-admin: resend email failed", error instanceof Error ? error.message : "unknown");
+      }
+    } else {
+      console.error("whatsapp-admin: resend email skipped, internal secret missing");
+    }
+
+    let phone = typedPhone;
+    if (!phone) {
+      const { data: lastMessage } = await admin
+        .from("whatsapp_outbox")
+        .select("to_phone")
+        .eq("payload->>email", email)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      phone = normalizeBrazilPhone(typeof lastMessage?.to_phone === "string" ? lastMessage.to_phone : "");
+    }
+
+    let whatsapp: "sent" | "queued" | "no_phone" | "off" = "no_phone";
+    if (phone) {
+      const { data: connection } = await admin
+        .from("whatsapp_connection")
+        .select("enabled, base_url, token")
+        .eq("id", 1)
+        .maybeSingle();
+      const { data: template } = await admin.from("whatsapp_templates").select("body").eq("key", "welcome").maybeSingle();
+      if (!connection?.enabled || !connection.base_url || !connection.token || !template?.body) {
+        whatsapp = "off";
+      } else {
+        const row = {
+          kind: "welcome",
+          to_phone: phone,
+          payload: { name, email, actionLink },
+          idempotency_key: `resend:${userId}:${crypto.randomUUID()}`,
+        };
+        try {
+          const text = renderWelcomeMessage(template.body, { name, email, link: actionLink });
+          const providerId = await sendText(connection.base_url, connection.token, phone, text);
+          await admin.from("whatsapp_outbox").insert({
+            ...row,
+            status: "sent",
+            attempts: 1,
+            sent_at: new Date().toISOString(),
+            provider_id: providerId,
+          });
+          whatsapp = "sent";
+        } catch (error) {
+          console.error("whatsapp-admin: resend whatsapp failed", error instanceof Error ? error.message : "unknown");
+          // Fica na fila: a rotina de envio tenta de novo.
+          const { error: queueError } = await admin.from("whatsapp_outbox").insert({ ...row, status: "queued" });
+          whatsapp = queueError ? "off" : "queued";
+        }
+      }
+    }
+
+    if (!emailSent && whatsapp !== "sent" && whatsapp !== "queued") {
+      return json(cors, 502, { error: "O acesso não saiu nem por e-mail nem por WhatsApp" });
+    }
+    return json(cors, 200, { ok: true, email: emailSent, whatsapp, phone: phone ? maskPhone(phone) : null });
+  }
+
   return json(cors, 400, { error: "Ação inválida" });
 });
