@@ -626,6 +626,7 @@ export type Database = {
           title: string
           top_video_url: string | null
           verse_reference: string | null
+          verse_text: string | null
         }
         Insert: {
           confession_text?: string | null
@@ -642,6 +643,7 @@ export type Database = {
           title: string
           top_video_url?: string | null
           verse_reference?: string | null
+          verse_text?: string | null
         }
         Update: {
           confession_text?: string | null
@@ -658,6 +660,7 @@ export type Database = {
           title?: string
           top_video_url?: string | null
           verse_reference?: string | null
+          verse_text?: string | null
         }
         Relationships: [
           {

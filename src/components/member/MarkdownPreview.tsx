@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import { SignedFileLink } from "@/components/member/SignedFileLink";
 
 interface MarkdownPreviewProps {
   content: string;
@@ -108,16 +109,24 @@ const markdownComponents = {
   hr: () => (
     <hr className="my-8 border-border/50" />
   ),
-  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-    <a 
-      href={href} 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
-    >
-      {children}
-    </a>
-  ),
+  // Arquivos do nosso armazenamento são privados: o link pede um endereço assinado ao abrir.
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
+    const isFile = Boolean(href && /\.pdf($|\?)/i.test(href));
+    return (
+      <SignedFileLink
+        href={href ?? "#"}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={
+          isFile
+            ? "my-2 inline-flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/5 px-4 py-3 font-medium text-primary no-underline transition-colors hover:bg-primary/10"
+            : "text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
+        }
+      >
+        {children}
+      </SignedFileLink>
+    );
+  },
 };
 
 interface MarkdownContentProps {

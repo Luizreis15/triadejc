@@ -18,6 +18,7 @@ import { useQuery as useRQQuery } from "@tanstack/react-query";
 import ProductDetail from "./ProductDetail";
 import { trackFor, trackLessonUnits, isLessonUnlocked } from "@/lib/trackCurriculum";
 import { countModuleSteps } from "@/lib/moduleProgress";
+import { useEntitledCatalog } from "@/hooks/useEntitledCatalog";
 
 // Define the card type with section
 interface ModuleCard {
@@ -119,6 +120,15 @@ export default function ModuleDetail() {
   const totalCards = steps.total;
   const completedCards = steps.done;
   const progressPercent = steps.percent;
+
+  // Ao fechar o módulo, a aluna vê qual é o próximo na ordem da Jornada.
+  const { modules: journeyModules } = useEntitledCatalog();
+  const moduleDone = steps.total > 0 && steps.done >= steps.total;
+  const nextModule = module
+    ? journeyModules
+        .filter((item) => item.product_id === module.product_id && item.order_index > module.order_index)
+        .sort((a, b) => a.order_index - b.order_index)[0]
+    : undefined;
 
   // Group cards by SECTION (not type)
   const introCards = cards.filter(c => c.section === "intro");
@@ -562,6 +572,26 @@ export default function ModuleDetail() {
             ))}
           </ContentSection>
         </div>
+      )}
+
+      {moduleDone && (
+        <section className="rounded-2xl border border-green-200 bg-green-50/60 p-5 text-center space-y-3">
+          <p className="font-serif text-lg font-semibold text-foreground">Você concluiu {module.title} 🎉</p>
+          {nextModule ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                O próximo passo da sua Jornada é {nextModule.title}. Siga quando sentir que é o momento.
+              </p>
+              <Link to={`/membros/app/modulos/${nextModule.slug}`}>
+                <Button className="h-12 w-full">Ir para {nextModule.title}</Button>
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Este é o último módulo da Jornada. Volte às leituras sempre que precisar.
+            </p>
+          )}
+        </section>
       )}
 
       {cards.length === 0 && moduleDays.length === 0 && (

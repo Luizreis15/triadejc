@@ -326,6 +326,19 @@ export default function DayView() {
           {lessonDays.length > 1 && (
             <h2 className="font-serif text-lg font-semibold text-foreground">{part.title}</h2>
           )}
+          {part.verse_reference && (
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 space-y-2">
+              {part.verse_text && (
+                <p className="font-serif text-lg italic leading-relaxed text-foreground">“{part.verse_text}”</p>
+              )}
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <span className="font-serif font-semibold text-primary">
+                  {part.verse_reference}{part.verse_text ? " (NVI)" : ""}
+                </span>
+              </div>
+            </div>
+          )}
           <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-0">
             {part.message_text.split("\n").map((line, i) => (
               <p key={i} className={cn(
@@ -336,14 +349,6 @@ export default function DayView() {
               </p>
             ))}
           </div>
-          {part.verse_reference && (
-            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                <span className="font-serif font-semibold text-primary">{part.verse_reference}</span>
-              </div>
-            </div>
-          )}
           {part.confession_text && part.id !== day.id && (
             <p className="font-serif italic text-foreground leading-relaxed">“{part.confession_text}”</p>
           )}

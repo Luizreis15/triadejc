@@ -9,13 +9,15 @@ import { toast } from "@/hooks/use-toast";
 import { normalizeBreaks } from "@/components/member/MarkdownPreview";
 
 const OPEN_QUESTION = "O que esta leitura falou com você?";
-const MARKER = /reflex[ãa]o\s+escrita|perguntas?\s+(para|de)\s+reflex|para\s+refletir|^\W*reflita\b/i;
+const MARKER = /reflex[ãa]o\s+(escrita|para\s+a\s+jornada)|perguntas?\s+(para|de)\s+reflex|para\s+refletir|^\W*reflita\b|pr[áa]tica\s+sel[áa]/i;
+// O marcador é um título curto. Frase longa que só cita "para refletir" é texto corrido.
+const MARKER_MAX = 60;
 
 /** Perguntas que o texto traz depois de "Reflexão escrita". Sem elas, sobra um campo livre. */
 export function reflectionQuestions(content: string | null | undefined): string[] {
   if (!content) return [OPEN_QUESTION];
   const lines = normalizeBreaks(content).split("\n");
-  const start = lines.findIndex((line) => MARKER.test(line));
+  const start = lines.findIndex((line) => line.trim().length <= MARKER_MAX && MARKER.test(line));
   if (start < 0) return [OPEN_QUESTION];
   const questions = lines
     .slice(start + 1)
