@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import { instanceConnected, sendText } from "../_shared/uazapi.ts";
 import { renderWelcomeMessage } from "../_shared/whatsappMessage.ts";
 import { shortAccessLink } from "../_shared/accessLink.ts";
+import { senderPhones } from "../_shared/senderPhone.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -43,6 +44,14 @@ async function deliver(admin: SupabaseClient, row: OutboxRow): Promise<"sent" | 
     await admin.from("whatsapp_outbox").update({
       status: "skipped",
       last_error: "Conexão desligada ou incompleta",
+    }).eq("id", row.id);
+    return "skipped";
+  }
+
+  if ((await senderPhones(admin)).has(row.to_phone)) {
+    await admin.from("whatsapp_outbox").update({
+      status: "skipped",
+      last_error: "Celular da compra é o da SDR, que só dispara",
     }).eq("id", row.id);
     return "skipped";
   }
