@@ -4,6 +4,7 @@ import { maskPhone, normalizeBrazilPhone } from "../_shared/phone.ts";
 import { renderWelcomeMessage, templateIsUsable } from "../_shared/whatsappMessage.ts";
 import { shortAccessLink } from "../_shared/accessLink.ts";
 import { findContactPhone } from "../_shared/contactPhone.ts";
+import { senderPhones } from "../_shared/senderPhone.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.jordanacantarelli.com.br",
@@ -167,6 +168,9 @@ Deno.serve(async (req) => {
   if (action === "send_test") {
     const phone = normalizeBrazilPhone(typeof body.phone === "string" ? body.phone : "");
     if (!phone) return json(cors, 400, { error: "Informe um celular com DDD" });
+    if ((await senderPhones(admin)).has(phone)) {
+      return json(cors, 400, { error: "Este é o WhatsApp da SDR, que só dispara. Use outro número para o teste." });
+    }
     const { data: connection } = await admin
       .from("whatsapp_connection")
       .select("base_url, token")
@@ -214,6 +218,9 @@ Deno.serve(async (req) => {
     const rawPhone = typeof body.phone === "string" ? body.phone.trim() : "";
     const typedPhone = rawPhone ? normalizeBrazilPhone(rawPhone) : null;
     if (rawPhone && !typedPhone) return json(cors, 400, { error: "Informe o celular com DDD" });
+    if (typedPhone && (await senderPhones(admin)).has(typedPhone)) {
+      return json(cors, 400, { error: "Este é o WhatsApp da SDR, que só dispara. Informe o celular da aluna." });
+    }
 
     const { data: profile } = await admin.from("profiles").select("email, name").eq("id", userId).maybeSingle();
     const email = typeof profile?.email === "string" ? profile.email.trim() : "";
