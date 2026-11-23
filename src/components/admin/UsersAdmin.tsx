@@ -39,6 +39,14 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 
+/** 5511987654321 → (11) 98765-4321 */
+function formatPhone(phone: string): string {
+  const local = phone.replace(/\D/g, "").replace(/^55/, "");
+  if (local.length === 11) return `(${local.slice(0, 2)}) ${local.slice(2, 7)}-${local.slice(7)}`;
+  if (local.length === 10) return `(${local.slice(0, 2)}) ${local.slice(2, 6)}-${local.slice(6)}`;
+  return local;
+}
+
 export function UsersAdmin() {
   const { user: adminUser } = useAuth();
   const [search, setSearch] = useState("");
@@ -50,6 +58,7 @@ export function UsersAdmin() {
   const [isResendDialogOpen, setIsResendDialogOpen] = useState(false);
   const [resendUser, setResendUser] = useState<{ id: string; name: string; email: string } | null>(null);
   const [resendPhone, setResendPhone] = useState("");
+  const [resendPhoneState, setResendPhoneState] = useState<"loading" | "found" | "missing">("missing");
   const queryClient = useQueryClient();
 
   const { data: users, isLoading, refetch } = useQuery({
@@ -220,7 +229,15 @@ export function UsersAdmin() {
       email: user.email || "",
     });
     setResendPhone("");
+    setResendPhoneState("loading");
     setIsResendDialogOpen(true);
+    void supabase.functions
+      .invoke("whatsapp-admin", { body: { action: "contact_phone", user_id: user.id } })
+      .then(({ data, error }) => {
+        const phone = !error && typeof data?.phone === "string" ? data.phone : "";
+        setResendPhone((typed) => typed || formatPhone(phone));
+        setResendPhoneState(phone ? "found" : "missing");
+      });
   };
 
   const handleMakeAdmin = async (userId: string, email: string) => {
@@ -546,16 +563,20 @@ export function UsersAdmin() {
               <p className="text-sm text-muted-foreground">{resendUser?.email}</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="resend-phone">WhatsApp (opcional)</Label>
+              <Label htmlFor="resend-phone">WhatsApp</Label>
               <Input
                 id="resend-phone"
                 inputMode="tel"
-                placeholder="(11) 90000-0000"
+                placeholder={resendPhoneState === "loading" ? "Buscando o celular..." : "(11) 90000-0000"}
                 value={resendPhone}
                 onChange={(event) => setResendPhone(event.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Em branco, vai para o celular informado na compra.
+                {resendPhoneState === "found"
+                  ? "Celular do cadastro da aluna. Pode trocar se ela mudou de número."
+                  : resendPhoneState === "loading"
+                    ? "Buscando o celular da compra..."
+                    : "Não há celular desta aluna no sistema. Digite o número para enviar por WhatsApp."}
               </p>
             </div>
           </div>

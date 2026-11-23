@@ -1243,6 +1243,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      redeem_access_link: {
+        Args: { _code: string }
+        Returns: { link_type: string; token_hash: string }[]
+      }
       can_read_module: {
         Args: { _module_id: string; _user_id: string }
         Returns: boolean
