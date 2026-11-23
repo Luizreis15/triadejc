@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { instanceConnected, sendText } from "../_shared/uazapi.ts";
 import { renderWelcomeMessage } from "../_shared/whatsappMessage.ts";
+import { shortAccessLink } from "../_shared/accessLink.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -65,7 +66,7 @@ async function deliver(admin: SupabaseClient, row: OutboxRow): Promise<"sent" | 
   }
 
   try {
-    const text = renderWelcomeMessage(template.body, { name, email, link });
+    const text = renderWelcomeMessage(template.body, { name, email, link: await shortAccessLink(admin, link) });
     const providerId = await sendText(connection.base_url, connection.token, row.to_phone, text);
     await admin.from("whatsapp_outbox").update({
       status: "sent",

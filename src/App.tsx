@@ -19,6 +19,7 @@ import LinksPage from "./pages/LinksPage";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import ResetPassword from "./pages/ResetPassword";
+import AccessLink from "./pages/AccessLink";
 import NotFound from "./pages/NotFound";
 
 // Admin pages
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/membros" element={<Login />} />
             <Route path="/membros/signup" element={<Navigate to="/membros" replace />} />
             <Route path="/membros/reset-password" element={<ResetPassword />} />
+            <Route path="/a/:code" element={<AccessLink />} />
             
             {/* Protected member routes */}
             <Route path="/membros/app" element={<ProtectedRoute><AppLayout><Home /></AppLayout></ProtectedRoute>} />

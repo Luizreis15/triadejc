@@ -2,6 +2,8 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import { instanceConnected, sendText } from "../_shared/uazapi.ts";
 import { maskPhone, normalizeBrazilPhone } from "../_shared/phone.ts";
 import { renderWelcomeMessage, templateIsUsable } from "../_shared/whatsappMessage.ts";
+import { shortAccessLink } from "../_shared/accessLink.ts";
+import { findContactPhone } from "../_shared/contactPhone.ts";
 
 const ALLOWED_ORIGINS = [
   "https://www.jordanacantarelli.com.br",
@@ -197,6 +199,15 @@ Deno.serve(async (req) => {
     return json(cors, 200, { ok: true });
   }
 
+  if (action === "contact_phone") {
+    const userId = typeof body.user_id === "string" ? body.user_id.trim() : "";
+    if (!userId) return json(cors, 400, { error: "Informe a aluna" });
+    const { data: profile } = await admin.from("profiles").select("email").eq("id", userId).maybeSingle();
+    const email = typeof profile?.email === "string" ? profile.email : "";
+    const phone = email ? await findContactPhone(admin, email) : null;
+    return json(cors, 200, { phone });
+  }
+
   if (action === "resend_access") {
     const userId = typeof body.user_id === "string" ? body.user_id.trim() : "";
     if (!userId) return json(cors, 400, { error: "Informe a aluna" });
@@ -250,17 +261,7 @@ Deno.serve(async (req) => {
       console.error("whatsapp-admin: resend email skipped, internal secret missing");
     }
 
-    let phone = typedPhone;
-    if (!phone) {
-      const { data: lastMessage } = await admin
-        .from("whatsapp_outbox")
-        .select("to_phone")
-        .eq("payload->>email", email)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      phone = normalizeBrazilPhone(typeof lastMessage?.to_phone === "string" ? lastMessage.to_phone : "");
-    }
+    const phone = typedPhone ?? await findContactPhone(admin, email);
 
     let whatsapp: "sent" | "queued" | "no_phone" | "off" = "no_phone";
     if (phone) {
@@ -280,7 +281,8 @@ Deno.serve(async (req) => {
           idempotency_key: `resend:${userId}:${crypto.randomUUID()}`,
         };
         try {
-          const text = renderWelcomeMessage(template.body, { name, email, link: actionLink });
+          const shortLink = await shortAccessLink(admin, actionLink);
+          const text = renderWelcomeMessage(template.body, { name, email, link: shortLink });
           const providerId = await sendText(connection.base_url, connection.token, phone, text);
           await admin.from("whatsapp_outbox").insert({
             ...row,
