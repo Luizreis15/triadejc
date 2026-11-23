@@ -49,6 +49,7 @@ export function UsersAdmin() {
   const [makeAdmin, setMakeAdmin] = useState(false);
   const [isResendDialogOpen, setIsResendDialogOpen] = useState(false);
   const [resendUser, setResendUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [resendPhone, setResendPhone] = useState("");
   const queryClient = useQueryClient();
 
   const { data: users, isLoading, refetch } = useQuery({
@@ -181,20 +182,34 @@ export function UsersAdmin() {
   });
 
   const resendAccessEmail = useMutation({
-    mutationFn: async ({ email }: { email: string }) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "https://www.jordanacantarelli.com.br/membros/reset-password",
+    mutationFn: async ({ userId, phone }: { userId: string; phone: string }) => {
+      const { data, error } = await supabase.functions.invoke("whatsapp-admin", {
+        body: { action: "resend_access", user_id: userId, phone: phone.trim() || undefined },
       });
-      if (error) throw error;
+      if (error) {
+        const context = (error as { context?: unknown }).context;
+        const details = context instanceof Response ? await context.json().catch(() => null) : null;
+        throw new Error(details?.error || "Erro ao reenviar o acesso");
+      }
+      if (data?.error) throw new Error(data.error);
+      return data as { email: boolean; whatsapp: "sent" | "queued" | "no_phone" | "off"; phone: string | null };
     },
-    onSuccess: () => {
-      toast.success("Link para definir senha enviado.");
+    onSuccess: (data) => {
+      const emailPart = data.email ? "E-mail enviado." : "O e-mail não saiu.";
+      const whatsappPart = {
+        sent: `WhatsApp enviado para ${data.phone}.`,
+        queued: `WhatsApp na fila para ${data.phone}: o envio será tentado de novo.`,
+        no_phone: "WhatsApp não enviado: sem celular desta aluna. Informe o número e reenvie.",
+        off: "WhatsApp não enviado: a conexão está desligada ou incompleta.",
+      }[data.whatsapp];
+      if (data.email && data.whatsapp === "sent") toast.success(`${emailPart} ${whatsappPart}`);
+      else toast.warning(`${emailPart} ${whatsappPart}`);
       setIsResendDialogOpen(false);
       setResendUser(null);
+      setResendPhone("");
     },
     onError: (error: Error) => {
-      console.error("Error sending access email:", error);
-      toast.error(error.message || "Erro ao enviar e-mail de acesso");
+      toast.error(error.message || "Erro ao reenviar o acesso");
     },
   });
 
@@ -204,6 +219,7 @@ export function UsersAdmin() {
       name: user.name || "",
       email: user.email || "",
     });
+    setResendPhone("");
     setIsResendDialogOpen(true);
   };
 
@@ -486,7 +502,7 @@ export function UsersAdmin() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenResendDialog(user)}
-                            title="Reenviar email de boas-vindas"
+                            title="Reenviar acesso por e-mail e WhatsApp"
                           >
                             <Send className="h-4 w-4" />
                           </Button>
@@ -517,7 +533,7 @@ export function UsersAdmin() {
           <DialogHeader>
             <DialogTitle>Enviar link de acesso</DialogTitle>
             <DialogDescription>
-              A aluna recebe um e-mail para definir a senha. A senha atual não é enviada.
+              A aluna recebe o link para definir a senha por e-mail e por WhatsApp. A senha atual não é enviada.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -528,6 +544,19 @@ export function UsersAdmin() {
             <div className="space-y-2">
               <Label>Email</Label>
               <p className="text-sm text-muted-foreground">{resendUser?.email}</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="resend-phone">WhatsApp (opcional)</Label>
+              <Input
+                id="resend-phone"
+                inputMode="tel"
+                placeholder="(11) 90000-0000"
+                value={resendPhone}
+                onChange={(event) => setResendPhone(event.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Em branco, vai para o celular informado na compra.
+              </p>
             </div>
           </div>
           <DialogFooter>
@@ -542,11 +571,11 @@ export function UsersAdmin() {
             </Button>
             <Button
               onClick={() => {
-                if (resendUser?.email) {
-                  resendAccessEmail.mutate({ email: resendUser.email });
+                if (resendUser?.id) {
+                  resendAccessEmail.mutate({ userId: resendUser.id, phone: resendPhone });
                 }
               }}
-              disabled={!resendUser?.email || resendAccessEmail.isPending}
+              disabled={!resendUser?.id || resendAccessEmail.isPending}
             >
               {resendAccessEmail.isPending ? "Enviando..." : "Enviar link"}
             </Button>
